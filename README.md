@@ -129,4 +129,4 @@ El proyecto sigue los principios de **Clean Architecture**:
 
 ## Licencia
 
-MIT License
+© 2025 - Todos los derechos reservados
