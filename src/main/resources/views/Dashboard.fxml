@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ferreteria.infrastructure.ui.DashboardController"
+            styleClass="dashboard-root">
+
+    <!-- Navbar Superior -->
+    <top>
+        <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="12">
+            <padding>
+                <Insets top="0" right="32" bottom="0" left="32"/>
+            </padding>
+
+            <!-- Logo y Marca -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="🔧" styleClass="navbar-icon"/>
+                <Label text="Ferreteria" styleClass="navbar-brand"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Menu de Navegacion -->
+            <HBox alignment="CENTER" spacing="6">
+                <Button text="Dashboard" styleClass="nav-button nav-button-active"/>
+                <Button text="Productos" onAction="#handleProducts" styleClass="nav-button"/>
+                <Button text="Ventas" onAction="#handleSales" styleClass="nav-button"/>
+                <Button text="Reportes" onAction="#handleReports" styleClass="nav-button"/>
+                <Button text="Usuarios" onAction="#handleUsers" styleClass="nav-button"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Usuario y Logout -->
+            <HBox alignment="CENTER_RIGHT" spacing="20">
+                <VBox alignment="CENTER_RIGHT">
+                    <Label fx:id="welcomeLabel" text="Administrador" styleClass="nav-user-name"/>
+                    <Label fx:id="roleLabel" text="Admin" styleClass="nav-user-role"/>
+                </VBox>
+                <Button text="Cerrar Sesion" onAction="#handleLogout" styleClass="logout-btn, danger"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- Contenido Principal -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+            <VBox styleClass="main-content" spacing="28">
+                <padding>
+                    <Insets top="32" right="40" bottom="32" left="40"/>
+                </padding>
+
+                <!-- Header de Pagina -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <VBox HBox.hgrow="ALWAYS" spacing="6">
+                        <Label text="Panel de Control" styleClass="page-title"/>
+                        <Label text="Bienvenido al sistema de gestion de tu ferreteria" styleClass="page-subtitle"/>
+                    </VBox>
+                    <Label fx:id="dateLabel" styleClass="date-label"/>
+                </HBox>
+
+                <!-- Cards de Estadisticas -->
+                <HBox spacing="24" alignment="CENTER">
+                    <!-- Card Productos -->
+                    <VBox styleClass="stat-card card-blue" HBox.hgrow="ALWAYS">
+                        <Label text="📦" styleClass="card-icon"/>
+                        <Label fx:id="totalProductsLabel" text="0" styleClass="card-value"/>
+                        <Label text="Total Productos" styleClass="card-label"/>
+                    </VBox>
+
+                    <!-- Card Stock Bajo -->
+                    <VBox styleClass="stat-card card-orange" HBox.hgrow="ALWAYS">
+                        <Label text="⚠" styleClass="card-icon"/>
+                        <Label fx:id="lowStockLabel" text="0" styleClass="card-value"/>
+                        <Label text="Stock Bajo" styleClass="card-label"/>
+                    </VBox>
+
+                    <!-- Card Ventas Hoy -->
+                    <VBox styleClass="stat-card card-green" HBox.hgrow="ALWAYS">
+                        <Label text="💵" styleClass="card-icon"/>
+                        <Label fx:id="todaySalesLabel" text="0" styleClass="card-value"/>
+                        <Label text="Ventas del Dia" styleClass="card-label"/>
+                    </VBox>
+
+                    <!-- Card Usuarios -->
+                    <VBox styleClass="stat-card card-purple" HBox.hgrow="ALWAYS">
+                        <Label text="👥" styleClass="card-icon"/>
+                        <Label fx:id="totalUsersLabel" text="0" styleClass="card-value"/>
+                        <Label text="Usuarios Activos" styleClass="card-label"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Seccion de Acciones Rapidas -->
+                <VBox spacing="16">
+                    <Label text="Acciones Rapidas" styleClass="section-title"/>
+                    <HBox spacing="16">
+                        <Button text="+ Nueva Venta" styleClass="action-button, success" onAction="#handleSales"/>
+                        <Button text="+ Nuevo Producto" styleClass="action-button, accent" onAction="#handleProducts"/>
+                        <Button text="Ver Inventario" styleClass="action-button" onAction="#handleProducts"/>
+                        <Button text="Generar Reporte" styleClass="action-button" onAction="#handleReports"/>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.ferreteria.infrastructure.ui.LoginController"
+      styleClass="login-root">
+
+    <!-- Panel Izquierdo - Branding -->
+    <VBox styleClass="login-brand-panel" HBox.hgrow="ALWAYS" alignment="CENTER" spacing="24">
+        <padding>
+            <Insets top="50" right="50" bottom="40" left="50"/>
+        </padding>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <!-- Logo Principal -->
+        <VBox alignment="CENTER" spacing="16">
+            <Label text="🔧" styleClass="brand-icon"/>
+            <Label text="Ferreteria" styleClass="brand-title"/>
+            <Label text="Sistema de Gestion" styleClass="brand-tagline"/>
+        </VBox>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <!-- Descripcion -->
+        <VBox alignment="CENTER" spacing="6">
+            <Label text="Administra tu inventario," styleClass="brand-desc-text"/>
+            <Label text="controla tus ventas y" styleClass="brand-desc-text"/>
+            <Label text="genera reportes facilmente." styleClass="brand-desc-text"/>
+        </VBox>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <!-- Version -->
+        <Label text="v1.0.0" styleClass="version-label"/>
+    </VBox>
+
+    <!-- Panel Derecho - Formulario -->
+    <VBox styleClass="login-form-panel" HBox.hgrow="ALWAYS" alignment="CENTER">
+        <padding>
+            <Insets top="50" right="70" bottom="50" left="70"/>
+        </padding>
+
+        <!-- Contenedor del formulario -->
+        <VBox alignment="CENTER_LEFT" spacing="28" maxWidth="380">
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- Titulo -->
+            <VBox spacing="10">
+                <Label text="Bienvenido" styleClass="form-title"/>
+                <Label text="Ingresa tus credenciales para acceder al sistema" styleClass="form-subtitle"/>
+            </VBox>
+
+            <!-- Campos -->
+            <VBox spacing="22">
+                <!-- Usuario -->
+                <VBox spacing="8">
+                    <Label text="USUARIO" styleClass="field-label"/>
+                    <TextField fx:id="usernameField"
+                               promptText="Ingresa tu usuario"
+                               styleClass="login-field"/>
+                </VBox>
+
+                <!-- Contrasena -->
+                <VBox spacing="8">
+                    <Label text="CONTRASENA" styleClass="field-label"/>
+                    <PasswordField fx:id="passwordField"
+                                  promptText="Ingresa tu contrasena"
+                                  styleClass="login-field"/>
+                </VBox>
+
+                <!-- Error -->
+                <Label fx:id="errorLabel"
+                       styleClass="error-label"
+                       visible="false"
+                       managed="false"/>
+
+                <!-- Boton -->
+                <Button fx:id="loginButton"
+                        text="INICIAR SESION"
+                        onAction="#handleLogin"
+                        styleClass="login-button"
+                        maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Hint -->
+            <VBox alignment="CENTER" spacing="6" styleClass="hint-box">
+                <Label text="Credenciales de prueba:" styleClass="hint-label"/>
+                <Label text="admin / admin123" styleClass="hint-credentials"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </VBox>
+
+</HBox>
