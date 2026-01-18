@@ -28,8 +28,8 @@ Sistema de punto de venta para ferretería con interfaz gráfica moderna. Incluy
 
 ### Clonar el repositorio
 ```bash
-git clone https://github.com/tu-usuario/ferreteria-java.git
-cd ferreteria-java
+git clone https://github.com/Areyuna09/Sistema-Ferreteria.git
+cd Sistema-Ferreteria
 ```
 
 ### Ejecutar en modo desarrollo
