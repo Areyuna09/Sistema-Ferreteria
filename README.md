@@ -1,107 +1,105 @@
-# Sistema Ferretería - JavaFX
+# Sistema de Gestión para Ferretería
 
-Sistema de gestión para ferretería desarrollado con Java 17, JavaFX y SQLite.
+Sistema de punto de venta para ferretería con interfaz gráfica moderna. Incluye autenticación de usuarios, dashboard de estadísticas, gestión de productos e inventario.
 
-## Arquitectura
+## Stack Tecnológico
 
-El proyecto sigue **Clean Architecture** con principios **SOLID**:
+| Tecnología | Versión | Descripción |
+|------------|---------|-------------|
+| Java | 17+ | Lenguaje principal |
+| JavaFX | 21.0.1 | Framework de interfaz gráfica |
+| AtlantaFX | 2.0.1 | Tema moderno para JavaFX |
+| SQLite | 3.45.1 | Base de datos embebida |
+| Maven | 3.9+ | Gestión de dependencias y build |
+| BCrypt | 0.4 | Hash seguro de contraseñas |
 
-```
-src/main/java/com/ferreteria/
-├── domain/                    # Capa de dominio
-│   ├── entities/              # Entidades de negocio
-│   ├── repositories/          # Interfaces (puertos)
-│   └── exceptions/            # Excepciones de dominio
-├── application/               # Capa de aplicación
-│   └── usecases/              # Casos de uso
-├── infrastructure/            # Capa de infraestructura
-│   ├── persistence/           # Repositorios SQLite
-│   └── ui/                    # Controladores JavaFX
-├── Main.java                  # Entrada de aplicación
-└── Launcher.java              # Launcher para JAR
-```
+## Requisitos del Sistema
 
-## Requisitos
+### Para desarrollo
+- JDK 17 o superior
+- Maven 3.9 o superior
+- IDE con soporte para JavaFX (IntelliJ IDEA, Eclipse, VS Code)
 
-- **Java 17** o superior
-- **Maven 3.8+**
+### Para generar instaladores
+- **Windows:** WiX Toolset 3.14 (`winget install WiXToolset.WiXToolset`)
+- **Linux:** dpkg-deb (incluido en la mayoría de distribuciones)
 
-## Instalación
+## Instalación y Ejecución
 
+### Clonar el repositorio
 ```bash
-# Clonar
-git clone <url-repositorio>
+git clone https://github.com/tu-usuario/ferreteria-java.git
 cd ferreteria-java
+```
 
-# Compilar
-mvn clean compile
-
-# Ejecutar
+### Ejecutar en modo desarrollo
+```bash
 mvn javafx:run
 ```
 
-## Credenciales por defecto
-
-```
-Usuario: admin
-Contraseña: admin123
-```
-
-## Generar ejecutable
-
+### Compilar JAR
 ```bash
-# Crear JAR con dependencias
-mvn clean package
-
-# Ejecutar JAR
-java -jar target/ferreteria-app-1.0.0.jar
+mvn clean package -DskipTests
 ```
 
-## Tecnologías
+## Generar Instaladores
 
-- **Java 17** - Lenguaje
-- **JavaFX 21** - Interfaz gráfica
-- **SQLite** - Base de datos embebida
-- **BCrypt** - Hash de contraseñas
-- **Maven** - Gestión de dependencias
+### Windows (.exe)
+```bash
+# Ejecutar el script
+build-exe.bat
+```
+El instalador se genera en: `target/dist/Ferreteria-1.0.0.exe`
 
-## Principios aplicados
+### Linux (.deb)
+```bash
+# Dar permisos y ejecutar
+chmod +x build-linux.sh
+./build-linux.sh
+```
+El paquete se genera en: `target/dist/ferreteria_1.0.0_amd64.deb`
 
-### SOLID
-- **S**ingle Responsibility: Cada clase tiene una responsabilidad
-- **O**pen/Closed: Extensible mediante interfaces
-- **L**iskov Substitution: Repositorios intercambiables
-- **I**nterface Segregation: Interfaces pequeñas y específicas
-- **D**ependency Inversion: Dependemos de abstracciones
-
-### Clean Architecture
-- **Domain**: Entidades y reglas de negocio (sin dependencias externas)
-- **Application**: Casos de uso (orquestación)
-- **Infrastructure**: Implementaciones (UI, DB)
-
-## Estructura de la base de datos
-
-```sql
--- Usuarios
-users (id, username, password, role, full_name, active, created_at)
-
--- Productos
-products (id, code, name, description, category, price, cost, stock, min_stock, location, active)
-
--- Ventas
-sales (id, user_id, total, payment_method, created_at)
+Instalar con:
+```bash
+sudo dpkg -i target/dist/ferreteria_1.0.0_amd64.deb
 ```
 
-## Ventajas sobre Electron
+## Estructura del Proyecto
 
-| Característica | Electron | JavaFX |
-|---------------|----------|--------|
-| Tamaño ejecutable | ~150-200MB | ~40-50MB |
-| RAM en uso | ~200-400MB | ~50-100MB |
-| Tiempo de inicio | 3-5 seg | 1-2 seg |
-| Dependencias runtime | Node.js + Chromium | JVM |
+```
+src/main/java/com/ferreteria/
+├── Main.java                    # Punto de entrada JavaFX
+├── Launcher.java                # Launcher para JAR ejecutable
+├── application/
+│   └── usecases/                # Casos de uso de la aplicación
+├── domain/
+│   ├── entities/                # Entidades del dominio
+│   ├── exceptions/              # Excepciones personalizadas
+│   └── repositories/            # Interfaces de repositorios
+└── infrastructure/
+    ├── persistence/             # Implementación SQLite
+    └── ui/                      # Controladores JavaFX
 
----
+src/main/resources/
+├── views/                       # Archivos FXML
+├── styles/                      # CSS personalizado
+└── icons/                       # Iconos de la aplicación
+```
 
-**Versión:** 1.0.0
-**Java:** 17+
+## Credenciales por Defecto
+
+| Usuario | Contraseña | Rol |
+|---------|------------|-----|
+| admin | admin123 | Administrador |
+
+## Arquitectura
+
+El proyecto sigue los principios de **Clean Architecture**:
+
+- **Domain:** Entidades y reglas de negocio independientes del framework
+- **Application:** Casos de uso que orquestan la lógica de negocio
+- **Infrastructure:** Implementaciones concretas (UI, persistencia)
+
+## Licencia
+
+MIT License
