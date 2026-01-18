@@ -16,13 +16,40 @@ Sistema de punto de venta para ferretería con interfaz gráfica moderna. Incluy
 ## Requisitos del Sistema
 
 ### Para desarrollo
-- JDK 17 o superior
-- Maven 3.9 o superior
-- IDE con soporte para JavaFX (IntelliJ IDEA, Eclipse, VS Code)
+
+| Dependencia | Versión | Descarga |
+|-------------|---------|----------|
+| JDK | 17+ | [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=17) |
+| Maven | 3.9+ | [Apache Maven](https://maven.apache.org/download.cgi) |
 
 ### Para generar instaladores
-- **Windows:** WiX Toolset 3.14 (`winget install WiXToolset.WiXToolset`)
-- **Linux:** dpkg-deb (incluido en la mayoría de distribuciones)
+
+| Dependencia | Plataforma | Descarga |
+|-------------|------------|----------|
+| WiX Toolset | Windows | [WiX Releases](https://wixtoolset.org/releases/) o `winget install WiXToolset.WiXToolset` |
+| dpkg-deb | Linux | Incluido en la mayoría de distribuciones |
+
+### Configuración del PATH
+
+Las dependencias pueden instalarse en cualquier ubicación, pero deben estar accesibles desde la terminal:
+
+**Windows:**
+1. Agregar `JAVA_HOME` apuntando a la carpeta del JDK (ej: `C:\Program Files\Eclipse Adoptium\jdk-17`)
+2. Agregar al `PATH`:
+   - `%JAVA_HOME%\bin`
+   - Carpeta `bin` de Maven (ej: `C:\Program Files\Maven\bin`)
+
+**Linux:**
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+Para verificar la instalación:
+```bash
+java -version    # Debe mostrar version 17+
+mvn -version     # Debe mostrar version 3.9+
+```
 
 ## Instalación y Ejecución
 
