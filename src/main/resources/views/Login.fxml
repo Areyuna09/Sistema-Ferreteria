@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <HBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.ferreteria.infrastructure.ui.LoginController"
+      fx:controller="com.ferreteria.controllers.LoginController"
       styleClass="login-root">
 
     <!-- Panel Izquierdo - Branding -->

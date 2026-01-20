@@ -1,4 +1,4 @@
-package com.ferreteria.domain.entities;
+package com.ferreteria.models;
 
 /**
  * Roles disponibles en el sistema.

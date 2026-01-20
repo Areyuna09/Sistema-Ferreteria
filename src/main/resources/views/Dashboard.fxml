@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.ferreteria.infrastructure.ui.DashboardController"
+            fx:controller="com.ferreteria.controllers.DashboardController"
             styleClass="dashboard-root">
 
     <!-- Navbar Superior -->

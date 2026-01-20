@@ -1,9 +1,10 @@
-package com.ferreteria.infrastructure.persistence;
+package com.ferreteria.models.dao;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Configuración de conexión a la base de datos.
@@ -37,6 +38,9 @@ public class DatabaseConfig {
     public Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            // Activar foreign keys en SQLite
+            Statement stmt = connection.createStatement();
+            stmt.execute("PRAGMA foreign_keys = ON");
         }
         return connection;
     }

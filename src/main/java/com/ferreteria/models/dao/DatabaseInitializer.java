@@ -1,4 +1,4 @@
-package com.ferreteria.infrastructure.persistence;
+package com.ferreteria.models.dao;
 
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;

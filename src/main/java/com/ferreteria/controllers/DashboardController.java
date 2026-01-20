@@ -1,8 +1,8 @@
-package com.ferreteria.infrastructure.ui;
+package com.ferreteria.controllers;
 
-import com.ferreteria.application.usecases.SessionManager;
-import com.ferreteria.domain.entities.User;
-import com.ferreteria.infrastructure.persistence.DatabaseConfig;
+import com.ferreteria.models.User;
+import com.ferreteria.models.dao.DatabaseConfig;
+import com.ferreteria.utils.SessionManager;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

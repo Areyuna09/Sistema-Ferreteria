@@ -1,10 +1,9 @@
-package com.ferreteria.domain.entities;
+package com.ferreteria.models;
 
 import java.time.LocalDateTime;
 
 /**
- * Entidad de dominio que representa un usuario del sistema.
- * Inmutable después de creación para garantizar integridad.
+ * Modelo que representa un usuario del sistema.
  */
 public class User {
 

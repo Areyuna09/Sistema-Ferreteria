@@ -1,27 +1,23 @@
-package com.ferreteria.infrastructure.persistence;
+package com.ferreteria.models.dao;
 
-import com.ferreteria.domain.entities.User;
-import com.ferreteria.domain.repositories.UserRepository;
-import org.mindrot.jbcrypt.BCrypt;
+import com.ferreteria.models.User;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementación SQLite del repositorio de usuarios.
+ * Data Access Object para usuarios.
  */
-public class SqliteUserRepository implements UserRepository {
+public class UserDAO {
 
     private final DatabaseConfig config;
 
-    public SqliteUserRepository(DatabaseConfig config) {
+    public UserDAO(DatabaseConfig config) {
         this.config = config;
     }
 
-    @Override
     public Optional<User> findById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         try {
@@ -38,7 +34,6 @@ public class SqliteUserRepository implements UserRepository {
         return Optional.empty();
     }
 
-    @Override
     public Optional<User> findByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try {
@@ -55,7 +50,6 @@ public class SqliteUserRepository implements UserRepository {
         return Optional.empty();
     }
 
-    @Override
     public List<User> findAll() {
         String sql = "SELECT * FROM users ORDER BY username";
         List<User> users = new ArrayList<>();
@@ -73,7 +67,6 @@ public class SqliteUserRepository implements UserRepository {
         return users;
     }
 
-    @Override
     public List<User> findAllActive() {
         String sql = "SELECT * FROM users WHERE active = 1 ORDER BY username";
         List<User> users = new ArrayList<>();
@@ -91,7 +84,6 @@ public class SqliteUserRepository implements UserRepository {
         return users;
     }
 
-    @Override
     public User save(User user) {
         if (user.getId() > 0) {
             return update(user);
@@ -136,7 +128,6 @@ public class SqliteUserRepository implements UserRepository {
         return user;
     }
 
-    @Override
     public void delete(int id) {
         String sql = "UPDATE users SET active = 0 WHERE id = ?";
         try {
@@ -148,12 +139,10 @@ public class SqliteUserRepository implements UserRepository {
         }
     }
 
-    @Override
     public boolean existsByUsername(String username) {
         return findByUsername(username).isPresent();
     }
 
-    @Override
     public int count() {
         String sql = "SELECT COUNT(*) FROM users WHERE active = 1";
         try {

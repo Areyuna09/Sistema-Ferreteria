@@ -1,10 +1,10 @@
-package com.ferreteria.domain.entities;
+package com.ferreteria.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Entidad de dominio que representa un producto del inventario.
+ * Modelo que representa un producto del inventario.
  */
 public class Product {
 

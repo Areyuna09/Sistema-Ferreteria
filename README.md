@@ -91,21 +91,26 @@ Instalar con:
 sudo dpkg -i target/dist/ferreteria_1.0.0_amd64.deb
 ```
 
-## Estructura del Proyecto
+## Estructura del Proyecto (MVC)
 
 ```
 src/main/java/com/ferreteria/
 ├── Main.java                    # Punto de entrada JavaFX
 ├── Launcher.java                # Launcher para JAR ejecutable
-├── application/
-│   └── usecases/                # Casos de uso de la aplicación
-├── domain/
-│   ├── entities/                # Entidades del dominio
-│   ├── exceptions/              # Excepciones personalizadas
-│   └── repositories/            # Interfaces de repositorios
-└── infrastructure/
-    ├── persistence/             # Implementación SQLite
-    └── ui/                      # Controladores JavaFX
+├── models/                      # Modelos de datos
+│   ├── User.java
+│   ├── Product.java
+│   ├── UserRole.java
+│   └── dao/                     # Data Access Objects
+│       ├── DatabaseConfig.java
+│       ├── DatabaseInitializer.java
+│       └── UserDAO.java
+├── controllers/                 # Controladores JavaFX
+│   ├── LoginController.java
+│   └── DashboardController.java
+└── utils/                       # Utilidades
+    ├── SessionManager.java
+    └── AuthenticationException.java
 
 src/main/resources/
 ├── views/                       # Archivos FXML
@@ -121,11 +126,11 @@ src/main/resources/
 
 ## Arquitectura
 
-El proyecto sigue los principios de **Clean Architecture**:
+El proyecto sigue el patrón **MVC (Model-View-Controller)**:
 
-- **Domain:** Entidades y reglas de negocio independientes del framework
-- **Application:** Casos de uso que orquestan la lógica de negocio
-- **Infrastructure:** Implementaciones concretas (UI, persistencia)
+- **Models:** Entidades de datos y DAOs para acceso a base de datos
+- **Views:** Archivos FXML que definen la interfaz gráfica
+- **Controllers:** Manejan la lógica de las pantallas y eventos del usuario
 
 ## Licencia
 

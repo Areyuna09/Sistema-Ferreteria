@@ -1,6 +1,6 @@
-package com.ferreteria.application.usecases;
+package com.ferreteria.utils;
 
-import com.ferreteria.domain.entities.User;
+import com.ferreteria.models.User;
 
 /**
  * Gestiona la sesión del usuario actual.

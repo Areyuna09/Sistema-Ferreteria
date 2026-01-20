@@ -1,11 +1,10 @@
-package com.ferreteria.infrastructure.ui;
+package com.ferreteria.controllers;
 
-import com.ferreteria.application.usecases.LoginUseCase;
-import com.ferreteria.application.usecases.SessionManager;
-import com.ferreteria.domain.entities.User;
-import com.ferreteria.domain.exceptions.AuthenticationException;
-import com.ferreteria.infrastructure.persistence.DatabaseConfig;
-import com.ferreteria.infrastructure.persistence.SqliteUserRepository;
+import com.ferreteria.models.User;
+import com.ferreteria.models.dao.DatabaseConfig;
+import com.ferreteria.models.dao.UserDAO;
+import com.ferreteria.utils.AuthenticationException;
+import com.ferreteria.utils.SessionManager;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,6 +12,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.Optional;
 
 /**
  * Controlador de la pantalla de Login.
@@ -24,18 +27,15 @@ public class LoginController {
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
 
-    private final LoginUseCase loginUseCase;
+    private final UserDAO userDAO;
 
     public LoginController() {
-        var userRepository = new SqliteUserRepository(DatabaseConfig.getInstance());
-        this.loginUseCase = new LoginUseCase(userRepository);
+        this.userDAO = new UserDAO(DatabaseConfig.getInstance());
     }
 
     @FXML
     public void initialize() {
         errorLabel.setVisible(false);
-
-        // Enter en password hace login
         passwordField.setOnAction(e -> handleLogin());
     }
 
@@ -51,7 +51,7 @@ public class LoginController {
 
         try {
             loginButton.setDisable(true);
-            User user = loginUseCase.execute(username, password);
+            User user = authenticate(username, password);
             SessionManager.getInstance().setCurrentUser(user);
             navigateToDashboard();
         } catch (AuthenticationException e) {
@@ -62,6 +62,26 @@ public class LoginController {
         } finally {
             loginButton.setDisable(false);
         }
+    }
+
+    private User authenticate(String username, String password) {
+        Optional<User> userOpt = userDAO.findByUsername(username);
+
+        if (userOpt.isEmpty()) {
+            throw new AuthenticationException("Usuario no encontrado");
+        }
+
+        User user = userOpt.get();
+
+        if (!user.isActive()) {
+            throw new AuthenticationException("Usuario desactivado");
+        }
+
+        if (!BCrypt.checkpw(password, user.getPasswordHash())) {
+            throw new AuthenticationException("Contraseña incorrecta");
+        }
+
+        return user;
     }
 
     private void showError(String message) {

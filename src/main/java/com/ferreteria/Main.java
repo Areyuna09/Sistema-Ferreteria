@@ -1,7 +1,7 @@
 package com.ferreteria;
 
-import com.ferreteria.infrastructure.persistence.DatabaseConfig;
-import com.ferreteria.infrastructure.persistence.DatabaseInitializer;
+import com.ferreteria.models.dao.DatabaseConfig;
+import com.ferreteria.models.dao.DatabaseInitializer;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
