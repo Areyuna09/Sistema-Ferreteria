@@ -8,14 +8,12 @@
             fx:controller="com.ferreteria.controllers.ReportsController"
             styleClass="reports-root">
 
-    <!-- Navbar Superior (igual que Dashboard) -->
     <top>
         <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="12">
             <padding>
                 <Insets top="0" right="32" bottom="0" left="32"/>
             </padding>
 
-            <!-- Logo y Marca -->
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="F" styleClass="navbar-icon"/>
                 <Label text="Ferreteria" styleClass="navbar-brand"/>
@@ -23,7 +21,6 @@
 
             <Region HBox.hgrow="ALWAYS"/>
 
-            <!-- Menu de Navegacion -->
             <HBox alignment="CENTER" spacing="6">
                 <Button text="Dashboard" onAction="#handleDashboard" styleClass="nav-button"/>
                 <Button text="Productos" onAction="#handleProducts" styleClass="nav-button"/>
@@ -34,18 +31,16 @@
 
             <Region HBox.hgrow="ALWAYS"/>
 
-            <!-- Usuario y Logout -->
             <HBox alignment="CENTER_RIGHT" spacing="20">
                 <VBox alignment="CENTER_RIGHT">
                     <Label fx:id="welcomeLabel" text="Administrador" styleClass="nav-user-name"/>
                     <Label fx:id="roleLabel" text="Admin" styleClass="nav-user-role"/>
                 </VBox>
-                <Button text="Cerrar Sesion" onAction="#handleLogout" styleClass="logout-btn, danger"/>
+                <Button text="Cerrar Sesion" onAction="#handleLogout" styleClass="logout-btn"/>
             </HBox>
         </HBox>
     </top>
 
-    <!-- Contenido Principal -->
     <center>
         <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
             <VBox styleClass="main-content" spacing="24">
@@ -53,15 +48,13 @@
                     <Insets top="32" right="40" bottom="32" left="40"/>
                 </padding>
 
-                <!-- Header -->
                 <HBox alignment="CENTER_LEFT" spacing="20">
-                    <VBox HBox.hgrow="ALWAYS" spacing="6">
+                    <VBox spacing="6">
                         <Label text="Reportes de Ventas" styleClass="page-title"/>
-                        <Label text="Análisis mensual de ventas, productos y métodos de pago" styleClass="page-subtitle"/>
+                        <Label text="Analisis mensual de ventas productos y metodos de pago" styleClass="page-subtitle"/>
                     </VBox>
                 </HBox>
 
-                <!-- Panel de Filtros -->
                 <HBox styleClass="filter-panel" spacing="20" alignment="CENTER_LEFT">
                     <VBox spacing="6">
                         <Label text="MES" styleClass="filter-label"/>
@@ -69,16 +62,15 @@
                     </VBox>
                     
                     <VBox spacing="6">
-                        <Label text="AÑO" styleClass="filter-label"/>
-                        <ComboBox fx:id="yearCombo" styleClass="filter-combo" promptText="Seleccionar año"/>
+                        <Label text="ANIO" styleClass="filter-label"/>
+                        <ComboBox fx:id="yearCombo" styleClass="filter-combo" promptText="Seleccionar anio"/>
                     </VBox>
                     
                     <Region HBox.hgrow="SOMETIMES"/>
                     
                     <VBox alignment="BOTTOM_LEFT" spacing="6">
                         <Label text=" "/>
-                        <Button text="Generar Reporte" onAction="#handleGenerateReport" 
-                                styleClass="action-button, accent" prefWidth="180"/>
+                        <Button text="Generar Reporte" onAction="#handleGenerateReport" styleClass="action-button" prefWidth="180"/>
                     </VBox>
                     
                     <Separator orientation="VERTICAL"/>
@@ -86,71 +78,60 @@
                     <VBox alignment="BOTTOM_LEFT" spacing="6">
                         <Label text=" "/>
                         <HBox spacing="8">
-                            <Button text="Exportar PDF" onAction="#handleExportPDF" 
-                                    styleClass="export-button" disable="true" fx:id="exportPdfBtn"/>
-                            <Button text="Exportar Excel" onAction="#handleExportExcel" 
-                                    styleClass="export-button" disable="true" fx:id="exportExcelBtn"/>
+                            <Button text="Exportar PDF" onAction="#handleExportPDF" styleClass="export-button" disable="true" fx:id="exportPdfBtn"/>
+                            <Button text="Exportar Excel" onAction="#handleExportExcel" styleClass="export-button" disable="true" fx:id="exportExcelBtn"/>
                         </HBox>
                     </VBox>
                 </HBox>
 
-                <!-- Cards de Estadísticas -->
                 <HBox spacing="20" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
-                    <VBox styleClass="stat-card card-blue" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="stat-card card-blue">
                         <Label text="Total" styleClass="card-icon"/>
-                        <Label fx:id="totalSalesLabel" text="$0.00" styleClass="card-value"/>
+                        <Label fx:id="totalSalesLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Total Recaudado" styleClass="card-label"/>
                     </VBox>
 
-                    <VBox styleClass="stat-card card-green" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="stat-card card-green">
                         <Label text="Ventas" styleClass="card-icon"/>
                         <Label fx:id="totalTransactionsLabel" text="0" styleClass="card-value"/>
                         <Label text="Ventas Realizadas" styleClass="card-label"/>
                     </VBox>
 
-                    <VBox styleClass="stat-card card-purple" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="stat-card card-purple">
                         <Label text="Promedio" styleClass="card-icon"/>
-                        <Label fx:id="avgSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label fx:id="avgSaleLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Promedio por Venta" styleClass="card-label"/>
                     </VBox>
 
-                    <VBox styleClass="stat-card card-orange" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="stat-card card-orange">
                         <Label text="Max" styleClass="card-icon"/>
-                        <Label fx:id="maxSaleLabel" text="$0.00" styleClass="card-value"/>
-                        <Label text="Venta Máxima" styleClass="card-label"/>
+                        <Label fx:id="maxSaleLabel" text="0.00" styleClass="card-value"/>
+                        <Label text="Venta Maxima" styleClass="card-label"/>
                     </VBox>
                 </HBox>
 
-                <!-- Sección: Métodos de Pago -->
                 <VBox spacing="12" fx:id="paymentMethodsSection" managed="false" visible="false">
-                    <Label text="Totales por Método de Pago" styleClass="section-title"/>
-                    <HBox spacing="16" fx:id="paymentMethodsContainer">
-                        <!-- Se llena dinámicamente -->
-                    </HBox>
+                    <Label text="Totales por Metodo de Pago" styleClass="section-title"/>
+                    <HBox spacing="16" fx:id="paymentMethodsContainer"/>
                 </VBox>
 
-                <!-- Sección: Productos Vendidos -->
                 <VBox spacing="12" fx:id="productsSection" managed="false" visible="false">
-                    <Label text="Productos Más Vendidos" styleClass="section-title"/>
+                    <Label text="Productos Mas Vendidos" styleClass="section-title"/>
                     <TableView fx:id="productsTable" styleClass="products-table">
                         <columns>
-                            <TableColumn text="#" prefWidth="60" styleClass="col-number"/>
                             <TableColumn text="Producto" fx:id="productColumn" prefWidth="250"/>
                             <TableColumn text="Variante" fx:id="variantColumn" prefWidth="200"/>
-                            <TableColumn text="Cantidad" fx:id="quantityColumn" prefWidth="120" styleClass="col-center"/>
-                            <TableColumn text="Precio Unit." fx:id="priceColumn" prefWidth="130" styleClass="col-price"/>
-                            <TableColumn text="Total Vendido" fx:id="totalColumn" prefWidth="150" styleClass="col-price"/>
+                            <TableColumn text="Cantidad" fx:id="quantityColumn" prefWidth="120"/>
+                            <TableColumn text="Precio Unit" fx:id="priceColumn" prefWidth="130"/>
+                            <TableColumn text="Total Vendido" fx:id="totalColumn" prefWidth="150"/>
                         </columns>
                     </TableView>
                 </VBox>
 
-                <!-- Mensaje cuando no hay datos -->
-                <VBox alignment="CENTER" spacing="16" styleClass="empty-state" 
-                      fx:id="emptyStateContainer" managed="true" visible="true">
+                <VBox alignment="CENTER" spacing="16" styleClass="empty-state" fx:id="emptyStateContainer" managed="true" visible="true">
                     <Label text="Reportes" styleClass="empty-icon"/>
-                    <Label text="Selecciona un mes y año para generar el reporte" styleClass="empty-text"/>
-                    <Label text="Los reportes muestran ventas, productos más vendidos y métodos de pago" 
-                           styleClass="empty-subtext"/>
+                    <Label text="Selecciona un mes y anio para generar el reporte" styleClass="empty-text"/>
+                    <Label text="Los reportes muestran ventas productos mas vendidos y metodos de pago" styleClass="empty-subtext"/>
                 </VBox>
 
             </VBox>

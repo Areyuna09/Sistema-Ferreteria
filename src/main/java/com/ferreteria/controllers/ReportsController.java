@@ -391,11 +391,6 @@ public class ReportsController {
     private void handleDashboard() {
         navigateTo("/views/Dashboard.fxml", "Sistema Ferretería - Dashboard");
     }
-    @FXML
-private void handleBack() {
-    navigateTo("/views/Dashboard.fxml", "Sistema Ferretería - Dashboard");
-}
-
 
     @FXML
     private void handleProducts() {
