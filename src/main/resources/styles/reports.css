@@ -1,0 +1,295 @@
+/* ============================================
+   REPORTES - ESTILOS ESPECÍFICOS
+   ============================================ */
+
+.reports-root {
+    -fx-background-color: #f1f5f9;
+}
+
+/* ============================================
+   PANEL DE FILTROS
+   ============================================ */
+
+.filter-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-padding: 24 32;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);
+}
+
+.filter-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-padding: 0 0 4 2;
+}
+
+.filter-combo {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 12 16;
+    -fx-font-size: 14px;
+    -fx-pref-width: 160;
+}
+
+.filter-combo:focused {
+    -fx-border-color: #0ea5e9;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.15), 6, 0, 0, 0);
+}
+
+.filter-combo .list-cell {
+    -fx-font-size: 14px;
+    -fx-padding: 10 14;
+}
+
+.export-button {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 18;
+    -fx-cursor: hand;
+}
+
+.export-button:hover {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #0ea5e9;
+}
+
+.export-button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/* ============================================
+   TARJETAS DE MÉTODOS DE PAGO
+   ============================================ */
+
+.payment-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 3);
+    -fx-alignment: center;
+    -fx-min-width: 160;
+    -fx-pref-width: 180;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+}
+
+.payment-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 16, 0, 0, 6);
+    -fx-translate-y: -2;
+}
+
+/* Colores específicos por método de pago */
+.payment-efectivo {
+    -fx-background-color: linear-gradient(to bottom right, #f0fdf4, #dcfce7), white;
+    -fx-background-insets: 0, 2;
+}
+
+.payment-tarjeta {
+    -fx-background-color: linear-gradient(to bottom right, #eff6ff, #dbeafe), white;
+    -fx-background-insets: 0, 2;
+}
+
+.payment-transferencia {
+    -fx-background-color: linear-gradient(to bottom right, #faf5ff, #f3e8ff), white;
+    -fx-background-insets: 0, 2;
+}
+
+/* ============================================
+   TABLA DE PRODUCTOS
+   ============================================ */
+
+.products-table {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);
+}
+
+.products-table .column-header {
+    -fx-background-color: #f8fafc;
+    -fx-padding: 16 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+}
+
+.products-table .table-row-cell {
+    -fx-padding: 14 20;
+    -fx-border-color: transparent transparent #f1f5f9 transparent;
+    -fx-font-size: 14px;
+}
+
+.products-table .table-row-cell:hover {
+    -fx-background-color: #f8fafc;
+}
+
+.products-table .table-row-cell:selected {
+    -fx-background-color: #e0f2fe;
+}
+
+.products-table .table-cell {
+    -fx-padding: 14 20;
+}
+
+/* Columnas específicas */
+.col-number {
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+}
+
+.col-center {
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+}
+
+.col-price {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+/* ============================================
+   ESTADO VACÍO
+   ============================================ */
+
+.empty-state {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-padding: 80 40;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 8, 0, 0, 3);
+    -fx-min-height: 400;
+}
+
+.empty-icon {
+    -fx-font-size: 72px;
+    -fx-padding: 0 0 20 0;
+}
+
+.empty-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.empty-subtext {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
+    -fx-max-width: 400;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADA
+   ============================================ */
+
+.products-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+}
+
+.products-table .scroll-bar:vertical .track {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 5;
+}
+
+.products-table .scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 5;
+}
+
+.products-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #94a3b8;
+}
+
+/* ============================================
+   SEPARADOR
+   ============================================ */
+
+.separator {
+    -fx-padding: 0;
+}
+
+.separator .line {
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1 0 0 0;
+}
+
+.separator:vertical .line {
+    -fx-border-color: transparent #e2e8f0 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+/* ============================================
+   ANIMACIONES Y TRANSICIONES
+   ============================================ */
+
+.payment-card,
+.stat-card,
+.filter-panel,
+.products-table {
+    -fx-cursor: hand;
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   RESPONSIVE - Ajustes para pantallas pequeñas
+   ============================================ */
+
+@media screen and (max-width: 1200px) {
+    .filter-panel {
+        -fx-spacing: 12;
+    }
+    
+    .payment-card {
+        -fx-min-width: 140;
+        -fx-pref-width: 150;
+        -fx-padding: 20;
+    }
+    
+    .stat-card {
+        -fx-min-width: 150;
+    }
+}
+
+/* ============================================
+   MEJORAS VISUALES
+   ============================================ */
+
+/* Efecto hover suave en filas de tabla */
+.products-table .table-row-cell {
+    transition: background-color 0.2s ease;
+}
+
+/* Resaltar total en tabla */
+.products-table .table-row-cell:nth-child(even) {
+    -fx-background-color: #fafafa;
+}
+
+.products-table .table-row-cell:nth-child(even):hover {
+    -fx-background-color: #f0f9ff;
+}
+
+/* Efecto glassmorphism en cards */
+.payment-card,
+.stat-card {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-backdrop-filter: blur(10px);
+}

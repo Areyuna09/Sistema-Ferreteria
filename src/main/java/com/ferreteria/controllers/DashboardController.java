@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * Controlador del Dashboard principal.
@@ -42,7 +43,7 @@ public class DashboardController {
             roleLabel.setText("Rol: " + user.getRole().getValue());
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM yyyy", new Locale("es", "ES"));
         dateLabel.setText(LocalDateTime.now().format(formatter));
     }
 
@@ -101,7 +102,7 @@ public class DashboardController {
     @FXML
     public void handleReports() {
         System.out.println("Navegando a Reportes...");
-        // TODO: Implementar vista de reportes
+        navigateTo("/views/Reports.fxml", "Sistema Ferretería - Reportes");
     }
 
     @FXML
@@ -112,6 +113,37 @@ public class DashboardController {
         }
         System.out.println("Navegando a Usuarios...");
         // TODO: Implementar vista de usuarios
+    }
+
+    /**
+     * Navega a una vista específica
+     * 
+     * @param fxmlPath Ruta del archivo FXML
+     * @param title Título de la ventana
+     */
+    private void navigateTo(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            // Agregar CSS adicional para reportes si es necesario
+            if (fxmlPath.contains("Reports")) {
+                scene.getStylesheets().add(getClass().getResource("/styles/reports.css").toExternalForm());
+            }
+
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            stage.setTitle(title);
+            stage.setScene(scene);
+            stage.setMaximized(true); // Maximizar para mejor visualización de reportes
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            System.err.println("Error al navegar a " + fxmlPath + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void navigateToLogin() {
