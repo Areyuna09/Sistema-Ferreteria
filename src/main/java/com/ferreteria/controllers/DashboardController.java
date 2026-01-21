@@ -88,8 +88,7 @@ public class DashboardController {
 
     @FXML
     public void handleProducts() {
-        System.out.println("Navegando a Productos...");
-        // TODO: Implementar vista de productos
+        navigateToProducts();
     }
 
     @FXML
@@ -100,8 +99,7 @@ public class DashboardController {
 
     @FXML
     public void handleReports() {
-        System.out.println("Navegando a Reportes...");
-        // TODO: Implementar vista de reportes
+        navigateToReports();
     }
 
     @FXML
@@ -124,6 +122,38 @@ public class DashboardController {
             stage.setTitle("Sistema Ferretería - Login");
             stage.setScene(scene);
             stage.setResizable(false);
+            stage.centerOnScreen();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateToProducts() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/views/Products.fxml"));
+            Scene scene = new Scene(root, 1200, 800);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            stage.setTitle("Sistema Ferretería - Productos");
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.centerOnScreen();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateToReports() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/views/Reports.fxml"));
+            Scene scene = new Scene(root, 1200, 800);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            stage.setTitle("Sistema Ferretería - Reportes");
+            stage.setScene(scene);
+            stage.setResizable(true);
             stage.centerOnScreen();
         } catch (Exception e) {
             e.printStackTrace();
