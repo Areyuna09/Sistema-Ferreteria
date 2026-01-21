@@ -2,7 +2,7 @@
 
 Sistema de punto de venta para ferretería con interfaz gráfica moderna. Incluye autenticación de usuarios, dashboard de estadísticas, gestión de productos e inventario.
 
-## Stack Tecnológico
+## Stack Tecnológico.
 
 | Tecnología | Versión | Descripción |
 |------------|---------|-------------|
