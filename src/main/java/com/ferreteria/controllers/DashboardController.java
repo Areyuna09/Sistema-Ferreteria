@@ -57,8 +57,8 @@ public class DashboardController {
                 totalProductsLabel.setText(String.valueOf(rs.getInt(1)));
             }
 
-            // Productos con stock bajo
-            rs = stmt.executeQuery("SELECT COUNT(*) FROM products WHERE active = 1 AND stock <= min_stock");
+            // Variantes con stock bajo
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM product_variants WHERE active = 1 AND stock <= min_stock");
             if (rs.next()) {
                 lowStockLabel.setText(String.valueOf(rs.getInt(1)));
             }
