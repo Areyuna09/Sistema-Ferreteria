@@ -58,7 +58,11 @@ public class DashboardController {
             }
 
             // Variantes con stock bajo
-            rs = stmt.executeQuery("SELECT COUNT(*) FROM product_variants WHERE active = 1 AND stock <= min_stock");
+            rs = stmt.executeQuery("""
+                SELECT COUNT(*) FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
+                WHERE pv.active = 1 AND p.active = 1 AND pv.stock <= pv.min_stock
+                """);
             if (rs.next()) {
                 lowStockLabel.setText(String.valueOf(rs.getInt(1)));
             }

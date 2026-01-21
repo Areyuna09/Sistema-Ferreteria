@@ -108,7 +108,8 @@ public class ProductsController {
         };
     }
 
-    private void loadProducts() {
+    @FXML
+    public void loadProducts() {
         List<Product> products = new ArrayList<>();
         
         try {
@@ -116,11 +117,14 @@ public class ProductsController {
             Statement stmt = conn.createStatement();
             
             ResultSet rs = stmt.executeQuery("""
-                SELECT id, code, name, description, category, price, cost, 
-                       stock, min_stock, location, active, created_at 
-                FROM products 
-                WHERE active = 1 
-                ORDER BY name
+                SELECT p.id, p.code, p.name, p.description, c.name as category,
+                       pv.sale_price as price, pv.cost_price as cost, pv.stock, pv.min_stock,
+                       p.location, p.active, p.created_at 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN product_variants pv ON p.id = pv.product_id
+                WHERE p.active = 1 AND pv.active = 1
+                ORDER BY p.name
                 """);
             
             while (rs.next()) {
@@ -178,11 +182,14 @@ public class ProductsController {
                 var conn = DatabaseConfig.getInstance().getConnection();
                 Statement stmt = conn.createStatement();
                 
-                // Marcar como inactivo en lugar de eliminar físicamente
+                // Marcar como inactivo en ambas tablas
                 String sql = "UPDATE products SET active = 0 WHERE id = " + product.getId();
-                int rowsAffected = stmt.executeUpdate(sql);
+                int rowsAffected1 = stmt.executeUpdate(sql);
                 
-                if (rowsAffected > 0) {
+                sql = "UPDATE product_variants SET active = 0 WHERE product_id = " + product.getId();
+                int rowsAffected2 = stmt.executeUpdate(sql);
+                
+                if (rowsAffected1 > 0 || rowsAffected2 > 0) {
                     showAlert("Éxito", "Producto eliminado correctamente");
                     loadProducts(); // Recargar la tabla
                 } else {

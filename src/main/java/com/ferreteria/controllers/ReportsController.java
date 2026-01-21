@@ -169,10 +169,12 @@ public class ReportsController {
             Statement stmt = conn.createStatement();
             
             ResultSet rs = stmt.executeQuery("""
-                SELECT name, category, price, stock 
-                FROM products 
-                WHERE active = 1 
-                ORDER BY category, name
+                SELECT p.name, c.name as category, pv.sale_price as price, pv.stock 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN product_variants pv ON p.id = pv.product_id
+                WHERE p.active = 1 AND pv.active = 1 
+                ORDER BY c.name, p.name
                 """);
             
             while (rs.next()) {
@@ -204,16 +206,18 @@ public class ReportsController {
             Statement stmt = conn.createStatement();
             
             ResultSet rs = stmt.executeQuery("""
-                SELECT name, category, stock, min_stock 
-                FROM products 
-                WHERE active = 1 AND stock <= min_stock 
-                ORDER BY stock ASC
+                SELECT p.name, c.name as category, pv.stock, pv.min_stock 
+                FROM products p
+                JOIN categories c ON p.category_id = c.id
+                JOIN product_variants pv ON p.id = pv.product_id
+                WHERE p.active = 1 AND pv.active = 1 AND pv.stock <= pv.min_stock 
+                ORDER BY pv.stock ASC
                 """);
             
             while (rs.next()) {
                 ReportItem item = new ReportItem(
                     rs.getString("name"),
-                    "Stock actual: " + rs.getInt("stock") + " | Mínimo: " + rs.getInt("min_stock"),
+                    rs.getString("category") + " | Stock actual: " + rs.getInt("stock") + " | Mínimo: " + rs.getInt("min_stock"),
                     BigDecimal.ZERO,
                     LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 );
@@ -238,10 +242,12 @@ public class ReportsController {
             Statement stmt = conn.createStatement();
             
             ResultSet rs = stmt.executeQuery("""
-                SELECT category, COUNT(*) as count, SUM(price * stock) as total_value
-                FROM products 
-                WHERE active = 1 
-                GROUP BY category 
+                SELECT c.name as category, COUNT(*) as count, SUM(pv.sale_price * pv.stock) as total_value
+                FROM products p
+                JOIN categories c ON p.category_id = c.id
+                JOIN product_variants pv ON p.id = pv.product_id
+                WHERE p.active = 1 AND pv.active = 1 
+                GROUP BY c.name 
                 ORDER BY total_value DESC
                 """);
             
