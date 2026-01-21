@@ -11,8 +11,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -60,6 +66,10 @@ public class ReportsController {
     // FXML - Métodos de Pago
     @FXML private VBox paymentMethodsSection;
     @FXML private HBox paymentMethodsContainer;
+
+    // FXML - Gráfico
+    @FXML private VBox chartSection;
+    @FXML private StackPane chartContainer;
 
     // FXML - Tabla de Productos
     @FXML private VBox productsSection;
@@ -193,6 +203,7 @@ public class ReportsController {
                         updateStatistics(stats);
                         updatePaymentMethods(paymentTotals);
                         updateProductsTable(productsSummary);
+                        updateChart(reportDAO.getDailySales(selectedPeriod));
                         showReportSections();
                         enableExportButtons();
                     });
@@ -300,6 +311,62 @@ public class ReportsController {
     }
 
     /**
+     * Actualiza el gráfico de ventas por día
+     */
+    private void updateChart(Map<Integer, BigDecimal> dailySales) {
+        chartContainer.getChildren().clear();
+        
+        if (dailySales == null || dailySales.isEmpty()) {
+            VBox emptyChart = new VBox(20);
+            emptyChart.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyChart.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-padding: 60;");
+            
+            Label icon = new Label("Sin Datos");
+            icon.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;");
+            
+            Label message = new Label("No hay ventas registradas en este mes");
+            message.setStyle("-fx-font-size: 16px; -fx-text-fill: #64748b;");
+            
+            emptyChart.getChildren().addAll(icon, message);
+            chartContainer.getChildren().add(emptyChart);
+            
+            LOGGER.info("No hay datos de ventas para el gráfico");
+            return;
+        }
+
+        LOGGER.info("Generando gráfico con " + dailySales.size() + " días de datos");
+
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        
+        xAxis.setLabel("Dia del Mes");
+        yAxis.setLabel("Monto (ARS)");
+        
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("Ventas Diarias - " + 
+            selectedPeriod.getMonth().getDisplayName(java.time.format.TextStyle.FULL, new Locale("es", "ES")) + 
+            " " + selectedPeriod.getYear());
+        barChart.setLegendVisible(false);
+        barChart.setAnimated(true);
+        
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Ventas");
+        
+        for (Map.Entry<Integer, BigDecimal> entry : dailySales.entrySet()) {
+            String day = String.valueOf(entry.getKey());
+            double amount = entry.getValue().doubleValue();
+            series.getData().add(new XYChart.Data<>(day, amount));
+            LOGGER.info("Dia " + day + ": $" + amount);
+        }
+        
+        barChart.getData().add(series);
+        barChart.setPrefHeight(350);
+        barChart.setStyle("-fx-background-color: transparent;");
+        
+        chartContainer.getChildren().add(barChart);
+    }
+
+    /**
      * Muestra las secciones del reporte y oculta el estado vacío
      */
     private void showReportSections() {
@@ -311,6 +378,9 @@ public class ReportsController {
 
         paymentMethodsSection.setVisible(true);
         paymentMethodsSection.setManaged(true);
+
+        chartSection.setVisible(true);
+        chartSection.setManaged(true);
 
         productsSection.setVisible(true);
         productsSection.setManaged(true);

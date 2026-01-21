@@ -165,11 +165,16 @@ public class ReportDAO {
      */
     public Map<Integer, BigDecimal> getDailySales(YearMonth yearMonth) {
         Map<Integer, BigDecimal> dailySales = new TreeMap<>();
+        
+        // Agregar log para debugging
+        LOGGER.info("Consultando ventas diarias para: " + yearMonth.toString());
+        
         String query = "SELECT " +
                       "CAST(strftime('%d', s.created_at) AS INTEGER) as dia, " +
                       "SUM(s.total) as total " +
                       "FROM sales s " +
                       "WHERE strftime('%Y-%m', s.created_at) = ? " +
+                      "AND s.status = 'completed' " +
                       "GROUP BY dia " +
                       "ORDER BY dia";
 
@@ -178,11 +183,35 @@ public class ReportDAO {
             
             stmt.setString(1, yearMonth.toString());
             
+            LOGGER.info("Ejecutando query con periodo: " + yearMonth.toString());
+            
             try (ResultSet rs = stmt.executeQuery()) {
+                int rowCount = 0;
                 while (rs.next()) {
                     int day = rs.getInt("dia");
                     BigDecimal total = rs.getBigDecimal("total");
                     dailySales.put(day, total);
+                    rowCount++;
+                    LOGGER.info("Dia " + day + ": $" + total);
+                }
+                
+                if (rowCount == 0) {
+                    LOGGER.warning("No se encontraron ventas diarias para " + yearMonth);
+                    
+                    // Query de debug para ver que hay en la tabla
+                    String debugQuery = "SELECT COUNT(*) as total, " +
+                                       "MIN(created_at) as primera, " +
+                                       "MAX(created_at) as ultima " +
+                                       "FROM sales WHERE status = 'completed'";
+                    
+                    try (Statement debugStmt = conn.createStatement();
+                         ResultSet debugRs = debugStmt.executeQuery(debugQuery)) {
+                        if (debugRs.next()) {
+                            LOGGER.info("Total ventas en BD: " + debugRs.getInt("total"));
+                            LOGGER.info("Primera venta: " + debugRs.getString("primera"));
+                            LOGGER.info("Ultima venta: " + debugRs.getString("ultima"));
+                        }
+                    }
                 }
             }
             

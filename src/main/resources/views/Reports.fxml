@@ -42,10 +42,10 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
-            <VBox styleClass="main-content" spacing="24">
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER">
+            <VBox styleClass="main-content" spacing="28" minHeight="600">
                 <padding>
-                    <Insets top="32" right="40" bottom="32" left="40"/>
+                    <Insets top="32" right="40" bottom="100" left="40"/>
                 </padding>
 
                 <HBox alignment="CENTER_LEFT" spacing="20">
@@ -112,12 +112,20 @@
 
                 <VBox spacing="12" fx:id="paymentMethodsSection" managed="false" visible="false">
                     <Label text="Totales por Metodo de Pago" styleClass="section-title"/>
-                    <HBox spacing="16" fx:id="paymentMethodsContainer"/>
+                    <HBox spacing="16" fx:id="paymentMethodsContainer" minHeight="120"/>
+                </VBox>
+
+                <VBox spacing="12" fx:id="chartSection" managed="false" visible="false">
+                    <Label text="Ventas por Dia del Mes" styleClass="section-title"/>
+                    <StackPane fx:id="chartContainer" styleClass="chart-container" prefHeight="350"/>
                 </VBox>
 
                 <VBox spacing="12" fx:id="productsSection" managed="false" visible="false">
+                    <padding>
+                        <Insets bottom="40"/>
+                    </padding>
                     <Label text="Productos Mas Vendidos" styleClass="section-title"/>
-                    <TableView fx:id="productsTable" styleClass="products-table">
+                    <TableView fx:id="productsTable" styleClass="products-table" prefHeight="400">
                         <columns>
                             <TableColumn text="Producto" fx:id="productColumn" prefWidth="250"/>
                             <TableColumn text="Variante" fx:id="variantColumn" prefWidth="200"/>
