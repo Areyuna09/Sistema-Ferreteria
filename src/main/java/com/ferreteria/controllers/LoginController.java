@@ -1,17 +1,23 @@
 package com.ferreteria.controllers;
 
+import com.ferreteria.Main;
 import com.ferreteria.models.User;
 import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.models.dao.UserDAO;
 import com.ferreteria.utils.AuthenticationException;
 import com.ferreteria.utils.SessionManager;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -26,6 +32,9 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
+    @FXML private ImageView backgroundImage;
+    @FXML private VBox brandPanel;
+    @FXML private VBox formPanel;
 
     private final UserDAO userDAO;
 
@@ -37,6 +46,63 @@ public class LoginController {
     public void initialize() {
         errorLabel.setVisible(false);
         passwordField.setOnAction(e -> handleLogin());
+
+        setupBackground();
+        playEntryAnimations();
+    }
+
+    private void setupBackground() {
+        try {
+            Image bgImage = new Image(getClass().getResourceAsStream("/images/background.jpg"));
+            backgroundImage.setImage(bgImage);
+
+            GaussianBlur blur = new GaussianBlur(25);
+            backgroundImage.setEffect(blur);
+
+            // Bind image size to parent for responsive scaling
+            backgroundImage.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    backgroundImage.fitWidthProperty().bind(newScene.widthProperty());
+                    backgroundImage.fitHeightProperty().bind(newScene.heightProperty());
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar imagen de fondo: " + e.getMessage());
+        }
+    }
+
+    private void playEntryAnimations() {
+        brandPanel.setOpacity(0);
+        brandPanel.setTranslateY(20);
+        formPanel.setOpacity(0);
+        formPanel.setTranslateY(20);
+
+        FadeTransition fadeBrand = new FadeTransition(Duration.millis(400), brandPanel);
+        fadeBrand.setFromValue(0);
+        fadeBrand.setToValue(1);
+        fadeBrand.setInterpolator(Interpolator.EASE_OUT);
+
+        TranslateTransition slideBrand = new TranslateTransition(Duration.millis(400), brandPanel);
+        slideBrand.setFromY(20);
+        slideBrand.setToY(0);
+        slideBrand.setInterpolator(Interpolator.EASE_OUT);
+
+        FadeTransition fadeForm = new FadeTransition(Duration.millis(400), formPanel);
+        fadeForm.setFromValue(0);
+        fadeForm.setToValue(1);
+        fadeForm.setDelay(Duration.millis(100));
+        fadeForm.setInterpolator(Interpolator.EASE_OUT);
+
+        TranslateTransition slideForm = new TranslateTransition(Duration.millis(400), formPanel);
+        slideForm.setFromY(20);
+        slideForm.setToY(0);
+        slideForm.setDelay(Duration.millis(100));
+        slideForm.setInterpolator(Interpolator.EASE_OUT);
+
+        ParallelTransition parallel = new ParallelTransition(
+            fadeBrand, slideBrand, fadeForm, slideForm
+        );
+        parallel.play();
     }
 
     @FXML
@@ -91,19 +157,6 @@ public class LoginController {
     }
 
     private void navigateToDashboard() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/views/Dashboard.fxml"));
-            Scene scene = new Scene(root, 1200, 700);
-            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            stage.setTitle("Sistema Ferretería - Dashboard");
-            stage.setScene(scene);
-            stage.setResizable(true);
-            stage.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Error cargando dashboard");
-        }
+        Main.navigateTo("/views/Dashboard.fxml", "Sistema Ferreteria - Dashboard");
     }
 }

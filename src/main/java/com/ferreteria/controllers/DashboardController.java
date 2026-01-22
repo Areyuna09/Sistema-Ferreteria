@@ -1,15 +1,12 @@
 package com.ferreteria.controllers;
 
+import com.ferreteria.Main;
 import com.ferreteria.models.User;
 import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.utils.SessionManager;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -115,18 +112,6 @@ public class DashboardController {
     }
 
     private void navigateToLogin() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
-            Scene scene = new Scene(root, 400, 500);
-            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-            stage.setTitle("Sistema Ferretería - Login");
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Main.navigateTo("/views/Login.fxml", "Ferreteria - Sistema de Gestion");
     }
 }
