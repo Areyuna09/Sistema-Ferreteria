@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ferreteria.controllers.NewProductDialogController">
+   <children>
+      <VBox spacing="20.0" styleClass="dialog-container">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         
+         <Label styleClass="dialog-title" text="Nuevo Producto" />
+         
+         <GridPane hgap="15.0" vgap="15.0">
+            <children>
+               <!-- Fila 1: Código y Nombre -->
+               <Label text="Código:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+               <TextField fx:id="codeField" promptText="Ej: PROD-001" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+               
+               <Label text="Nombre:*" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+               <TextField fx:id="nameField" promptText="Nombre del producto" GridPane.rowIndex="0" GridPane.columnIndex="3" />
+               
+               <!-- Fila 2: Categoría y Ubicación -->
+               <Label text="Categoría:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+               <ComboBox fx:id="categoryComboBox" prefWidth="200.0" promptText="Seleccionar categoría" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+               
+               <Label text="Ubicación:" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+               <TextField fx:id="locationField" promptText="Ej: Pasillo A, Estantería 3" GridPane.rowIndex="1" GridPane.columnIndex="3" />
+               
+               <!-- Fila 3: Precio de Venta y Precio de Costo -->
+               <Label text="Precio Venta:*" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+               <TextField fx:id="priceField" promptText="0.00" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+               
+               <Label text="Precio Costo:" GridPane.rowIndex="2" GridPane.columnIndex="2" />
+               <TextField fx:id="costField" promptText="0.00" GridPane.rowIndex="2" GridPane.columnIndex="3" />
+               
+               <!-- Fila 4: Stock y Stock Mínimo -->
+               <Label text="Stock Inicial:*" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+               <TextField fx:id="stockField" promptText="0" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+               
+               <Label text="Stock Mínimo:" GridPane.rowIndex="3" GridPane.columnIndex="2" />
+               <TextField fx:id="minStockField" promptText="5" GridPane.rowIndex="3" GridPane.columnIndex="3" />
+               
+               <!-- Fila 5: Descripción -->
+               <Label text="Descripción:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+               <TextArea fx:id="descriptionArea" prefRowCount="3" promptText="Descripción detallada del producto..." GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.columnSpan="3" />
+            </children>
+            <columnConstraints>
+               <ColumnConstraints hgrow="NEVER" minWidth="80.0" />
+               <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" />
+               <ColumnConstraints hgrow="NEVER" minWidth="100.0" />
+               <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" />
+            </columnConstraints>
+         </GridPane>
+         
+         <!-- Botones de acción -->
+         <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <children>
+               <Button mnemonicParsing="false" onAction="#handleCancel" styleClass="secondary-button" text="Cancelar" />
+               <Button mnemonicParsing="false" onAction="#handleSave" styleClass="primary-button" text="Guardar Producto" />
+            </children>
+         </HBox>
+         
+      </VBox>
+   </children>
+</VBox>

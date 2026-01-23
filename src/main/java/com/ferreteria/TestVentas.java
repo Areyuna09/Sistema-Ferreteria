@@ -15,7 +15,7 @@ import java.util.List;
 public class TestVentas {
 
     private static DatabaseConfig dbConfig;
-    private static VentaDAO ventaDAO;
+    private static SaleDAO saleDAO;
     private static ProductVariantDAO variantDAO;
 
     public static void main(String[] args) {
@@ -58,7 +58,7 @@ public class TestVentas {
         DatabaseInitializer initializer = new DatabaseInitializer(dbConfig);
         initializer.initialize();
 
-        ventaDAO = new VentaDAO(dbConfig);
+        saleDAO = new SaleDAO(dbConfig);
         variantDAO = new ProductVariantDAO(dbConfig);
 
         System.out.println("  ✓ Base de datos inicializada\n");
@@ -172,7 +172,7 @@ public class TestVentas {
             v2.getDisplayName(), stockAntes2);
 
         // Crear items
-        DetalleVenta item1 = new DetalleVenta.Builder()
+        SaleItem item1 = new SaleItem.Builder()
             .variantId(v1.getId())
             .quantity(2)
             .unitPrice(v1.getSalePrice())
@@ -181,7 +181,7 @@ public class TestVentas {
             .variantName(v1.getVariantName())
             .build();
 
-        DetalleVenta item2 = new DetalleVenta.Builder()
+        SaleItem item2 = new SaleItem.Builder()
             .variantId(v2.getId())
             .quantity(3)
             .unitPrice(v2.getSalePrice())
@@ -193,27 +193,27 @@ public class TestVentas {
         BigDecimal total = item1.getSubtotal().add(item2.getSubtotal());
 
         // Crear pago
-        PagoVenta pago = new PagoVenta.Builder()
-            .paymentMethod(PagoVenta.MetodoPago.EFECTIVO)
+        SalePayment payment = new SalePayment.Builder()
+            .paymentMethod(SalePayment.PaymentMethod.CASH)
             .amount(total)
             .build();
 
         // Crear venta
-        Venta venta = new Venta.Builder()
+        Sale sale = new Sale.Builder()
             .userId(1) // Admin
             .total(total)
             .status("completed")
             .notes("Venta de prueba")
             .addItem(item1)
             .addItem(item2)
-            .addPago(pago)
+            .addPayment(payment)
             .build();
 
         System.out.printf("  Creando venta por $%.2f...%n", total);
 
-        Venta ventaCreada = ventaDAO.crear(venta);
+        Sale createdSale = saleDAO.create(sale);
 
-        System.out.println("  ✓ Venta creada con ID: " + ventaCreada.getId());
+        System.out.println("  ✓ Venta creada con ID: " + createdSale.getId());
 
         // Verificar stock actualizado
         ProductVariant v1Despues = variantDAO.buscarPorId(v1.getId()).orElseThrow();
@@ -233,34 +233,34 @@ public class TestVentas {
         System.out.println("► TEST: Listar ventas...");
 
         // Listar todas
-        List<Venta> todas = ventaDAO.listarTodas();
+        List<Sale> todas = saleDAO.findAll();
         System.out.println("  Total ventas: " + todas.size());
 
         // Listar por fecha
-        List<Venta> hoy = ventaDAO.listarPorFecha(LocalDate.now());
+        List<Sale> hoy = saleDAO.findByDate(LocalDate.now());
         System.out.println("  Ventas de hoy: " + hoy.size());
 
         // Listar completadas
-        List<Venta> completadas = ventaDAO.listarCompletadas();
+        List<Sale> completadas = saleDAO.findCompleted();
         System.out.println("  Ventas completadas: " + completadas.size());
 
         // Mostrar detalle de última venta
         if (!todas.isEmpty()) {
-            Venta ultima = ventaDAO.buscarPorId(todas.get(0).getId()).orElseThrow();
+            Sale ultima = saleDAO.findById(todas.get(0).getId()).orElseThrow();
             System.out.println("\n  Última venta (#" + ultima.getId() + "):");
             System.out.printf("    Total: $%.2f%n", ultima.getTotal());
             System.out.println("    Items: " + ultima.getItems().size());
-            for (DetalleVenta item : ultima.getItems()) {
+            for (SaleItem item : ultima.getItems()) {
                 System.out.printf("      - %s x%d = $%.2f%n",
                     item.getDisplayName(),
                     item.getQuantity(),
                     item.getSubtotal());
             }
-            System.out.println("    Pagos: " + ultima.getPagos().size());
-            for (PagoVenta pago : ultima.getPagos()) {
+            System.out.println("    Pagos: " + ultima.getPayments().size());
+            for (SalePayment payment : ultima.getPayments()) {
                 System.out.printf("      - %s: $%.2f%n",
-                    pago.getPaymentMethodDisplayName(),
-                    pago.getAmount());
+                    payment.getPaymentMethodDisplayName(),
+                    payment.getAmount());
             }
         }
 
@@ -270,24 +270,24 @@ public class TestVentas {
     private static void testAnularVenta() {
         System.out.println("► TEST: Anular venta...");
 
-        List<Venta> completadas = ventaDAO.listarCompletadas();
+        List<Sale> completadas = saleDAO.findCompleted();
         if (completadas.isEmpty()) {
             System.out.println("  ⚠ No hay ventas para anular");
             return;
         }
 
-        Venta ventaAAnular = ventaDAO.buscarPorId(completadas.get(0).getId()).orElseThrow();
+        Sale saleToCancel = saleDAO.findById(completadas.get(0).getId()).orElseThrow();
 
         // Guardar stock antes
-        int variantId = ventaAAnular.getItems().get(0).getVariantId();
-        int cantidad = ventaAAnular.getItems().get(0).getQuantity();
+        int variantId = saleToCancel.getItems().get(0).getVariantId();
+        int cantidad = saleToCancel.getItems().get(0).getQuantity();
         ProductVariant antes = variantDAO.buscarPorId(variantId).orElseThrow();
         int stockAntes = antes.getStock();
 
         System.out.printf("  Anulando venta #%d (stock %s antes: %d)...%n",
-            ventaAAnular.getId(), antes.getDisplayName(), stockAntes);
+            saleToCancel.getId(), antes.getDisplayName(), stockAntes);
 
-        ventaDAO.anular(ventaAAnular.getId());
+        saleDAO.cancel(saleToCancel.getId());
 
         // Verificar stock revertido
         ProductVariant despues = variantDAO.buscarPorId(variantId).orElseThrow();
@@ -297,8 +297,8 @@ public class TestVentas {
         assert despues.getStock() == stockAntes + cantidad : "Stock no se revirtió correctamente";
 
         // Verificar estado
-        Venta ventaAnulada = ventaDAO.buscarPorId(ventaAAnular.getId()).orElseThrow();
-        assert ventaAnulada.isCancelled() : "Venta no quedó como anulada";
+        Sale cancelledSale = saleDAO.findById(saleToCancel.getId()).orElseThrow();
+        assert cancelledSale.isCancelled() : "Venta no quedó como anulada";
 
         System.out.println("  ✓ Venta anulada y stock revertido\n");
     }
@@ -310,12 +310,12 @@ public class TestVentas {
         int year = hoy.getYear();
         int month = hoy.getMonthValue();
 
-        BigDecimal totalHoy = ventaDAO.totalDelDia(hoy);
-        BigDecimal totalMes = ventaDAO.totalDelMes(year, month);
-        BigDecimal totalGeneral = ventaDAO.totalGeneral();
-        int cantidadHoy = ventaDAO.contarDelDia(hoy);
-        int totalVentas = ventaDAO.contar();
-        int completadas = ventaDAO.contarCompletadas();
+        BigDecimal totalHoy = saleDAO.dailyTotal(hoy);
+        BigDecimal totalMes = saleDAO.monthlyTotal(year, month);
+        BigDecimal totalGeneral = saleDAO.overallTotal();
+        int cantidadHoy = saleDAO.dailyCount(hoy);
+        int totalVentas = saleDAO.count();
+        int completadas = saleDAO.countCompleted();
 
         System.out.printf("  Ventas de hoy: %d por $%.2f%n", cantidadHoy, totalHoy);
         System.out.printf("  Ventas del mes: $%.2f%n", totalMes);
@@ -323,11 +323,11 @@ public class TestVentas {
         System.out.printf("  Total ventas: %d (completadas: %d)%n", totalVentas, completadas);
 
         // Estadísticas por usuario
-        var stats = ventaDAO.estadisticasPorUsuario(1);
+        var stats = saleDAO.statsByUser(1);
         System.out.printf("  Usuario #1: %d ventas, $%.2f total, $%.2f promedio%n",
-            stats.cantidadVentas(),
-            stats.totalVentas(),
-            stats.promedioVenta());
+            stats.salesCount(),
+            stats.totalSales(),
+            stats.averageSale());
 
         System.out.println("  ✓ Test pasado\n");
     }

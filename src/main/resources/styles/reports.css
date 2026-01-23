@@ -1,0 +1,554 @@
+/* ============================================
+   REPORTES - ESTILOS MEJORADOS Y MODERNOS
+   ============================================ */
+
+.reports-root {
+    -fx-background-color: #f1f5f9;
+}
+
+/* ============================================
+   PANEL DE FILTROS - MEJORADO
+   ============================================ */
+
+.filter-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-padding: 28 36;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 16, 0, 0, 4);
+    -fx-border-color: rgba(226, 232, 240, 0.8);
+    -fx-border-width: 1;
+    -fx-border-radius: 18;
+}
+
+.filter-panel:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 20, 0, 0, 6);
+    -fx-border-color: rgba(14, 165, 233, 0.3);
+}
+
+.filter-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+    -fx-padding: 0 0 6 4;
+    -fx-letter-spacing: 0.5px;
+}
+
+.filter-combo {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 14 18;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-pref-width: 180;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 4, 0, 0, 2);
+}
+
+.filter-combo:focused {
+    -fx-border-color: #0ea5e9;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.2), 8, 0, 0, 0);
+}
+
+.filter-combo:hover {
+    -fx-border-color: #cbd5e1;
+    -fx-background-color: white;
+}
+
+.filter-combo .list-cell {
+    -fx-font-size: 14px;
+    -fx-padding: 12 16;
+}
+
+.filter-combo .list-cell:hover {
+    -fx-background-color: #f0f9ff;
+}
+
+.export-button {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8fafc);
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 14 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);
+}
+
+.export-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #f0f9ff, #e0f2fe);
+    -fx-border-color: #0ea5e9;
+    -fx-text-fill: #0284c7;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.2), 10, 0, 0, 4);
+    -fx-translate-y: -2;
+}
+
+.export-button:pressed {
+    -fx-translate-y: 0;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.3), 8, 0, 0, 2);
+}
+
+.export-button:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
+/* ============================================
+   CARDS DE ESTADÍSTICAS - ANIMADOS
+   ============================================ */
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 32;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0, 0, 6);
+    -fx-alignment: center;
+    -fx-spacing: 10;
+    -fx-min-width: 200;
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+}
+
+.stat-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 24, 0, 0, 10);
+    -fx-translate-y: -4;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.card-icon {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 6 0;
+}
+
+.card-value {
+    -fx-font-size: 38px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 0;
+}
+
+.card-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+}
+
+/* Efectos de gradiente mejorados */
+.card-blue {
+    -fx-border-color: #3b82f6;
+    -fx-background-color: 
+        linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%),
+        white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 20, 18;
+}
+.card-blue .card-value { -fx-text-fill: #2563eb; }
+.card-blue .card-icon { -fx-text-fill: #3b82f6; }
+
+.card-orange {
+    -fx-border-color: #f97316;
+    -fx-background-color: 
+        linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(254, 215, 170, 0.1) 100%),
+        white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 20, 18;
+}
+.card-orange .card-value { -fx-text-fill: #ea580c; }
+.card-orange .card-icon { -fx-text-fill: #f97316; }
+
+.card-green {
+    -fx-border-color: #22c55e;
+    -fx-background-color: 
+        linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(187, 247, 208, 0.1) 100%),
+        white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 20, 18;
+}
+.card-green .card-value { -fx-text-fill: #16a34a; }
+.card-green .card-icon { -fx-text-fill: #22c55e; }
+
+.card-purple {
+    -fx-border-color: #a855f7;
+    -fx-background-color: 
+        linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(233, 213, 255, 0.1) 100%),
+        white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 20, 18;
+}
+.card-purple .card-value { -fx-text-fill: #9333ea; }
+.card-purple .card-icon { -fx-text-fill: #a855f7; }
+
+/* ============================================
+   TARJETAS DE MÉTODOS DE PAGO - MEJORADAS
+   ============================================ */
+
+.payment-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-padding: 28;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);
+    -fx-alignment: center;
+    -fx-min-width: 170;
+    -fx-pref-width: 190;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 2;
+    -fx-border-radius: 16;
+}
+
+.payment-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.14), 18, 0, 0, 8);
+    -fx-translate-y: -3;
+    -fx-border-color: #0ea5e9;
+}
+
+/* ============================================
+   TABLA DE PRODUCTOS - MODERNA
+   ============================================ */
+
+.products-table {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 4);
+}
+
+.products-table .column-header-background {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 18 18 0 0;
+}
+
+.products-table .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 18 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+}
+
+.products-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-padding: 16 20;
+    -fx-border-color: transparent transparent #f1f5f9 transparent;
+    -fx-font-size: 14px;
+}
+
+.products-table .table-row-cell:odd {
+    -fx-background-color: #fafbfc;
+}
+
+.products-table .table-row-cell:hover {
+    -fx-background-color: #f0f9ff;
+    -fx-cursor: hand;
+}
+
+.products-table .table-row-cell:selected {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #0f172a;
+}
+
+.products-table .table-cell {
+    -fx-padding: 16 20;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Columnas específicas */
+.col-number {
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+}
+
+.col-center {
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.col-price {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 15px;
+}
+
+/* ============================================
+   ESTADO VACÍO - MEJORADO
+   ============================================ */
+
+.empty-state {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 100 60;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 12, 0, 0, 4);
+    -fx-min-height: 400;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
+.empty-icon {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #cbd5e1;
+    -fx-padding: 0 0 24 0;
+}
+
+.empty-text {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 0 0 8 0;
+}
+
+.empty-subtext {
+    -fx-font-size: 15px;
+    -fx-text-fill: #64748b;
+    -fx-max-width: 450;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-line-spacing: 2;
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADA
+   ============================================ */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12;
+}
+
+.scroll-pane > .scroll-bar:vertical .track {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 6;
+}
+
+.scroll-pane > .scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 6;
+}
+
+.scroll-pane > .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #94a3b8;
+}
+
+.scroll-pane > .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: #64748b;
+}
+
+.products-table .scroll-bar:vertical {
+    -fx-pref-width: 10;
+}
+
+.products-table .scroll-bar:vertical .track {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 5;
+}
+
+.products-table .scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 5;
+}
+
+.products-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #94a3b8;
+}
+
+/* ============================================
+   SEPARADOR
+   ============================================ */
+
+.separator {
+    -fx-padding: 0;
+}
+
+.separator .line {
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1 0 0 0;
+}
+
+.separator:vertical .line {
+    -fx-border-color: transparent #e2e8f0 transparent transparent;
+    -fx-border-width: 0 2 0 0;
+}
+
+/* ============================================
+   GRÁFICO DE VENTAS
+   ============================================ */
+
+.chart-container {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 4);
+    -fx-padding: 20;
+}
+
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+.chart-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.chart-content {
+    -fx-padding: 10;
+}
+
+.axis {
+    -fx-tick-label-font-size: 12px;
+    -fx-tick-label-fill: #64748b;
+}
+
+.axis-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+}
+
+.chart-bar {
+    -fx-bar-fill: linear-gradient(to top, #0ea5e9, #3b82f6);
+}
+
+.chart-bar:hover {
+    -fx-bar-fill: linear-gradient(to top, #0284c7, #2563eb);
+    -fx-cursor: hand;
+}
+
+.chart-plot-background {
+    -fx-background-color: #fafbfc;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: #e2e8f0;
+    -fx-stroke-width: 1;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: #e2e8f0;
+    -fx-stroke-width: 1;
+}
+
+/* ============================================
+   SECCIÓN DE TÍTULOS
+   ============================================ */
+
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 12 0;
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL - RESPONSIVO
+   ============================================ */
+
+.main-content {
+    -fx-padding: 32 40 100 40;
+    -fx-background-color: transparent;
+}
+
+.main-content > VBox {
+    -fx-spacing: 20;
+}
+
+/* Asegurar espaciado entre secciones */
+.section-title {
+    -fx-padding: 20 0 12 0;
+}
+
+/* ============================================
+   ANIMACIONES Y TRANSICIONES
+   ============================================ */
+
+.stat-card,
+.payment-card,
+.filter-panel,
+.export-button,
+.products-table .table-row-cell {
+    -fx-cursor: hand;
+}
+
+/* Animación de entrada para las cards */
+@keyframes fadeInUp {
+    from {
+        -fx-opacity: 0;
+        -fx-translate-y: 20;
+    }
+    to {
+        -fx-opacity: 1;
+        -fx-translate-y: 0;
+    }
+}
+
+/* ============================================
+   MEJORAS VISUALES ADICIONALES
+   ============================================ */
+
+/* Efecto de carga suave */
+.stat-card,
+.payment-card,
+.filter-panel {
+    -fx-opacity: 1;
+}
+
+/* Bordes con gradiente simulado */
+.filter-panel::before {
+    -fx-background-color: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+
+/* Sombras más pronunciadas al hacer hover */
+.stat-card:hover,
+.payment-card:hover {
+    -fx-background-color: white;
+}
+
+/* Mejorar legibilidad de números grandes */
+.card-value {
+    -fx-letter-spacing: -0.5px;
+}
+
+/* ============================================
+   FIX RESPONSIVIDAD - PADDING BOTTOM Y SCROLL
+   ============================================ */
+
+/* Forzar scroll cuando sea necesario */
+.scroll-pane {
+    -fx-fit-to-width: true;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Asegurar que el último elemento tenga espacio */
+.products-table,
+.chart-container,
+.payment-card:last-child {
+    -fx-margin: 0 0 40 0;
+}

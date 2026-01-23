@@ -35,7 +35,7 @@ public class DebugController {
     @FXML private TextArea datosOutput;
 
     private DatabaseConfig dbConfig;
-    private VentaDAO ventaDAO;
+    private SaleDAO saleDAO;
     private ProductVariantDAO variantDAO;
     private UserDAO userDAO;
 
@@ -46,7 +46,7 @@ public class DebugController {
     @FXML
     public void initialize() {
         dbConfig = DatabaseConfig.getInstance();
-        ventaDAO = new VentaDAO(dbConfig);
+        saleDAO = new SaleDAO(dbConfig);
         variantDAO = new ProductVariantDAO(dbConfig);
         userDAO = new UserDAO(dbConfig);
 
@@ -65,50 +65,50 @@ public class DebugController {
 
         // === MÓDULO VENTAS ===
         List<MetodoInfo> metodosVentas = new ArrayList<>();
-        metodosVentas.add(new MetodoInfo("listarTodas", "Lista todas las ventas", List.of(), () -> {
-            var ventas = ventaDAO.listarTodas();
-            return formatVentas(ventas);
+        metodosVentas.add(new MetodoInfo("findAll", "Lista todas las ventas", List.of(), () -> {
+            var sales = saleDAO.findAll();
+            return formatSales(sales);
         }));
-        metodosVentas.add(new MetodoInfo("listarCompletadas", "Lista ventas completadas", List.of(), () -> {
-            var ventas = ventaDAO.listarCompletadas();
-            return formatVentas(ventas);
+        metodosVentas.add(new MetodoInfo("findCompleted", "Lista ventas completadas", List.of(), () -> {
+            var sales = saleDAO.findCompleted();
+            return formatSales(sales);
         }));
-        metodosVentas.add(new MetodoInfo("listarAnuladas", "Lista ventas anuladas", List.of(), () -> {
-            var ventas = ventaDAO.listarAnuladas();
-            return formatVentas(ventas);
+        metodosVentas.add(new MetodoInfo("findCancelled", "Lista ventas anuladas", List.of(), () -> {
+            var sales = saleDAO.findCancelled();
+            return formatSales(sales);
         }));
-        metodosVentas.add(new MetodoInfo("buscarPorId", "Busca una venta por ID", List.of("id (int)"), () -> {
+        metodosVentas.add(new MetodoInfo("findById", "Busca una venta por ID", List.of("id (int)"), () -> {
             int id = getIntParam("id (int)");
-            var venta = ventaDAO.buscarPorId(id);
-            return venta.map(this::formatVentaDetalle).orElse("Venta no encontrada con ID: " + id);
+            var sale = saleDAO.findById(id);
+            return sale.map(this::formatSaleDetail).orElse("Venta no encontrada con ID: " + id);
         }));
-        metodosVentas.add(new MetodoInfo("listarPorFecha", "Lista ventas de una fecha", List.of("fecha (yyyy-MM-dd)"), () -> {
+        metodosVentas.add(new MetodoInfo("findByDate", "Lista ventas de una fecha", List.of("fecha (yyyy-MM-dd)"), () -> {
             LocalDate fecha = getDateParam("fecha (yyyy-MM-dd)");
-            var ventas = ventaDAO.listarPorFecha(fecha);
-            return formatVentas(ventas);
+            var sales = saleDAO.findByDate(fecha);
+            return formatSales(sales);
         }));
-        metodosVentas.add(new MetodoInfo("totalDelDia", "Total vendido en una fecha", List.of("fecha (yyyy-MM-dd)"), () -> {
+        metodosVentas.add(new MetodoInfo("dailyTotal", "Total vendido en una fecha", List.of("fecha (yyyy-MM-dd)"), () -> {
             LocalDate fecha = getDateParam("fecha (yyyy-MM-dd)");
-            BigDecimal total = ventaDAO.totalDelDia(fecha);
+            BigDecimal total = saleDAO.dailyTotal(fecha);
             return "Total del día " + fecha + ": $" + String.format("%,.2f", total);
         }));
-        metodosVentas.add(new MetodoInfo("totalDelMes", "Total vendido en un mes", List.of("año (int)", "mes (int)"), () -> {
+        metodosVentas.add(new MetodoInfo("monthlyTotal", "Total vendido en un mes", List.of("año (int)", "mes (int)"), () -> {
             int year = getIntParam("año (int)");
             int month = getIntParam("mes (int)");
-            BigDecimal total = ventaDAO.totalDelMes(year, month);
+            BigDecimal total = saleDAO.monthlyTotal(year, month);
             return "Total del mes " + month + "/" + year + ": $" + String.format("%,.2f", total);
         }));
-        metodosVentas.add(new MetodoInfo("contarDelDia", "Cantidad de ventas en una fecha", List.of("fecha (yyyy-MM-dd)"), () -> {
+        metodosVentas.add(new MetodoInfo("dailyCount", "Cantidad de ventas en una fecha", List.of("fecha (yyyy-MM-dd)"), () -> {
             LocalDate fecha = getDateParam("fecha (yyyy-MM-dd)");
-            int cantidad = ventaDAO.contarDelDia(fecha);
+            int cantidad = saleDAO.dailyCount(fecha);
             return "Ventas del día " + fecha + ": " + cantidad;
         }));
-        metodosVentas.add(new MetodoInfo("contar", "Cantidad total de ventas", List.of(), () -> {
-            return "Total de ventas en el sistema: " + ventaDAO.contar();
+        metodosVentas.add(new MetodoInfo("count", "Cantidad total de ventas", List.of(), () -> {
+            return "Total de ventas en el sistema: " + saleDAO.count();
         }));
-        metodosVentas.add(new MetodoInfo("anular", "Anula una venta (revierte stock)", List.of("id (int)"), () -> {
+        metodosVentas.add(new MetodoInfo("cancel", "Anula una venta (revierte stock)", List.of("id (int)"), () -> {
             int id = getIntParam("id (int)");
-            ventaDAO.anular(id);
+            saleDAO.cancel(id);
             return "Venta #" + id + " anulada correctamente. Stock revertido.";
         }));
         metodosPorModulo.put("Ventas", metodosVentas);
@@ -485,7 +485,7 @@ public class DebugController {
             logDatos("  - " + v1.getDisplayName() + " x2 = $" + v1.getSalePrice().multiply(BigDecimal.valueOf(2)));
             logDatos("  - " + v2.getDisplayName() + " x1 = $" + v2.getSalePrice());
 
-            DetalleVenta item1 = new DetalleVenta.Builder()
+            SaleItem item1 = new SaleItem.Builder()
                 .variantId(v1.getId())
                 .quantity(2)
                 .unitPrice(v1.getSalePrice())
@@ -494,7 +494,7 @@ public class DebugController {
                 .variantName(v1.getVariantName())
                 .build();
 
-            DetalleVenta item2 = new DetalleVenta.Builder()
+            SaleItem item2 = new SaleItem.Builder()
                 .variantId(v2.getId())
                 .quantity(1)
                 .unitPrice(v2.getSalePrice())
@@ -505,25 +505,25 @@ public class DebugController {
 
             BigDecimal total = item1.getSubtotal().add(item2.getSubtotal());
 
-            PagoVenta pago = new PagoVenta.Builder()
-                .paymentMethod(PagoVenta.MetodoPago.EFECTIVO)
+            SalePayment payment = new SalePayment.Builder()
+                .paymentMethod(SalePayment.PaymentMethod.CASH)
                 .amount(total)
                 .build();
 
-            Venta venta = new Venta.Builder()
+            Sale sale = new Sale.Builder()
                 .userId(1)
                 .total(total)
                 .status("completed")
                 .notes("Venta de prueba desde Debug Panel")
                 .addItem(item1)
                 .addItem(item2)
-                .addPago(pago)
+                .addPayment(payment)
                 .build();
 
-            Venta ventaCreada = ventaDAO.crear(venta);
+            Sale createdSale = saleDAO.create(sale);
 
             logDatos("\n✓ VENTA CREADA EXITOSAMENTE");
-            logDatos("  ID: " + ventaCreada.getId());
+            logDatos("  ID: " + createdSale.getId());
             logDatos("  Total: $" + String.format("%,.2f", total));
             logDatos("  Items: 2");
             logDatos("  Pago: Efectivo");
@@ -545,12 +545,12 @@ public class DebugController {
         int month = hoy.getMonthValue();
 
         logDatos("VENTAS:");
-        logDatos("  Total de ventas: " + ventaDAO.contar());
-        logDatos("  Completadas: " + ventaDAO.contarCompletadas());
-        logDatos("  Ventas hoy: " + ventaDAO.contarDelDia(hoy));
-        logDatos("  Total hoy: $" + String.format("%,.2f", ventaDAO.totalDelDia(hoy)));
-        logDatos("  Total mes: $" + String.format("%,.2f", ventaDAO.totalDelMes(year, month)));
-        logDatos("  Total histórico: $" + String.format("%,.2f", ventaDAO.totalGeneral()));
+        logDatos("  Total de ventas: " + saleDAO.count());
+        logDatos("  Completadas: " + saleDAO.countCompleted());
+        logDatos("  Ventas hoy: " + saleDAO.dailyCount(hoy));
+        logDatos("  Total hoy: $" + String.format("%,.2f", saleDAO.dailyTotal(hoy)));
+        logDatos("  Total mes: $" + String.format("%,.2f", saleDAO.monthlyTotal(year, month)));
+        logDatos("  Total histórico: $" + String.format("%,.2f", saleDAO.overallTotal()));
 
         logDatos("\nPRODUCTOS:");
         logDatos("  Variantes disponibles: " + variantDAO.listarDisponibles().size());
@@ -597,51 +597,51 @@ public class DebugController {
         return LocalDate.parse(camposParametros.get(param).getText().trim());
     }
 
-    private String formatVentas(List<Venta> ventas) {
-        if (ventas.isEmpty()) return "No se encontraron ventas";
+    private String formatSales(List<Sale> sales) {
+        if (sales.isEmpty()) return "No se encontraron ventas";
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-8s %-20s %-15s %-12s %-10s\n", "ID", "Fecha", "Total", "Items", "Estado"));
         sb.append("─".repeat(70)).append("\n");
 
-        for (Venta v : ventas) {
+        for (Sale s : sales) {
             sb.append(String.format("%-8d %-20s $%-14s %-12d %-10s\n",
-                v.getId(),
-                v.getCreatedAt() != null ? v.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-",
-                String.format("%,.2f", v.getTotal()),
-                v.getTotalItems(),
-                v.isCompleted() ? "OK" : "ANULADA"
+                s.getId(),
+                s.getCreatedAt() != null ? s.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-",
+                String.format("%,.2f", s.getTotal()),
+                s.getTotalItems(),
+                s.isCompleted() ? "OK" : "ANULADA"
             ));
         }
 
         sb.append("─".repeat(70)).append("\n");
-        sb.append("Total: ").append(ventas.size()).append(" ventas");
+        sb.append("Total: ").append(sales.size()).append(" ventas");
         return sb.toString();
     }
 
-    private String formatVentaDetalle(Venta v) {
+    private String formatSaleDetail(Sale s) {
         StringBuilder sb = new StringBuilder();
-        sb.append("VENTA #").append(v.getId()).append("\n");
+        sb.append("VENTA #").append(s.getId()).append("\n");
         sb.append("─".repeat(40)).append("\n");
-        sb.append("Fecha: ").append(v.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n");
-        sb.append("Usuario: ").append(v.getUserName() != null ? v.getUserName() : "ID " + v.getUserId()).append("\n");
-        sb.append("Estado: ").append(v.isCompleted() ? "Completada" : "Anulada").append("\n");
-        sb.append("Notas: ").append(v.getNotes() != null ? v.getNotes() : "-").append("\n\n");
+        sb.append("Fecha: ").append(s.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n");
+        sb.append("Usuario: ").append(s.getUserName() != null ? s.getUserName() : "ID " + s.getUserId()).append("\n");
+        sb.append("Estado: ").append(s.isCompleted() ? "Completada" : "Anulada").append("\n");
+        sb.append("Notas: ").append(s.getNotes() != null ? s.getNotes() : "-").append("\n\n");
 
         sb.append("ITEMS:\n");
-        for (DetalleVenta item : v.getItems()) {
+        for (SaleItem item : s.getItems()) {
             sb.append(String.format("  • %s x%d = $%,.2f\n",
                 item.getDisplayName(), item.getQuantity(), item.getSubtotal()));
         }
 
         sb.append("\nPAGOS:\n");
-        for (PagoVenta pago : v.getPagos()) {
+        for (SalePayment payment : s.getPayments()) {
             sb.append(String.format("  • %s: $%,.2f\n",
-                pago.getPaymentMethodDisplayName(), pago.getAmount()));
+                payment.getPaymentMethodDisplayName(), payment.getAmount()));
         }
 
         sb.append("\n").append("─".repeat(40)).append("\n");
-        sb.append("TOTAL: $").append(String.format("%,.2f", v.getTotal()));
+        sb.append("TOTAL: $").append(String.format("%,.2f", s.getTotal()));
         return sb.toString();
     }
 

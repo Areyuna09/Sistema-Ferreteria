@@ -1,9 +1,7 @@
 package com.ferreteria.controllers;
 
 import com.ferreteria.Main;
-import com.ferreteria.models.User;
 import com.ferreteria.models.dao.DatabaseConfig;
-import com.ferreteria.utils.SessionManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -18,8 +16,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class DashboardController {
 
-    @FXML private Label welcomeLabel;
-    @FXML private Label roleLabel;
+    @FXML private NavbarController navbarController;
     @FXML private Label dateLabel;
     @FXML private Label totalProductsLabel;
     @FXML private Label lowStockLabel;
@@ -28,17 +25,14 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
-        loadUserInfo();
+        if (navbarController != null) {
+            navbarController.setActiveView("dashboard");
+        }
+        loadDate();
         loadStats();
     }
 
-    private void loadUserInfo() {
-        User user = SessionManager.getInstance().getCurrentUser();
-        if (user != null) {
-            welcomeLabel.setText("Bienvenido, " + user.getFullName());
-            roleLabel.setText("Rol: " + user.getRole().getValue());
-        }
-
+    private void loadDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM yyyy");
         dateLabel.setText(LocalDateTime.now().format(formatter));
     }
@@ -77,40 +71,24 @@ public class DashboardController {
         }
     }
 
+    // Acciones rápidas
     @FXML
-    public void handleLogout() {
-        SessionManager.getInstance().logout();
-        navigateToLogin();
+    public void handleNewSale() {
+        Main.navigateTo("/views/NuevaVenta.fxml", "Sistema Ferreteria - Nueva Venta");
     }
 
     @FXML
-    public void handleProducts() {
-        System.out.println("Navegando a Productos...");
-        // TODO: Implementar vista de productos
+    public void handleNewProduct() {
+        Main.navigateTo("/views/Products.fxml", "Sistema Ferreteria - Productos");
     }
 
     @FXML
-    public void handleSales() {
-        Main.navigateTo("/views/Ventas.fxml", "Sistema Ferreteria - Ventas");
+    public void handleInventory() {
+        Main.navigateTo("/views/Products.fxml", "Sistema Ferreteria - Productos");
     }
 
     @FXML
-    public void handleReports() {
-        System.out.println("Navegando a Reportes...");
-        // TODO: Implementar vista de reportes
-    }
-
-    @FXML
-    public void handleUsers() {
-        if (!SessionManager.getInstance().isAdmin()) {
-            System.out.println("Acceso denegado: solo administradores");
-            return;
-        }
-        System.out.println("Navegando a Usuarios...");
-        // TODO: Implementar vista de usuarios
-    }
-
-    private void navigateToLogin() {
-        Main.navigateTo("/views/Login.fxml", "Ferreteria - Sistema de Gestion");
+    public void handleGenerateReport() {
+        Main.navigateTo("/views/Reports.fxml", "Sistema Ferreteria - Reportes");
     }
 }

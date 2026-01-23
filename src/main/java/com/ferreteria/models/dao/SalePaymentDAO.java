@@ -1,7 +1,7 @@
 package com.ferreteria.models.dao;
 
-import com.ferreteria.models.PagoVenta;
-import com.ferreteria.models.PagoVenta.MetodoPago;
+import com.ferreteria.models.SalePayment;
+import com.ferreteria.models.SalePayment.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -12,74 +12,74 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Data Access Object para pagos de venta.
- * Permite manejar múltiples métodos de pago por venta.
+ * Data Access Object for sale payments.
+ * Allows handling multiple payment methods per sale.
  */
-public class PagoVentaDAO {
+public class SalePaymentDAO {
 
     private final DatabaseConfig config;
 
-    public PagoVentaDAO(DatabaseConfig config) {
+    public SalePaymentDAO(DatabaseConfig config) {
         this.config = config;
     }
 
     /**
-     * Crea un pago usando una conexión existente (para transacciones).
+     * Creates a payment using an existing connection (for transactions).
      *
-     * @param conn conexión con transacción activa
-     * @param saleId ID de la venta
-     * @param pago el pago a crear
-     * @return el pago creado con su ID
-     * @throws SQLException si hay error de base de datos
+     * @param conn connection with active transaction
+     * @param saleId ID of the sale
+     * @param payment the payment to create
+     * @return the created payment with its ID
+     * @throws SQLException if database error occurs
      */
-    public PagoVenta crear(Connection conn, int saleId, PagoVenta pago) throws SQLException {
+    public SalePayment create(Connection conn, int saleId, SalePayment payment) throws SQLException {
         String sql = """
             INSERT INTO sale_payments (sale_id, payment_method, amount, reference)
             VALUES (?, ?, ?, ?)
         """;
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pstmt.setInt(1, saleId);
-        pstmt.setString(2, pago.getPaymentMethod().getValue());
-        pstmt.setBigDecimal(3, pago.getAmount());
-        pstmt.setString(4, pago.getReference());
+        pstmt.setString(2, payment.getPaymentMethod().getValue());
+        pstmt.setBigDecimal(3, payment.getAmount());
+        pstmt.setString(4, payment.getReference());
         pstmt.executeUpdate();
 
         ResultSet keys = pstmt.getGeneratedKeys();
         if (keys.next()) {
-            return new PagoVenta.Builder()
+            return new SalePayment.Builder()
                 .id(keys.getInt(1))
                 .saleId(saleId)
-                .paymentMethod(pago.getPaymentMethod())
-                .amount(pago.getAmount())
-                .reference(pago.getReference())
+                .paymentMethod(payment.getPaymentMethod())
+                .amount(payment.getAmount())
+                .reference(payment.getReference())
                 .build();
         }
-        return pago;
+        return payment;
     }
 
     /**
-     * Crea un pago (sin transacción externa).
+     * Creates a payment (without external transaction).
      *
-     * @param pago el pago a crear
-     * @return el pago creado con su ID
+     * @param payment the payment to create
+     * @return the created payment with its ID
      */
-    public PagoVenta crear(PagoVenta pago) {
+    public SalePayment create(SalePayment payment) {
         try {
-            return crear(config.getConnection(), pago.getSaleId(), pago);
+            return create(config.getConnection(), payment.getSaleId(), payment);
         } catch (SQLException e) {
-            throw new RuntimeException("Error creando pago", e);
+            throw new RuntimeException("Error creating payment", e);
         }
     }
 
     /**
-     * Lista todos los pagos de una venta.
+     * Lists all payments for a sale.
      *
-     * @param saleId ID de la venta
-     * @return lista de pagos
+     * @param saleId ID of the sale
+     * @return list of payments
      */
-    public List<PagoVenta> listarPorVenta(int saleId) {
+    public List<SalePayment> findBySaleId(int saleId) {
         String sql = "SELECT * FROM sale_payments WHERE sale_id = ? ORDER BY id";
-        List<PagoVenta> pagos = new ArrayList<>();
+        List<SalePayment> payments = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
@@ -87,21 +87,21 @@ public class PagoVentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                pagos.add(mapResultSetToPago(rs));
+                payments.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando pagos de venta", e);
+            throw new RuntimeException("Error listing sale payments", e);
         }
-        return pagos;
+        return payments;
     }
 
     /**
-     * Obtiene el total pagado en una venta.
+     * Gets the total paid for a sale.
      *
-     * @param saleId ID de la venta
-     * @return suma de todos los pagos
+     * @param saleId ID of the sale
+     * @return sum of all payments
      */
-    public BigDecimal totalPagado(int saleId) {
+    public BigDecimal totalPaid(int saleId) {
         String sql = "SELECT COALESCE(SUM(amount), 0) as total FROM sale_payments WHERE sale_id = ?";
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
@@ -112,46 +112,46 @@ public class PagoVentaDAO {
                 return rs.getBigDecimal("total");
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error calculando total pagado", e);
+            throw new RuntimeException("Error calculating total paid", e);
         }
         return BigDecimal.ZERO;
     }
 
     /**
-     * Obtiene totales agrupados por método de pago.
+     * Gets totals grouped by payment method.
      *
-     * @return mapa con método de pago y su total
+     * @return map with payment method and its total
      */
-    public Map<MetodoPago, BigDecimal> totalesPorMetodo() {
+    public Map<PaymentMethod, BigDecimal> totalsByMethod() {
         String sql = """
             SELECT payment_method, SUM(amount) as total
             FROM sale_payments
             GROUP BY payment_method
         """;
-        Map<MetodoPago, BigDecimal> totales = new HashMap<>();
+        Map<PaymentMethod, BigDecimal> totals = new HashMap<>();
 
         try {
             Statement stmt = config.getConnection().createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
             while (rs.next()) {
-                MetodoPago metodo = MetodoPago.fromValue(rs.getString("payment_method"));
-                totales.put(metodo, rs.getBigDecimal("total"));
+                PaymentMethod method = PaymentMethod.fromValue(rs.getString("payment_method"));
+                totals.put(method, rs.getBigDecimal("total"));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error obteniendo totales por método", e);
+            throw new RuntimeException("Error getting totals by method", e);
         }
-        return totales;
+        return totals;
     }
 
     /**
-     * Obtiene totales por método de pago en un rango de fechas.
+     * Gets totals by payment method in a date range.
      *
-     * @param desde fecha inicial
-     * @param hasta fecha final
-     * @return mapa con método de pago y su total
+     * @param from start date
+     * @param to end date
+     * @return map with payment method and its total
      */
-    public Map<MetodoPago, BigDecimal> totalesPorMetodo(java.time.LocalDate desde, java.time.LocalDate hasta) {
+    public Map<PaymentMethod, BigDecimal> totalsByMethod(java.time.LocalDate from, java.time.LocalDate to) {
         String sql = """
             SELECT sp.payment_method, SUM(sp.amount) as total
             FROM sale_payments sp
@@ -160,63 +160,63 @@ public class PagoVentaDAO {
             AND s.status = 'completed'
             GROUP BY sp.payment_method
         """;
-        Map<MetodoPago, BigDecimal> totales = new HashMap<>();
+        Map<PaymentMethod, BigDecimal> totals = new HashMap<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
-            pstmt.setString(1, desde.toString());
-            pstmt.setString(2, hasta.toString());
+            pstmt.setString(1, from.toString());
+            pstmt.setString(2, to.toString());
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                MetodoPago metodo = MetodoPago.fromValue(rs.getString("payment_method"));
-                totales.put(metodo, rs.getBigDecimal("total"));
+                PaymentMethod method = PaymentMethod.fromValue(rs.getString("payment_method"));
+                totals.put(method, rs.getBigDecimal("total"));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error obteniendo totales por método en rango", e);
+            throw new RuntimeException("Error getting totals by method in range", e);
         }
-        return totales;
+        return totals;
     }
 
     /**
-     * Cuenta pagos por método.
+     * Counts payments by method.
      *
-     * @param metodo el método de pago
-     * @return cantidad de pagos con ese método
+     * @param method the payment method
+     * @return count of payments with that method
      */
-    public int contarPorMetodo(MetodoPago metodo) {
+    public int countByMethod(PaymentMethod method) {
         String sql = "SELECT COUNT(*) FROM sale_payments WHERE payment_method = ?";
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
-            pstmt.setString(1, metodo.getValue());
+            pstmt.setString(1, method.getValue());
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error contando pagos por método", e);
+            throw new RuntimeException("Error counting payments by method", e);
         }
         return 0;
     }
 
     /**
-     * Elimina todos los pagos de una venta (para anulación).
-     * Debe usarse dentro de una transacción.
+     * Deletes all payments for a sale (for cancellation).
+     * Should be used within a transaction.
      *
-     * @param conn conexión con transacción
-     * @param saleId ID de la venta
-     * @throws SQLException si hay error
+     * @param conn connection with transaction
+     * @param saleId ID of the sale
+     * @throws SQLException if error occurs
      */
-    public void eliminarPorVenta(Connection conn, int saleId) throws SQLException {
+    public void deleteBySaleId(Connection conn, int saleId) throws SQLException {
         String sql = "DELETE FROM sale_payments WHERE sale_id = ?";
         PreparedStatement pstmt = conn.prepareStatement(sql);
         pstmt.setInt(1, saleId);
         pstmt.executeUpdate();
     }
 
-    private PagoVenta mapResultSetToPago(ResultSet rs) throws SQLException {
-        return new PagoVenta.Builder()
+    private SalePayment mapResultSet(ResultSet rs) throws SQLException {
+        return new SalePayment.Builder()
             .id(rs.getInt("id"))
             .saleId(rs.getInt("sale_id"))
             .paymentMethod(rs.getString("payment_method"))

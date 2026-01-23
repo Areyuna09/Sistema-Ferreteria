@@ -7,11 +7,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Modelo que representa una venta en el sistema.
- * Mapea a la tabla 'sales' en la base de datos.
- * Incluye items (detalles) y pagos asociados.
+ * Model representing a sale in the system.
+ * Maps to the 'sales' table in the database.
+ * Includes items (details) and associated payments.
  */
-public class Venta {
+public class Sale {
 
     private final int id;
     private final int userId;
@@ -19,13 +19,13 @@ public class Venta {
     private final String status;
     private final String notes;
     private final LocalDateTime createdAt;
-    private final List<DetalleVenta> items;
-    private final List<PagoVenta> pagos;
+    private final List<SaleItem> items;
+    private final List<SalePayment> payments;
 
-    // Campo adicional para mostrar info del usuario (no persiste)
+    // Additional field to display user info (not persisted)
     private final String userName;
 
-    private Venta(Builder builder) {
+    private Sale(Builder builder) {
         this.id = builder.id;
         this.userId = builder.userId;
         this.total = builder.total;
@@ -33,7 +33,7 @@ public class Venta {
         this.notes = builder.notes;
         this.createdAt = builder.createdAt;
         this.items = new ArrayList<>(builder.items);
-        this.pagos = new ArrayList<>(builder.pagos);
+        this.payments = new ArrayList<>(builder.payments);
         this.userName = builder.userName;
     }
 
@@ -44,72 +44,72 @@ public class Venta {
     public String getStatus() { return status; }
     public String getNotes() { return notes; }
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public List<DetalleVenta> getItems() { return Collections.unmodifiableList(items); }
-    public List<PagoVenta> getPagos() { return Collections.unmodifiableList(pagos); }
+    public List<SaleItem> getItems() { return Collections.unmodifiableList(items); }
+    public List<SalePayment> getPayments() { return Collections.unmodifiableList(payments); }
     public String getUserName() { return userName; }
 
     /**
-     * Verifica si la venta está completada.
-     * @return true si el status es 'completed'
+     * Checks if the sale is completed.
+     * @return true if status is 'completed'
      */
     public boolean isCompleted() {
         return "completed".equals(status);
     }
 
     /**
-     * Verifica si la venta fue anulada.
-     * @return true si el status es 'cancelled'
+     * Checks if the sale was cancelled.
+     * @return true if status is 'cancelled'
      */
     public boolean isCancelled() {
         return "cancelled".equals(status);
     }
 
     /**
-     * Calcula el total basado en los items.
-     * @return suma de subtotales de todos los items
+     * Calculates total based on items.
+     * @return sum of subtotals of all items
      */
     public BigDecimal calculateTotal() {
         return items.stream()
-            .map(DetalleVenta::getSubtotal)
+            .map(SaleItem::getSubtotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
-     * Obtiene la cantidad total de productos vendidos.
-     * @return suma de cantidades de todos los items
+     * Gets total quantity of products sold.
+     * @return sum of quantities of all items
      */
     public int getTotalItems() {
         return items.stream()
-            .mapToInt(DetalleVenta::getQuantity)
+            .mapToInt(SaleItem::getQuantity)
             .sum();
     }
 
     /**
-     * Calcula el total pagado.
-     * @return suma de todos los pagos
+     * Calculates total paid amount.
+     * @return sum of all payments
      */
-    public BigDecimal getTotalPagado() {
-        return pagos.stream()
-            .map(PagoVenta::getAmount)
+    public BigDecimal getTotalPaid() {
+        return payments.stream()
+            .map(SalePayment::getAmount)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
-     * Verifica si la venta está completamente pagada.
-     * @return true si el total pagado >= total de la venta
+     * Checks if the sale is fully paid.
+     * @return true if total paid >= sale total
      */
-    public boolean estaPagada() {
-        return getTotalPagado().compareTo(total) >= 0;
+    public boolean isPaid() {
+        return getTotalPaid().compareTo(total) >= 0;
     }
 
     /**
-     * Obtiene el saldo pendiente.
-     * @return total - totalPagado
+     * Gets pending balance.
+     * @return total - totalPaid
      */
-    public BigDecimal getSaldoPendiente() {
-        BigDecimal pagado = getTotalPagado();
-        BigDecimal pendiente = total.subtract(pagado);
-        return pendiente.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : pendiente;
+    public BigDecimal getPendingBalance() {
+        BigDecimal paid = getTotalPaid();
+        BigDecimal pending = total.subtract(paid);
+        return pending.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : pending;
     }
 
     // Builder Pattern
@@ -120,8 +120,8 @@ public class Venta {
         private String status = "completed";
         private String notes;
         private LocalDateTime createdAt = LocalDateTime.now();
-        private List<DetalleVenta> items = new ArrayList<>();
-        private List<PagoVenta> pagos = new ArrayList<>();
+        private List<SaleItem> items = new ArrayList<>();
+        private List<SalePayment> payments = new ArrayList<>();
         private String userName;
 
         public Builder id(int id) {
@@ -154,23 +154,23 @@ public class Venta {
             return this;
         }
 
-        public Builder items(List<DetalleVenta> items) {
+        public Builder items(List<SaleItem> items) {
             this.items = new ArrayList<>(items);
             return this;
         }
 
-        public Builder addItem(DetalleVenta item) {
+        public Builder addItem(SaleItem item) {
             this.items.add(item);
             return this;
         }
 
-        public Builder pagos(List<PagoVenta> pagos) {
-            this.pagos = new ArrayList<>(pagos);
+        public Builder payments(List<SalePayment> payments) {
+            this.payments = new ArrayList<>(payments);
             return this;
         }
 
-        public Builder addPago(PagoVenta pago) {
-            this.pagos.add(pago);
+        public Builder addPayment(SalePayment payment) {
+            this.payments.add(payment);
             return this;
         }
 
@@ -179,17 +179,17 @@ public class Venta {
             return this;
         }
 
-        public Venta build() {
+        public Sale build() {
             validate();
-            return new Venta(this);
+            return new Sale(this);
         }
 
         private void validate() {
             if (userId <= 0) {
-                throw new IllegalArgumentException("Usuario es requerido");
+                throw new IllegalArgumentException("User is required");
             }
             if (total.compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException("Total no puede ser negativo");
+                throw new IllegalArgumentException("Total cannot be negative");
             }
         }
     }

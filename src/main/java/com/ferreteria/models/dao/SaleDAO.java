@@ -1,8 +1,8 @@
 package com.ferreteria.models.dao;
 
-import com.ferreteria.models.DetalleVenta;
-import com.ferreteria.models.PagoVenta;
-import com.ferreteria.models.Venta;
+import com.ferreteria.models.Sale;
+import com.ferreteria.models.SaleItem;
+import com.ferreteria.models.SalePayment;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -13,109 +13,109 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Data Access Object para ventas.
- * Maneja transacciones para crear ventas con actualización de stock y pagos.
+ * Data Access Object for sales.
+ * Handles transactions for creating sales with stock updates and payments.
  */
-public class VentaDAO {
+public class SaleDAO {
 
     private final DatabaseConfig config;
-    private final DetalleVentaDAO detalleDAO;
-    private final PagoVentaDAO pagoDAO;
+    private final SaleItemDAO itemDAO;
+    private final SalePaymentDAO paymentDAO;
 
-    public VentaDAO(DatabaseConfig config) {
+    public SaleDAO(DatabaseConfig config) {
         this.config = config;
-        this.detalleDAO = new DetalleVentaDAO(config);
-        this.pagoDAO = new PagoVentaDAO(config);
+        this.itemDAO = new SaleItemDAO(config);
+        this.paymentDAO = new SalePaymentDAO(config);
     }
 
     /**
-     * Crea una venta completa con items, pagos y actualiza el stock.
-     * Usa transacción para garantizar consistencia.
+     * Creates a complete sale with items, payments and updates stock.
+     * Uses transaction to guarantee consistency.
      *
-     * @param venta la venta a crear con sus items y pagos
-     * @return la venta creada con su ID asignado
-     * @throws RuntimeException si hay error en la transacción
+     * @param sale the sale to create with its items and payments
+     * @return the created sale with its assigned ID
+     * @throws RuntimeException if transaction error occurs
      */
-    public Venta crear(Venta venta) {
+    public Sale create(Sale sale) {
         Connection conn = null;
         try {
             conn = config.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Insertar cabecera de venta
-            int ventaId = insertarVenta(conn, venta);
+            // 1. Insert sale header
+            int saleId = insertSale(conn, sale);
 
-            // 2. Insertar items y actualizar stock
-            for (DetalleVenta item : venta.getItems()) {
-                detalleDAO.crear(conn, ventaId, item);
-                actualizarStock(conn, item.getVariantId(), -item.getQuantity());
+            // 2. Insert items and update stock
+            for (SaleItem item : sale.getItems()) {
+                itemDAO.create(conn, saleId, item);
+                updateStock(conn, item.getVariantId(), -item.getQuantity());
             }
 
-            // 3. Insertar pagos
-            for (PagoVenta pago : venta.getPagos()) {
-                pagoDAO.crear(conn, ventaId, pago);
+            // 3. Insert payments
+            for (SalePayment payment : sale.getPayments()) {
+                paymentDAO.create(conn, saleId, payment);
             }
 
             conn.commit();
-            return buscarPorId(ventaId).orElse(venta);
+            return findById(saleId).orElse(sale);
 
         } catch (SQLException e) {
             rollback(conn);
-            throw new RuntimeException("Error creando venta: " + e.getMessage(), e);
+            throw new RuntimeException("Error creating sale: " + e.getMessage(), e);
         } finally {
             setAutoCommitTrue(conn);
         }
     }
 
     /**
-     * Anula una venta y revierte el stock de todos sus items.
+     * Cancels a sale and reverts stock for all its items.
      *
-     * @param ventaId ID de la venta a anular
-     * @throws RuntimeException si la venta no existe o ya está anulada
+     * @param saleId ID of the sale to cancel
+     * @throws RuntimeException if sale doesn't exist or is already cancelled
      */
-    public void anular(int ventaId) {
+    public void cancel(int saleId) {
         Connection conn = null;
         try {
             conn = config.getConnection();
             conn.setAutoCommit(false);
 
-            // Verificar que existe y no está anulada
-            Venta venta = buscarPorId(ventaId)
-                .orElseThrow(() -> new RuntimeException("Venta no encontrada: " + ventaId));
+            // Verify it exists and is not cancelled
+            Sale sale = findById(saleId)
+                .orElseThrow(() -> new RuntimeException("Sale not found: " + saleId));
 
-            if (venta.isCancelled()) {
-                throw new RuntimeException("La venta ya está anulada");
+            if (sale.isCancelled()) {
+                throw new RuntimeException("Sale is already cancelled");
             }
 
-            // 1. Cambiar status a cancelled
+            // 1. Change status to cancelled
             String sql = "UPDATE sales SET status = 'cancelled' WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, ventaId);
+            pstmt.setInt(1, saleId);
             pstmt.executeUpdate();
 
-            // 2. Revertir stock de cada item
-            List<DetalleVenta> items = detalleDAO.listarPorVenta(ventaId);
-            for (DetalleVenta item : items) {
-                actualizarStock(conn, item.getVariantId(), item.getQuantity());
+            // 2. Revert stock for each item
+            List<SaleItem> items = itemDAO.findBySaleId(saleId);
+            for (SaleItem item : items) {
+                updateStock(conn, item.getVariantId(), item.getQuantity());
             }
 
             conn.commit();
 
         } catch (SQLException e) {
             rollback(conn);
-            throw new RuntimeException("Error anulando venta: " + e.getMessage(), e);
+            throw new RuntimeException("Error cancelling sale: " + e.getMessage(), e);
         } finally {
             setAutoCommitTrue(conn);
         }
     }
 
     /**
-     * Busca una venta por su ID con todos sus detalles.
+     * Finds a sale by its ID with all its details.
      *
-     * @param id ID de la venta
-     * @return Optional con la venta completa si existe
+     * @param id ID of the sale
+     * @return Optional with the complete sale if exists
      */
-    public Optional<Venta> buscarPorId(int id) {
+    public Optional<Sale> findById(int id) {
         String sql = """
             SELECT s.*, u.full_name as user_name
             FROM sales s
@@ -128,11 +128,11 @@ public class VentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                // Cargar items y pagos
-                List<DetalleVenta> items = detalleDAO.listarPorVenta(id);
-                List<PagoVenta> pagos = pagoDAO.listarPorVenta(id);
+                // Load items and payments
+                List<SaleItem> items = itemDAO.findBySaleId(id);
+                List<SalePayment> payments = paymentDAO.findBySaleId(id);
 
-                return Optional.of(new Venta.Builder()
+                return Optional.of(new Sale.Builder()
                     .id(rs.getInt("id"))
                     .userId(rs.getInt("user_id"))
                     .total(rs.getBigDecimal("total"))
@@ -141,58 +141,58 @@ public class VentaDAO {
                     .createdAt(parseDateTime(rs.getString("created_at")))
                     .userName(rs.getString("user_name"))
                     .items(items)
-                    .pagos(pagos)
+                    .payments(payments)
                     .build());
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error buscando venta por ID", e);
+            throw new RuntimeException("Error finding sale by ID", e);
         }
         return Optional.empty();
     }
 
     /**
-     * Lista ventas de una fecha específica.
+     * Lists sales for a specific date.
      *
-     * @param fecha la fecha a buscar
-     * @return lista de ventas de ese día
+     * @param date the date to search
+     * @return list of sales for that day
      */
-    public List<Venta> listarPorFecha(LocalDate fecha) {
+    public List<Sale> findByDate(LocalDate date) {
         String sql = """
             SELECT * FROM sales
             WHERE DATE(created_at) = ?
             ORDER BY created_at DESC
         """;
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
-            pstmt.setString(1, fecha.toString());
+            pstmt.setString(1, date.toString());
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando ventas por fecha", e);
+            throw new RuntimeException("Error listing sales by date", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Lista ventas de un mes específico.
+     * Lists sales for a specific month.
      *
-     * @param year año
-     * @param month mes (1-12)
-     * @return lista de ventas del mes
+     * @param year year
+     * @param month month (1-12)
+     * @return list of sales for the month
      */
-    public List<Venta> listarPorMes(int year, int month) {
+    public List<Sale> findByMonth(int year, int month) {
         String sql = """
             SELECT * FROM sales
             WHERE strftime('%Y', created_at) = ?
             AND strftime('%m', created_at) = ?
             ORDER BY created_at DESC
         """;
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
@@ -201,41 +201,41 @@ public class VentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando ventas por mes", e);
+            throw new RuntimeException("Error listing sales by month", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Lista todas las ventas completadas.
+     * Lists all completed sales.
      *
-     * @return lista de ventas con status 'completed'
+     * @return list of sales with status 'completed'
      */
-    public List<Venta> listarCompletadas() {
-        return listarPorStatus("completed");
+    public List<Sale> findCompleted() {
+        return findByStatus("completed");
     }
 
     /**
-     * Lista todas las ventas anuladas.
+     * Lists all cancelled sales.
      *
-     * @return lista de ventas con status 'cancelled'
+     * @return list of sales with status 'cancelled'
      */
-    public List<Venta> listarAnuladas() {
-        return listarPorStatus("cancelled");
+    public List<Sale> findCancelled() {
+        return findByStatus("cancelled");
     }
 
     /**
-     * Lista ventas por status.
+     * Lists sales by status.
      *
-     * @param status el status a filtrar
-     * @return lista de ventas
+     * @param status the status to filter
+     * @return list of sales
      */
-    public List<Venta> listarPorStatus(String status) {
+    public List<Sale> findByStatus(String status) {
         String sql = "SELECT * FROM sales WHERE status = ? ORDER BY created_at DESC";
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
@@ -243,21 +243,21 @@ public class VentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando ventas por status", e);
+            throw new RuntimeException("Error listing sales by status", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Obtiene el total de ventas del día.
+     * Gets the total sales for a day.
      *
-     * @param fecha la fecha a consultar
-     * @return suma de totales de ventas completadas
+     * @param date the date to query
+     * @return sum of completed sales totals
      */
-    public BigDecimal totalDelDia(LocalDate fecha) {
+    public BigDecimal dailyTotal(LocalDate date) {
         String sql = """
             SELECT COALESCE(SUM(total), 0) as total
             FROM sales
@@ -265,75 +265,75 @@ public class VentaDAO {
         """;
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
-            pstmt.setString(1, fecha.toString());
+            pstmt.setString(1, date.toString());
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 return rs.getBigDecimal("total");
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error calculando total del día", e);
+            throw new RuntimeException("Error calculating daily total", e);
         }
         return BigDecimal.ZERO;
     }
 
     /**
-     * Cuenta las ventas del día.
+     * Counts sales for a day.
      *
-     * @param fecha la fecha a consultar
-     * @return cantidad de ventas completadas
+     * @param date the date to query
+     * @return count of completed sales
      */
-    public int contarDelDia(LocalDate fecha) {
+    public int dailyCount(LocalDate date) {
         String sql = """
             SELECT COUNT(*) FROM sales
             WHERE DATE(created_at) = ? AND status = 'completed'
         """;
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
-            pstmt.setString(1, fecha.toString());
+            pstmt.setString(1, date.toString());
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error contando ventas del día", e);
+            throw new RuntimeException("Error counting daily sales", e);
         }
         return 0;
     }
 
     /**
-     * Lista todas las ventas ordenadas por fecha descendente.
+     * Lists all sales ordered by date descending.
      *
-     * @return lista de todas las ventas
+     * @return list of all sales
      */
-    public List<Venta> listarTodas() {
+    public List<Sale> findAll() {
         String sql = "SELECT * FROM sales ORDER BY created_at DESC";
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             Statement stmt = config.getConnection().createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando todas las ventas", e);
+            throw new RuntimeException("Error listing all sales", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Lista ventas con paginación.
+     * Lists sales with pagination.
      *
-     * @param limit cantidad máxima de resultados
-     * @param offset desde qué registro empezar
-     * @return lista de ventas paginada
+     * @param limit maximum number of results
+     * @param offset starting record
+     * @return paginated list of sales
      */
-    public List<Venta> listarPaginado(int limit, int offset) {
+    public List<Sale> findPaginated(int limit, int offset) {
         String sql = "SELECT * FROM sales ORDER BY created_at DESC LIMIT ? OFFSET ?";
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
@@ -342,23 +342,23 @@ public class VentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando ventas paginadas", e);
+            throw new RuntimeException("Error listing paginated sales", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Lista ventas de un usuario específico.
+     * Lists sales for a specific user.
      *
-     * @param userId ID del usuario/vendedor
-     * @return lista de ventas del usuario
+     * @param userId ID of the user/seller
+     * @return list of user's sales
      */
-    public List<Venta> listarPorUsuario(int userId) {
+    public List<Sale> findByUserId(int userId) {
         String sql = "SELECT * FROM sales WHERE user_id = ? ORDER BY created_at DESC";
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
@@ -366,50 +366,50 @@ public class VentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando ventas por usuario", e);
+            throw new RuntimeException("Error listing sales by user", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Lista ventas en un rango de fechas.
+     * Lists sales in a date range.
      *
-     * @param desde fecha inicial (inclusive)
-     * @param hasta fecha final (inclusive)
-     * @return lista de ventas en el rango
+     * @param from start date (inclusive)
+     * @param to end date (inclusive)
+     * @return list of sales in range
      */
-    public List<Venta> listarPorRangoFechas(LocalDate desde, LocalDate hasta) {
+    public List<Sale> findByDateRange(LocalDate from, LocalDate to) {
         String sql = """
             SELECT * FROM sales
             WHERE DATE(created_at) BETWEEN ? AND ?
             ORDER BY created_at DESC
         """;
-        List<Venta> ventas = new ArrayList<>();
+        List<Sale> sales = new ArrayList<>();
 
         try {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
-            pstmt.setString(1, desde.toString());
-            pstmt.setString(2, hasta.toString());
+            pstmt.setString(1, from.toString());
+            pstmt.setString(2, to.toString());
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ventas.add(mapResultSetToVenta(rs));
+                sales.add(mapResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error listando ventas por rango de fechas", e);
+            throw new RuntimeException("Error listing sales by date range", e);
         }
-        return ventas;
+        return sales;
     }
 
     /**
-     * Cuenta el total de ventas.
+     * Counts total sales.
      *
-     * @return cantidad total de ventas
+     * @return total count of sales
      */
-    public int contar() {
+    public int count() {
         String sql = "SELECT COUNT(*) FROM sales";
         try {
             Statement stmt = config.getConnection().createStatement();
@@ -419,17 +419,17 @@ public class VentaDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error contando ventas", e);
+            throw new RuntimeException("Error counting sales", e);
         }
         return 0;
     }
 
     /**
-     * Cuenta ventas completadas.
+     * Counts completed sales.
      *
-     * @return cantidad de ventas completadas
+     * @return count of completed sales
      */
-    public int contarCompletadas() {
+    public int countCompleted() {
         String sql = "SELECT COUNT(*) FROM sales WHERE status = 'completed'";
         try {
             Statement stmt = config.getConnection().createStatement();
@@ -439,19 +439,19 @@ public class VentaDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error contando ventas completadas", e);
+            throw new RuntimeException("Error counting completed sales", e);
         }
         return 0;
     }
 
     /**
-     * Obtiene el total de ventas del mes.
+     * Gets the monthly sales total.
      *
-     * @param year año
-     * @param month mes (1-12)
-     * @return suma de totales de ventas completadas del mes
+     * @param year year
+     * @param month month (1-12)
+     * @return sum of completed sales totals for the month
      */
-    public BigDecimal totalDelMes(int year, int month) {
+    public BigDecimal monthlyTotal(int year, int month) {
         String sql = """
             SELECT COALESCE(SUM(total), 0) as total
             FROM sales
@@ -469,17 +469,17 @@ public class VentaDAO {
                 return rs.getBigDecimal("total");
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error calculando total del mes", e);
+            throw new RuntimeException("Error calculating monthly total", e);
         }
         return BigDecimal.ZERO;
     }
 
     /**
-     * Obtiene el total general de ventas completadas.
+     * Gets the overall total of completed sales.
      *
-     * @return suma de todos los totales
+     * @return sum of all totals
      */
-    public BigDecimal totalGeneral() {
+    public BigDecimal overallTotal() {
         String sql = "SELECT COALESCE(SUM(total), 0) as total FROM sales WHERE status = 'completed'";
         try {
             Statement stmt = config.getConnection().createStatement();
@@ -489,20 +489,20 @@ public class VentaDAO {
                 return rs.getBigDecimal("total");
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error calculando total general", e);
+            throw new RuntimeException("Error calculating overall total", e);
         }
         return BigDecimal.ZERO;
     }
 
     /**
-     * Obtiene estadísticas de ventas por usuario.
+     * Gets sales statistics for a user.
      *
-     * @param userId ID del usuario
-     * @return estadísticas del vendedor
+     * @param userId ID of the user
+     * @return seller statistics
      */
-    public EstadisticasVendedor estadisticasPorUsuario(int userId) {
+    public SellerStats statsByUser(int userId) {
         String sql = """
-            SELECT COUNT(*) as cantidad,
+            SELECT COUNT(*) as quantity,
                    COALESCE(SUM(total), 0) as total
             FROM sales
             WHERE user_id = ? AND status = 'completed'
@@ -513,63 +513,63 @@ public class VentaDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                return new EstadisticasVendedor(
+                return new SellerStats(
                     userId,
-                    rs.getInt("cantidad"),
+                    rs.getInt("quantity"),
                     rs.getBigDecimal("total")
                 );
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error obteniendo estadísticas de vendedor", e);
+            throw new RuntimeException("Error getting seller statistics", e);
         }
-        return new EstadisticasVendedor(userId, 0, BigDecimal.ZERO);
+        return new SellerStats(userId, 0, BigDecimal.ZERO);
     }
 
     /**
-     * Record para estadísticas de vendedor.
+     * Record for seller statistics.
      */
-    public record EstadisticasVendedor(
+    public record SellerStats(
         int userId,
-        int cantidadVentas,
-        BigDecimal totalVentas
+        int salesCount,
+        BigDecimal totalSales
     ) {
-        public BigDecimal promedioVenta() {
-            if (cantidadVentas == 0) return BigDecimal.ZERO;
-            return totalVentas.divide(BigDecimal.valueOf(cantidadVentas), 2, java.math.RoundingMode.HALF_UP);
+        public BigDecimal averageSale() {
+            if (salesCount == 0) return BigDecimal.ZERO;
+            return totalSales.divide(BigDecimal.valueOf(salesCount), 2, java.math.RoundingMode.HALF_UP);
         }
     }
 
-    // Métodos privados auxiliares
+    // Private helper methods
 
-    private int insertarVenta(Connection conn, Venta venta) throws SQLException {
+    private int insertSale(Connection conn, Sale sale) throws SQLException {
         String sql = """
             INSERT INTO sales (user_id, total, status, notes)
             VALUES (?, ?, ?, ?)
         """;
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        pstmt.setInt(1, venta.getUserId());
-        pstmt.setBigDecimal(2, venta.getTotal());
-        pstmt.setString(3, venta.getStatus());
-        pstmt.setString(4, venta.getNotes());
+        pstmt.setInt(1, sale.getUserId());
+        pstmt.setBigDecimal(2, sale.getTotal());
+        pstmt.setString(3, sale.getStatus());
+        pstmt.setString(4, sale.getNotes());
         pstmt.executeUpdate();
 
         ResultSet keys = pstmt.getGeneratedKeys();
         if (keys.next()) {
             return keys.getInt(1);
         }
-        throw new SQLException("No se pudo obtener ID de venta creada");
+        throw new SQLException("Could not get created sale ID");
     }
 
-    private void actualizarStock(Connection conn, int variantId, int cantidad) throws SQLException {
+    private void updateStock(Connection conn, int variantId, int quantity) throws SQLException {
         String sql = "UPDATE product_variants SET stock = stock + ? WHERE id = ?";
         PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, cantidad);
+        pstmt.setInt(1, quantity);
         pstmt.setInt(2, variantId);
         pstmt.executeUpdate();
     }
 
-    private Venta mapResultSetToVenta(ResultSet rs) throws SQLException {
-        return new Venta.Builder()
+    private Sale mapResultSet(ResultSet rs) throws SQLException {
+        return new Sale.Builder()
             .id(rs.getInt("id"))
             .userId(rs.getInt("user_id"))
             .total(rs.getBigDecimal("total"))
@@ -592,7 +592,7 @@ public class VentaDAO {
         try {
             if (conn != null) conn.rollback();
         } catch (SQLException e) {
-            System.err.println("Error en rollback: " + e.getMessage());
+            System.err.println("Rollback error: " + e.getMessage());
         }
     }
 
@@ -600,7 +600,7 @@ public class VentaDAO {
         try {
             if (conn != null) conn.setAutoCommit(true);
         } catch (SQLException e) {
-            System.err.println("Error restaurando autocommit: " + e.getMessage());
+            System.err.println("Error restoring autocommit: " + e.getMessage());
         }
     }
 }

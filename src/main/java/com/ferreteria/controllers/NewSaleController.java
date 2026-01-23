@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controlador para el Punto de Venta (POS).
- * Maneja la creación de nuevas ventas.
+ * Controller for the Point of Sale (POS).
+ * Handles new sale creation.
  */
-public class NuevaVentaController {
+public class NewSaleController {
 
     @FXML private Label fechaLabel;
     @FXML private Label vendedorLabel;
@@ -53,17 +53,17 @@ public class NuevaVentaController {
     @FXML private Button confirmarBtn;
 
     private ProductVariantDAO variantDAO;
-    private VentaDAO ventaDAO;
+    private SaleDAO saleDAO;
 
     private ProductVariant productoSeleccionado;
-    private List<ItemCarrito> carrito = new ArrayList<>();
+    private List<CartItem> carrito = new ArrayList<>();
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm");
 
     @FXML
     public void initialize() {
         variantDAO = new ProductVariantDAO(DatabaseConfig.getInstance());
-        ventaDAO = new VentaDAO(DatabaseConfig.getInstance());
+        saleDAO = new SaleDAO(DatabaseConfig.getInstance());
 
         setupUI();
         setupProductList();
@@ -217,7 +217,7 @@ public class NuevaVentaController {
         }
 
         // Buscar si ya existe en el carrito
-        ItemCarrito existente = carrito.stream()
+        CartItem existente = carrito.stream()
             .filter(i -> i.variante.getId() == productoSeleccionado.getId())
             .findFirst()
             .orElse(null);
@@ -225,7 +225,7 @@ public class NuevaVentaController {
         if (existente != null) {
             existente.cantidad += cantidad;
         } else {
-            carrito.add(new ItemCarrito(productoSeleccionado, cantidad));
+            carrito.add(new CartItem(productoSeleccionado, cantidad));
         }
 
         actualizarCarritoUI();
@@ -252,7 +252,7 @@ public class NuevaVentaController {
             carritoContainer.setAlignment(Pos.CENTER);
         } else {
             carritoContainer.setAlignment(Pos.TOP_LEFT);
-            for (ItemCarrito item : carrito) {
+            for (CartItem item : carrito) {
                 carritoContainer.getChildren().add(crearItemCarritoUI(item));
             }
         }
@@ -269,7 +269,7 @@ public class NuevaVentaController {
         confirmarBtn.setDisable(carrito.isEmpty());
     }
 
-    private HBox crearItemCarritoUI(ItemCarrito item) {
+    private HBox crearItemCarritoUI(CartItem item) {
         HBox container = new HBox(8);
         container.setAlignment(Pos.CENTER_LEFT);
         container.setPadding(new Insets(12));
@@ -384,11 +384,11 @@ public class NuevaVentaController {
         }
 
         // Determinar método de pago
-        PagoVenta.MetodoPago metodo = PagoVenta.MetodoPago.EFECTIVO;
+        SalePayment.PaymentMethod metodo = SalePayment.PaymentMethod.CASH;
         if (btnTarjeta.isSelected()) {
-            metodo = PagoVenta.MetodoPago.TARJETA_DEBITO;
+            metodo = SalePayment.PaymentMethod.DEBIT_CARD;
         } else if (btnTransferencia.isSelected()) {
-            metodo = PagoVenta.MetodoPago.TRANSFERENCIA;
+            metodo = SalePayment.PaymentMethod.TRANSFER;
         }
 
         BigDecimal total = calcularTotal();
@@ -419,9 +419,9 @@ public class NuevaVentaController {
 
         try {
             // Crear items de venta
-            List<DetalleVenta> items = new ArrayList<>();
-            for (ItemCarrito item : carrito) {
-                items.add(new DetalleVenta.Builder()
+            List<SaleItem> items = new ArrayList<>();
+            for (CartItem item : carrito) {
+                items.add(new SaleItem.Builder()
                     .variantId(item.variante.getId())
                     .quantity(item.cantidad)
                     .unitPrice(item.variante.getSalePrice())
@@ -432,27 +432,27 @@ public class NuevaVentaController {
             }
 
             // Crear pago
-            PagoVenta pago = new PagoVenta.Builder()
+            SalePayment pago = new SalePayment.Builder()
                 .paymentMethod(metodo)
                 .amount(total)
                 .build();
 
             // Crear venta
             User user = SessionManager.getInstance().getCurrentUser();
-            Venta venta = new Venta.Builder()
+            Sale sale = new Sale.Builder()
                 .userId(user.getId())
                 .total(total)
                 .status("completed")
                 .notes(notasField.getText())
                 .items(items)
-                .addPago(pago)
+                .addPayment(pago)
                 .build();
 
             // Guardar
-            Venta ventaCreada = ventaDAO.crear(venta);
+            Sale createdSale = saleDAO.create(sale);
 
             // Mostrar ticket
-            mostrarTicket(ventaCreada);
+            mostrarTicket(createdSale);
 
             // Limpiar para nueva venta
             carrito.clear();
@@ -467,17 +467,17 @@ public class NuevaVentaController {
         }
     }
 
-    private void mostrarTicket(Venta venta) {
+    private void mostrarTicket(Sale sale) {
         StringBuilder sb = new StringBuilder();
         sb.append("═══════════════════════════════\n");
         sb.append("         FERRETERIA\n");
         sb.append("═══════════════════════════════\n\n");
-        sb.append("Venta #").append(venta.getId()).append("\n");
-        sb.append("Fecha: ").append(venta.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
+        sb.append("Venta #").append(sale.getId()).append("\n");
+        sb.append("Fecha: ").append(sale.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
         sb.append("Vendedor: ").append(SessionManager.getInstance().getCurrentUser().getFullName()).append("\n\n");
 
         sb.append("───────────────────────────────\n");
-        venta.getItems().forEach(item -> {
+        sale.getItems().forEach(item -> {
             sb.append(String.format("%s\n  %d x $%,.2f = $%,.2f\n",
                 item.getDisplayName(),
                 item.getQuantity(),
@@ -486,14 +486,14 @@ public class NuevaVentaController {
         });
 
         sb.append("───────────────────────────────\n");
-        sb.append(String.format("TOTAL: $%,.2f\n", venta.getTotal()));
+        sb.append(String.format("TOTAL: $%,.2f\n", sale.getTotal()));
         sb.append("───────────────────────────────\n\n");
         sb.append("    ¡Gracias por su compra!\n");
         sb.append("═══════════════════════════════\n");
 
         Alert ticket = new Alert(Alert.AlertType.INFORMATION);
         ticket.setTitle("Venta Completada");
-        ticket.setHeaderText("Venta #" + venta.getId() + " registrada exitosamente");
+        ticket.setHeaderText("Venta #" + sale.getId() + " registrada exitosamente");
 
         TextArea textArea = new TextArea(sb.toString());
         textArea.setEditable(false);
@@ -518,7 +518,7 @@ public class NuevaVentaController {
                 return;
             }
         }
-        Main.navigateTo("/views/Ventas.fxml", "Sistema Ferreteria - Ventas");
+        Main.navigateTo("/views/Sales.fxml", "Sistema Ferreteria - Ventas");
     }
 
     private void showAlert(String title, String message, Alert.AlertType type) {
@@ -530,13 +530,13 @@ public class NuevaVentaController {
     }
 
     /**
-     * Clase interna para representar un item en el carrito.
+     * Internal class for cart items.
      */
-    private static class ItemCarrito {
+    private static class CartItem {
         ProductVariant variante;
         int cantidad;
 
-        ItemCarrito(ProductVariant variante, int cantidad) {
+        CartItem(ProductVariant variante, int cantidad) {
             this.variante = variante;
             this.cantidad = cantidad;
         }

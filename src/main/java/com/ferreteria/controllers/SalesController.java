@@ -1,18 +1,15 @@
 package com.ferreteria.controllers;
 
 import com.ferreteria.Main;
-import com.ferreteria.models.User;
-import com.ferreteria.models.Venta;
+import com.ferreteria.models.Sale;
 import com.ferreteria.models.dao.DatabaseConfig;
-import com.ferreteria.models.dao.VentaDAO;
-import com.ferreteria.utils.SessionManager;
+import com.ferreteria.models.dao.SaleDAO;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
 
@@ -24,12 +21,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controlador para la vista de gestión de ventas.
+ * Controller for the sales management view.
  */
-public class VentasController {
+public class SalesController {
 
-    @FXML private Label welcomeLabel;
-    @FXML private Label roleLabel;
+    @FXML private NavbarController navbarController;
+
     @FXML private Label ventasHoyLabel;
     @FXML private Label ventasMesLabel;
     @FXML private Label cantidadHoyLabel;
@@ -40,21 +37,21 @@ public class VentasController {
     @FXML private ComboBox<String> statusFilter;
     @FXML private TextField searchField;
 
-    @FXML private TableView<Venta> ventasTable;
-    @FXML private TableColumn<Venta, String> colId;
-    @FXML private TableColumn<Venta, String> colFecha;
-    @FXML private TableColumn<Venta, String> colProductos;
-    @FXML private TableColumn<Venta, String> colVendedor;
-    @FXML private TableColumn<Venta, String> colTotal;
-    @FXML private TableColumn<Venta, String> colEstado;
-    @FXML private TableColumn<Venta, Void> colAcciones;
+    @FXML private TableView<Sale> ventasTable;
+    @FXML private TableColumn<Sale, String> colId;
+    @FXML private TableColumn<Sale, String> colFecha;
+    @FXML private TableColumn<Sale, String> colProductos;
+    @FXML private TableColumn<Sale, String> colVendedor;
+    @FXML private TableColumn<Sale, String> colTotal;
+    @FXML private TableColumn<Sale, String> colEstado;
+    @FXML private TableColumn<Sale, Void> colAcciones;
 
     @FXML private Button btnAnterior;
     @FXML private Button btnSiguiente;
     @FXML private Label paginaLabel;
 
-    private VentaDAO ventaDAO;
-    private ObservableList<Venta> ventasList;
+    private SaleDAO saleDAO;
+    private ObservableList<Sale> salesList;
     private int paginaActual = 0;
     private int totalPaginas = 1;
     private static final int ITEMS_POR_PAGINA = 15;
@@ -63,22 +60,17 @@ public class VentasController {
 
     @FXML
     public void initialize() {
-        ventaDAO = new VentaDAO(DatabaseConfig.getInstance());
-        ventasList = FXCollections.observableArrayList();
+        if (navbarController != null) {
+            navbarController.setActiveView("ventas");
+        }
 
-        loadUserInfo();
+        saleDAO = new SaleDAO(DatabaseConfig.getInstance());
+        salesList = FXCollections.observableArrayList();
+
         setupStatusFilter();
         setupTable();
         loadStats();
-        loadVentas();
-    }
-
-    private void loadUserInfo() {
-        User user = SessionManager.getInstance().getCurrentUser();
-        if (user != null) {
-            welcomeLabel.setText(user.getFullName());
-            roleLabel.setText(user.getRole().getValue());
-        }
+        loadSales();
     }
 
     private void setupStatusFilter() {
@@ -164,13 +156,13 @@ public class VentasController {
                 btnAnular.getStyleClass().addAll("action-button-small", "danger");
 
                 btnVer.setOnAction(e -> {
-                    Venta venta = getTableView().getItems().get(getIndex());
-                    handleVerDetalle(venta);
+                    Sale sale = getTableView().getItems().get(getIndex());
+                    handleViewDetail(sale);
                 });
 
                 btnAnular.setOnAction(e -> {
-                    Venta venta = getTableView().getItems().get(getIndex());
-                    handleAnularVenta(venta);
+                    Sale sale = getTableView().getItems().get(getIndex());
+                    handleCancelSale(sale);
                 });
             }
 
@@ -180,14 +172,14 @@ public class VentasController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    Venta venta = getTableView().getItems().get(getIndex());
-                    btnAnular.setDisable(venta.isCancelled());
+                    Sale sale = getTableView().getItems().get(getIndex());
+                    btnAnular.setDisable(sale.isCancelled());
                     setGraphic(container);
                 }
             }
         });
 
-        ventasTable.setItems(ventasList);
+        ventasTable.setItems(salesList);
     }
 
     private void loadStats() {
@@ -195,9 +187,9 @@ public class VentasController {
         int year = hoy.getYear();
         int month = hoy.getMonthValue();
 
-        BigDecimal totalHoy = ventaDAO.totalDelDia(hoy);
-        BigDecimal totalMes = ventaDAO.totalDelMes(year, month);
-        int cantidadHoy = ventaDAO.contarDelDia(hoy);
+        BigDecimal totalHoy = saleDAO.dailyTotal(hoy);
+        BigDecimal totalMes = saleDAO.monthlyTotal(year, month);
+        int cantidadHoy = saleDAO.dailyCount(hoy);
 
         ventasHoyLabel.setText("$" + String.format("%,.2f", totalHoy));
         ventasMesLabel.setText("$" + String.format("%,.2f", totalMes));
@@ -211,8 +203,8 @@ public class VentasController {
         }
     }
 
-    private void loadVentas() {
-        List<Venta> ventas;
+    private void loadSales() {
+        List<Sale> sales;
 
         // Aplicar filtros
         String status = statusFilter.getValue();
@@ -221,32 +213,32 @@ public class VentasController {
         String busquedaProducto = searchField.getText().trim().toLowerCase();
 
         if (desde != null && hasta != null) {
-            ventas = ventaDAO.listarPorRangoFechas(desde, hasta);
+            sales = saleDAO.findByDateRange(desde, hasta);
         } else if ("Completadas".equals(status)) {
-            ventas = ventaDAO.listarCompletadas();
+            sales = saleDAO.findCompleted();
         } else if ("Anuladas".equals(status)) {
-            ventas = ventaDAO.listarAnuladas();
+            sales = saleDAO.findCancelled();
         } else {
-            ventas = ventaDAO.listarTodas();
+            sales = saleDAO.findAll();
         }
 
         // Filtrar por status si hay rango de fechas
         if (desde != null && hasta != null && !"Todos".equals(status)) {
             String statusVal = "Completadas".equals(status) ? "completed" : "cancelled";
-            ventas = ventas.stream()
-                .filter(v -> v.getStatus().equals(statusVal))
+            sales = sales.stream()
+                .filter(s -> s.getStatus().equals(statusVal))
                 .toList();
         }
 
         // Cargar items para cada venta (para mostrar cantidad y para filtrar)
-        ventas = ventas.stream()
-            .map(v -> ventaDAO.buscarPorId(v.getId()).orElse(v))
+        sales = sales.stream()
+            .map(s -> saleDAO.findById(s.getId()).orElse(s))
             .toList();
 
         // Filtrar por producto si hay búsqueda
         if (!busquedaProducto.isEmpty()) {
-            ventas = ventas.stream()
-                .filter(v -> v.getItems().stream()
+            sales = sales.stream()
+                .filter(s -> s.getItems().stream()
                     .anyMatch(item ->
                         (item.getProductName() != null && item.getProductName().toLowerCase().contains(busquedaProducto)) ||
                         (item.getVariantName() != null && item.getVariantName().toLowerCase().contains(busquedaProducto)) ||
@@ -256,22 +248,22 @@ public class VentasController {
         }
 
         // Paginación
-        int total = ventas.size();
+        int total = sales.size();
         totalPaginas = (int) Math.ceil((double) total / ITEMS_POR_PAGINA);
         if (totalPaginas == 0) totalPaginas = 1;
 
         int desde_idx = paginaActual * ITEMS_POR_PAGINA;
         int hasta_idx = Math.min(desde_idx + ITEMS_POR_PAGINA, total);
 
-        ventasList.clear();
+        salesList.clear();
         if (desde_idx < total) {
-            ventasList.addAll(ventas.subList(desde_idx, hasta_idx));
+            salesList.addAll(sales.subList(desde_idx, hasta_idx));
         }
 
-        updatePaginacion();
+        updatePagination();
     }
 
-    private void updatePaginacion() {
+    private void updatePagination() {
         paginaLabel.setText("Pagina " + (paginaActual + 1) + " de " + totalPaginas);
         btnAnterior.setDisable(paginaActual == 0);
         btnSiguiente.setDisable(paginaActual >= totalPaginas - 1);
@@ -279,19 +271,19 @@ public class VentasController {
 
     @FXML
     public void handleNuevaVenta() {
-        Main.navigateTo("/views/NuevaVenta.fxml", "Nueva Venta - POS");
+        Main.navigateTo("/views/NewSale.fxml", "Nueva Venta - POS");
     }
 
     @FXML
     public void handleFiltrar() {
         paginaActual = 0;
-        loadVentas();
+        loadSales();
     }
 
     @FXML
     public void handleBuscarProducto() {
         paginaActual = 0;
-        loadVentas();
+        loadSales();
     }
 
     @FXML
@@ -301,14 +293,14 @@ public class VentasController {
         statusFilter.setValue("Todos");
         searchField.clear();
         paginaActual = 0;
-        loadVentas();
+        loadSales();
     }
 
     @FXML
     public void handlePaginaAnterior() {
         if (paginaActual > 0) {
             paginaActual--;
-            loadVentas();
+            loadSales();
         }
     }
 
@@ -316,26 +308,26 @@ public class VentasController {
     public void handlePaginaSiguiente() {
         if (paginaActual < totalPaginas - 1) {
             paginaActual++;
-            loadVentas();
+            loadSales();
         }
     }
 
-    private void handleVerDetalle(Venta venta) {
-        Optional<Venta> ventaCompleta = ventaDAO.buscarPorId(venta.getId());
-        if (ventaCompleta.isEmpty()) {
+    private void handleViewDetail(Sale sale) {
+        Optional<Sale> saleCompleta = saleDAO.findById(sale.getId());
+        if (saleCompleta.isEmpty()) {
             showAlert("Error", "No se pudo cargar la venta", Alert.AlertType.ERROR);
             return;
         }
 
-        Venta v = ventaCompleta.get();
+        Sale s = saleCompleta.get();
         StringBuilder sb = new StringBuilder();
-        sb.append("Venta #").append(v.getId()).append("\n");
-        sb.append("Fecha: ").append(v.getCreatedAt().format(dateFormatter)).append("\n");
-        sb.append("Vendedor: ").append(v.getUserName()).append("\n");
-        sb.append("Estado: ").append(v.isCompleted() ? "Completada" : "Anulada").append("\n\n");
+        sb.append("Venta #").append(s.getId()).append("\n");
+        sb.append("Fecha: ").append(s.getCreatedAt().format(dateFormatter)).append("\n");
+        sb.append("Vendedor: ").append(s.getUserName()).append("\n");
+        sb.append("Estado: ").append(s.isCompleted() ? "Completada" : "Anulada").append("\n\n");
 
         sb.append("--- ITEMS ---\n");
-        v.getItems().forEach(item -> {
+        s.getItems().forEach(item -> {
             sb.append(String.format("• %s x%d = $%,.2f\n",
                 item.getDisplayName(),
                 item.getQuantity(),
@@ -343,40 +335,40 @@ public class VentasController {
         });
 
         sb.append("\n--- PAGOS ---\n");
-        v.getPagos().forEach(pago -> {
+        s.getPayments().forEach(pago -> {
             sb.append(String.format("• %s: $%,.2f\n",
                 pago.getPaymentMethodDisplayName(),
                 pago.getAmount()));
         });
 
-        sb.append("\n").append("TOTAL: $").append(String.format("%,.2f", v.getTotal()));
+        sb.append("\n").append("TOTAL: $").append(String.format("%,.2f", s.getTotal()));
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Detalle de Venta");
-        alert.setHeaderText("Venta #" + v.getId());
+        alert.setHeaderText("Venta #" + s.getId());
         alert.setContentText(sb.toString());
         alert.getDialogPane().setMinWidth(400);
         alert.showAndWait();
     }
 
-    private void handleAnularVenta(Venta venta) {
-        if (venta.isCancelled()) {
+    private void handleCancelSale(Sale sale) {
+        if (sale.isCancelled()) {
             showAlert("Aviso", "Esta venta ya está anulada", Alert.AlertType.WARNING);
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmar Anulación");
-        confirm.setHeaderText("¿Anular venta #" + venta.getId() + "?");
+        confirm.setHeaderText("¿Anular venta #" + sale.getId() + "?");
         confirm.setContentText("Esta acción revertirá el stock de los productos. ¿Continuar?");
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                ventaDAO.anular(venta.getId());
+                saleDAO.cancel(sale.getId());
                 showAlert("Éxito", "Venta anulada correctamente", Alert.AlertType.INFORMATION);
                 loadStats();
-                loadVentas();
+                loadSales();
             } catch (Exception e) {
                 showAlert("Error", "No se pudo anular la venta: " + e.getMessage(), Alert.AlertType.ERROR);
             }
@@ -389,31 +381,5 @@ public class VentasController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    // Navegación
-    @FXML public void handleDashboard() {
-        Main.navigateTo("/views/Dashboard.fxml", "Sistema Ferreteria - Dashboard");
-    }
-
-    @FXML public void handleProducts() {
-        System.out.println("Navegando a Productos...");
-    }
-
-    @FXML public void handleReports() {
-        System.out.println("Navegando a Reportes...");
-    }
-
-    @FXML public void handleUsers() {
-        if (!SessionManager.getInstance().isAdmin()) {
-            showAlert("Acceso Denegado", "Solo administradores pueden acceder", Alert.AlertType.WARNING);
-            return;
-        }
-        System.out.println("Navegando a Usuarios...");
-    }
-
-    @FXML public void handleLogout() {
-        SessionManager.getInstance().logout();
-        Main.navigateTo("/views/Login.fxml", "Ferreteria - Sistema de Gestion");
     }
 }

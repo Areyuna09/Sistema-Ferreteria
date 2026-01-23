@@ -4,20 +4,20 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Modelo que representa un pago asociado a una venta.
- * Permite pagos combinados (ej: parte efectivo, parte tarjeta).
- * Mapea a la tabla 'sale_payments' en la base de datos.
+ * Model representing a payment associated with a sale.
+ * Allows combined payments (e.g., part cash, part card).
+ * Maps to the 'sale_payments' table in the database.
  */
-public class PagoVenta {
+public class SalePayment {
 
     private final int id;
     private final int saleId;
-    private final MetodoPago paymentMethod;
+    private final PaymentMethod paymentMethod;
     private final BigDecimal amount;
     private final String reference;
     private final LocalDateTime createdAt;
 
-    private PagoVenta(Builder builder) {
+    private SalePayment(Builder builder) {
         this.id = builder.id;
         this.saleId = builder.saleId;
         this.paymentMethod = builder.paymentMethod;
@@ -29,35 +29,35 @@ public class PagoVenta {
     // Getters
     public int getId() { return id; }
     public int getSaleId() { return saleId; }
-    public MetodoPago getPaymentMethod() { return paymentMethod; }
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public BigDecimal getAmount() { return amount; }
     public String getReference() { return reference; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     /**
-     * Obtiene el nombre del método de pago para mostrar.
-     * @return nombre legible del método de pago
+     * Gets the payment method name for display.
+     * @return readable payment method name
      */
     public String getPaymentMethodDisplayName() {
         return paymentMethod.getDisplayName();
     }
 
     /**
-     * Enum para los métodos de pago soportados.
+     * Enum for supported payment methods.
      */
-    public enum MetodoPago {
-        EFECTIVO("efectivo", "Efectivo"),
-        TARJETA_DEBITO("tarjeta_debito", "Tarjeta de Débito"),
-        TARJETA_CREDITO("tarjeta_credito", "Tarjeta de Crédito"),
-        TRANSFERENCIA("transferencia", "Transferencia Bancaria"),
+    public enum PaymentMethod {
+        CASH("efectivo", "Efectivo"),
+        DEBIT_CARD("tarjeta_debito", "Tarjeta de Débito"),
+        CREDIT_CARD("tarjeta_credito", "Tarjeta de Crédito"),
+        TRANSFER("transferencia", "Transferencia Bancaria"),
         MERCADO_PAGO("mercado_pago", "Mercado Pago"),
-        CUENTA_CORRIENTE("cuenta_corriente", "Cuenta Corriente"),
-        OTRO("otro", "Otro");
+        CREDIT_ACCOUNT("cuenta_corriente", "Cuenta Corriente"),
+        OTHER("otro", "Otro");
 
         private final String value;
         private final String displayName;
 
-        MetodoPago(String value, String displayName) {
+        PaymentMethod(String value, String displayName) {
             this.value = value;
             this.displayName = displayName;
         }
@@ -65,13 +65,13 @@ public class PagoVenta {
         public String getValue() { return value; }
         public String getDisplayName() { return displayName; }
 
-        public static MetodoPago fromValue(String value) {
-            for (MetodoPago m : values()) {
+        public static PaymentMethod fromValue(String value) {
+            for (PaymentMethod m : values()) {
                 if (m.value.equalsIgnoreCase(value)) {
                     return m;
                 }
             }
-            return OTRO;
+            return OTHER;
         }
     }
 
@@ -79,7 +79,7 @@ public class PagoVenta {
     public static class Builder {
         private int id;
         private int saleId;
-        private MetodoPago paymentMethod = MetodoPago.EFECTIVO;
+        private PaymentMethod paymentMethod = PaymentMethod.CASH;
         private BigDecimal amount = BigDecimal.ZERO;
         private String reference;
         private LocalDateTime createdAt = LocalDateTime.now();
@@ -94,13 +94,13 @@ public class PagoVenta {
             return this;
         }
 
-        public Builder paymentMethod(MetodoPago method) {
+        public Builder paymentMethod(PaymentMethod method) {
             this.paymentMethod = method;
             return this;
         }
 
         public Builder paymentMethod(String method) {
-            this.paymentMethod = MetodoPago.fromValue(method);
+            this.paymentMethod = PaymentMethod.fromValue(method);
             return this;
         }
 
@@ -119,17 +119,17 @@ public class PagoVenta {
             return this;
         }
 
-        public PagoVenta build() {
+        public SalePayment build() {
             validate();
-            return new PagoVenta(this);
+            return new SalePayment(this);
         }
 
         private void validate() {
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Monto debe ser mayor a 0");
+                throw new IllegalArgumentException("Amount must be greater than 0");
             }
             if (paymentMethod == null) {
-                throw new IllegalArgumentException("Método de pago es requerido");
+                throw new IllegalArgumentException("Payment method is required");
             }
         }
     }

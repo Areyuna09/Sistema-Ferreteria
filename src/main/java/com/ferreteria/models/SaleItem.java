@@ -4,10 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Modelo que representa un item/detalle de una venta.
- * Mapea a la tabla 'sale_items' en la base de datos.
+ * Model representing an item/detail of a sale.
+ * Maps to the 'sale_items' table in the database.
  */
-public class DetalleVenta {
+public class SaleItem {
 
     private final int id;
     private final int saleId;
@@ -17,11 +17,11 @@ public class DetalleVenta {
     private final BigDecimal subtotal;
     private final LocalDateTime createdAt;
 
-    // Campos adicionales para mostrar info del producto (no persisten)
+    // Additional fields to display product info (not persisted)
     private final String productName;
     private final String variantName;
 
-    private DetalleVenta(Builder builder) {
+    private SaleItem(Builder builder) {
         this.id = builder.id;
         this.saleId = builder.saleId;
         this.variantId = builder.variantId;
@@ -45,18 +45,18 @@ public class DetalleVenta {
     public String getVariantName() { return variantName; }
 
     /**
-     * Obtiene la descripción completa del item para mostrar.
-     * @return nombre del producto con su variante
+     * Gets the complete item description for display.
+     * @return product name with its variant
      */
     public String getDisplayName() {
         if (variantName != null && !variantName.isBlank()) {
             return productName + " - " + variantName;
         }
-        return productName != null ? productName : "Producto #" + variantId;
+        return productName != null ? productName : "Product #" + variantId;
     }
 
     /**
-     * Calcula el subtotal basado en cantidad y precio unitario.
+     * Calculates subtotal based on quantity and unit price.
      * @return quantity * unitPrice
      */
     public BigDecimal calculateSubtotal() {
@@ -121,28 +121,28 @@ public class DetalleVenta {
         }
 
         /**
-         * Calcula automáticamente el subtotal antes de construir.
-         * @return this builder con subtotal calculado
+         * Automatically calculates subtotal before building.
+         * @return this builder with calculated subtotal
          */
         public Builder calculateSubtotal() {
             this.subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
             return this;
         }
 
-        public DetalleVenta build() {
+        public SaleItem build() {
             validate();
-            return new DetalleVenta(this);
+            return new SaleItem(this);
         }
 
         private void validate() {
             if (variantId <= 0) {
-                throw new IllegalArgumentException("Variante de producto es requerida");
+                throw new IllegalArgumentException("Product variant is required");
             }
             if (quantity <= 0) {
-                throw new IllegalArgumentException("Cantidad debe ser mayor a 0");
+                throw new IllegalArgumentException("Quantity must be greater than 0");
             }
             if (unitPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException("Precio unitario no puede ser negativo");
+                throw new IllegalArgumentException("Unit price cannot be negative");
             }
         }
     }

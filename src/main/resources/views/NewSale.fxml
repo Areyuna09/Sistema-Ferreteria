@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.ferreteria.controllers.NuevaVentaController"
+            fx:controller="com.ferreteria.controllers.NewSaleController"
             style="-fx-background-color: #f1f5f9;"
             prefWidth="1200" prefHeight="700">
 
