@@ -14,18 +14,18 @@ public class DatabaseConfig {
 
     private static DatabaseConfig instance;
     private Connection connection;
+    private static final String DB_PATH = "ferreteria.db";
     private final String dbPath;
 
     private DatabaseConfig() {
-        String userHome = System.getProperty("user.home");
-        String appDataDir = userHome + File.separator + ".ferreteria-java-data";
+        String appDataDir = System.getProperty("user.dir");
 
         File dir = new File(appDataDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
 
-        this.dbPath = appDataDir + File.separator + "ferreteria.db";
+        this.dbPath = appDataDir + File.separator + DB_PATH;
     }
 
     public static synchronized DatabaseConfig getInstance() {

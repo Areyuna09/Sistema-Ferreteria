@@ -13,6 +13,11 @@
 *.tar.gz
 *.rar
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
 # Maven
 target/
 pom.xml.tag

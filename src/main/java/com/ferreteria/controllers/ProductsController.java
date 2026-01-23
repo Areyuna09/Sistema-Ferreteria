@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -28,6 +29,7 @@ import java.util.List;
 public class ProductsController {
 
     @FXML private TableView<Product> productsTable;
+    @FXML private TextField searchField;
     @FXML private TableColumn<Product, Integer> idColumn;
     @FXML private TableColumn<Product, String> codeColumn;
     @FXML private TableColumn<Product, String> nameColumn;
@@ -35,11 +37,20 @@ public class ProductsController {
     @FXML private TableColumn<Product, BigDecimal> priceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
     @FXML private TableColumn<Product, Void> actionsColumn;
+    
+    // Nuevos elementos de la navbar
+    @FXML private Label welcomeLabel;
+    @FXML private Label roleLabel;
+    @FXML private Label dateLabel;
 
     @FXML
     public void initialize() {
+        System.out.println("=== INICIALIZANDO PRODUCTSCONTROLLER ===");
         setupTableColumns();
+        setupSearchField();
+        setupNavbar();
         loadProducts();
+        System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
     }
 
     private void setupTableColumns() {
@@ -65,6 +76,42 @@ public class ProductsController {
 
         // Columna de acciones con botones Editar y Eliminar
         actionsColumn.setCellFactory(createActionsCellFactory());
+    }
+    
+    private void setupSearchField() {
+        // Configurar el listener para búsqueda en tiempo real
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterProducts(newValue);
+        });
+    }
+    
+    private void filterProducts(String searchText) {
+        List<Product> allProducts = (List<Product>) productsTable.getUserData();
+        if (allProducts == null) {
+            allProducts = new ArrayList<>();
+            productsTable.setUserData(allProducts);
+        }
+        
+        if (searchText == null || searchText.trim().isEmpty()) {
+            productsTable.getItems().setAll(allProducts);
+            return;
+        }
+        
+        String lowerSearchText = searchText.toLowerCase().trim();
+        List<Product> filteredProducts = new ArrayList<>();
+        
+        for (Product product : allProducts) {
+            boolean matches = 
+                (product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText)) ||
+                (product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText)) ||
+                (product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText));
+                
+            if (matches) {
+                filteredProducts.add(product);
+            }
+        }
+        
+        productsTable.getItems().setAll(filteredProducts);
     }
 
     private Callback<TableColumn<Product, Void>, TableCell<Product, Void>> createActionsCellFactory() {
@@ -110,6 +157,7 @@ public class ProductsController {
 
     @FXML
     public void loadProducts() {
+        System.out.println("Cargando productos iniciales...");
         List<Product> products = new ArrayList<>();
         
         try {
@@ -117,13 +165,14 @@ public class ProductsController {
             Statement stmt = conn.createStatement();
             
             ResultSet rs = stmt.executeQuery("""
-                SELECT p.id, p.code, p.name, p.description, c.name as category,
-                       pv.sale_price as price, pv.cost_price as cost, pv.stock, pv.min_stock,
+                SELECT p.id, p.code, p.name, p.description, p.category_id, c.name as category,
+                       COALESCE(pv.sale_price, 0) as price, COALESCE(pv.cost_price, 0) as cost, 
+                       COALESCE(pv.stock, 0) as stock, COALESCE(pv.min_stock, 5) as min_stock,
                        p.location, p.active, p.created_at 
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
-                LEFT JOIN product_variants pv ON p.id = pv.product_id
-                WHERE p.active = 1 AND pv.active = 1
+                LEFT JOIN product_variants pv ON p.id = pv.product_id AND pv.active = 1
+                WHERE p.active = 1
                 ORDER BY p.name
                 """);
             
@@ -146,12 +195,119 @@ public class ProductsController {
                 products.add(product);
             }
             
+            productsTable.setUserData(products);
             productsTable.getItems().setAll(products);
+            System.out.println("Productos iniciales cargados: " + products.size());
             
         } catch (Exception e) {
-            System.err.println("Error cargando productos: " + e.getMessage());
-            showAlert("Error", "No se pudieron cargar los productos: " + e.getMessage());
+            System.err.println("Error cargando productos iniciales: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void handleRefresh() {
+        System.out.println("=== BOTÓN REFRESH PRESIONADO ===");
+        
+        // Mostrar mensaje inmediato en la tabla
+        productsTable.setPlaceholder(new javafx.scene.control.Label("🔄 Refrescando..."));
+        
+        // Forzar un refresh inmediato de la UI
+        productsTable.refresh();
+        
+        // Ejecutar en un hilo separado para no bloquear la UI
+        new Thread(() -> {
+            try {
+                System.out.println("Iniciando carga de productos...");
+                
+                var conn = DatabaseConfig.getInstance().getConnection();
+                Statement stmt = conn.createStatement();
+                
+                ResultSet rs = stmt.executeQuery("""
+                    SELECT p.id, p.code, p.name, p.description, p.category_id, c.name as category,
+                           COALESCE(pv.sale_price, 0) as price, COALESCE(pv.cost_price, 0) as cost, 
+                           COALESCE(pv.stock, 0) as stock, COALESCE(pv.min_stock, 5) as min_stock,
+                           p.location, p.active, p.created_at 
+                    FROM products p
+                    LEFT JOIN categories c ON p.category_id = c.id
+                    LEFT JOIN product_variants pv ON p.id = pv.product_id AND pv.active = 1
+                    WHERE p.active = 1
+                    ORDER BY p.name
+                    """);
+                
+                List<Product> products = new ArrayList<>();
+                while (rs.next()) {
+                    Product product = new Product.Builder()
+                        .id(rs.getInt("id"))
+                        .code(rs.getString("code"))
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .category(rs.getString("category"))
+                        .price(rs.getBigDecimal("price"))
+                        .cost(rs.getBigDecimal("cost"))
+                        .stock(rs.getInt("stock"))
+                        .minStock(rs.getInt("min_stock"))
+                        .location(rs.getString("location"))
+                        .active(rs.getBoolean("active"))
+                        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                        .build();
+                    
+                    products.add(product);
+                }
+                
+                System.out.println("Se encontraron " + products.size() + " productos");
+                
+                // Actualizar la UI en el hilo de JavaFX
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        System.out.println("Actualizando UI en hilo JavaFX...");
+                        
+                        // Limpiar completamente la tabla
+                        productsTable.getItems().clear();
+                        
+                        // Agregar los nuevos productos
+                        productsTable.getItems().setAll(products);
+                        
+                        // Actualizar userData para el filtrado
+                        productsTable.setUserData(products);
+                        
+                        // Quitar el placeholder
+                        productsTable.setPlaceholder(null);
+                        
+                        // Forzar refresh de la tabla
+                        productsTable.refresh();
+                        
+                        // MOVER LA TABLA AL INICIO
+                        productsTable.scrollTo(0);
+                        
+                        // También hacer scroll del contenedor si es un ScrollPane
+                        if (productsTable.getParent() instanceof javafx.scene.control.ScrollPane) {
+                            ((javafx.scene.control.ScrollPane) productsTable.getParent()).setVvalue(0);
+                        }
+                        
+                        System.out.println("Tabla actualizada con " + productsTable.getItems().size() + " productos y movida al inicio");
+                        
+                        // Mostrar alerta para confirmar visualmente
+                        showAlert("Recarga Completada", "Se recargaron " + products.size() + " productos correctamente");
+                        
+                    } catch (Exception e) {
+                        System.err.println("Error actualizando UI: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+                
+            } catch (Exception e) {
+                System.err.println("Error en handleRefresh: " + e.getMessage());
+                e.printStackTrace();
+                
+                javafx.application.Platform.runLater(() -> {
+                    productsTable.setPlaceholder(new javafx.scene.control.Label("❌ Error al recargar"));
+                    showAlert("Error", "No se pudieron recargar los productos: " + e.getMessage());
+                });
+            }
+        }).start();
+        
+        System.out.println("=== FIN HANDLE REFRESH ===");
     }
 
     @FXML
@@ -161,8 +317,43 @@ public class ProductsController {
             return;
         }
         
-        showAlert("Editar Producto", "Función de editar producto en desarrollo.\nProducto seleccionado: " + product.getName());
-        // TODO: Implementar ventana de edición de producto
+        try {
+            // Cargar el diálogo
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/NewProductDialog.fxml"));
+            Parent root = loader.load();
+            
+            // Crear el escenario del diálogo
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Editar Producto");
+            Scene scene = new Scene(root);
+            
+            // Cargar los estilos CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            dialogStage.setScene(scene);
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(productsTable.getScene().getWindow());
+            dialogStage.setResizable(false);
+            dialogStage.centerOnScreen();
+            
+            // Obtener el controlador y configurarlo para edición
+            NewProductDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setProduct(product); // Pasar el producto a editar
+            
+            // Mostrar el diálogo y esperar a que se cierre
+            dialogStage.showAndWait();
+            
+            // Si se guardó el producto, recargar la tabla
+            if (controller.isSaveClicked()) {
+                loadProducts();
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error abriendo diálogo de edición: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Error", "No se pudo abrir el formulario de edición: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -205,8 +396,52 @@ public class ProductsController {
 
     @FXML
     public void handleNewProduct() {
-        showAlert("Nuevo Producto", "Función de nuevo producto en desarrollo");
-        // TODO: Implementar ventana de nuevo producto
+        System.out.println("Abriendo diálogo de nuevo producto...");
+        try {
+            // Cargar el diálogo
+            System.out.println("Cargando FXML: /views/NewProductDialog.fxml");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/NewProductDialog.fxml"));
+            if (loader.getLocation() == null) {
+                System.err.println("ERROR: No se encontró el archivo FXML");
+                showAlert("Error", "No se encontró el archivo del formulario");
+                return;
+            }
+            
+            Parent root = loader.load();
+            System.out.println("FXML cargado correctamente");
+            
+            // Crear el escenario del diálogo
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Nuevo Producto");
+            Scene scene = new Scene(root);
+            
+            // Cargar los estilos CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            dialogStage.setScene(scene);
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(productsTable.getScene().getWindow());
+            dialogStage.setResizable(false);
+            dialogStage.centerOnScreen();
+            
+            // Obtener el controlador y configurarlo
+            NewProductDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            
+            System.out.println("Mostrando diálogo...");
+            // Mostrar el diálogo y esperar a que se cierre
+            dialogStage.showAndWait();
+            
+            // Si se guardó el producto, recargar la tabla
+            if (controller.isSaveClicked()) {
+                loadProducts();
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error abriendo diálogo de nuevo producto: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Error", "No se pudo abrir el formulario de nuevo producto: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -224,6 +459,68 @@ public class ProductsController {
             stage.setTitle("Sistema Ferretería - Dashboard");
             stage.setScene(scene);
             stage.setResizable(true);
+            stage.centerOnScreen();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupNavbar() {
+        try {
+            // Configurar información del usuario
+            var session = SessionManager.getInstance();
+            if (session.getCurrentUser() != null) {
+                welcomeLabel.setText(session.getCurrentUser().getFullName());
+                roleLabel.setText(session.getCurrentUser().getRole().toString());
+            }
+            
+            // Configurar fecha actual
+            dateLabel.setText(java.time.LocalDateTime.now().format(
+                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+            ));
+            
+        } catch (Exception e) {
+            System.err.println("Error configurando navbar: " + e.getMessage());
+        }
+    }
+    
+    @FXML
+    public void handleSales() {
+        showAlert("Información", "Módulo de Ventas en desarrollo");
+    }
+    
+    @FXML
+    public void handleReports() {
+        showAlert("Información", "Módulo de Reportes en desarrollo");
+    }
+    
+    @FXML
+    public void handleUsers() {
+        showAlert("Información", "Módulo de Usuarios en desarrollo");
+    }
+    
+    @FXML
+    public void handleLogout() {
+        try {
+            SessionManager.getInstance().logout();
+            navigateToLogin();
+        } catch (Exception e) {
+            System.err.println("Error cerrando sesión: " + e.getMessage());
+            showAlert("Error", "No se pudo cerrar la sesión");
+        }
+    }
+    
+    private void navigateToLogin() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
+            Scene scene = new Scene(root, 1100, 650);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+
+            Stage stage = (Stage) productsTable.getScene().getWindow();
+            stage.setTitle("Ferreteria - Login");
+            stage.setScene(scene);
+            stage.setMinWidth(950);
+            stage.setMinHeight(600);
             stage.centerOnScreen();
         } catch (Exception e) {
             e.printStackTrace();
