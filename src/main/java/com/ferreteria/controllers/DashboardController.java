@@ -91,8 +91,7 @@ public class DashboardController {
 
     @FXML
     public void handleSales() {
-        System.out.println("Navegando a Ventas...");
-        // TODO: Implementar vista de ventas
+        Main.navigateTo("/views/Ventas.fxml", "Sistema Ferreteria - Ventas");
     }
 
     @FXML

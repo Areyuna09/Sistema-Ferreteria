@@ -40,7 +40,7 @@
                     <Label fx:id="welcomeLabel" text="Administrador" styleClass="nav-user-name"/>
                     <Label fx:id="roleLabel" text="Admin" styleClass="nav-user-role"/>
                 </VBox>
-                <Button text="Cerrar Sesion" onAction="#handleLogout" styleClass="logout-btn, danger"/>
+                <Button text="Cerrar Sesion" onAction="#handleLogout" styleClass="logout-btn danger"/>
             </HBox>
         </HBox>
     </top>
@@ -96,11 +96,13 @@
                 <!-- Seccion de Acciones Rapidas -->
                 <VBox spacing="16">
                     <Label text="Acciones Rapidas" styleClass="section-title"/>
-                    <HBox spacing="16">
-                        <Button text="+ Nueva Venta" styleClass="action-button, success" onAction="#handleSales"/>
-                        <Button text="+ Nuevo Producto" styleClass="action-button, accent" onAction="#handleProducts"/>
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+                        <Button text="+ Nueva Venta" styleClass="action-button success" onAction="#handleSales"/>
+                        <Button text="+ Nuevo Producto" styleClass="action-button accent" onAction="#handleProducts"/>
                         <Button text="Ver Inventario" styleClass="action-button" onAction="#handleProducts"/>
                         <Button text="Generar Reporte" styleClass="action-button" onAction="#handleReports"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="F12 = Debug Panel" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
                     </HBox>
                 </VBox>
 

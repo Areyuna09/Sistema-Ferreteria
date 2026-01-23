@@ -9,6 +9,8 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 /**
@@ -46,6 +48,9 @@ public class Main extends Application {
         Scene scene = new Scene(root, 1100, 650);
         scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
 
+        // Agregar atajo F12 para Debug Panel
+        setupDebugShortcut(scene);
+
         primaryStage.setTitle("Ferreteria - Sistema de Gestion");
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(950);
@@ -61,6 +66,11 @@ public class Main extends Application {
             Scene scene = new Scene(root, 1200, 700);
             scene.getStylesheets().add(Main.class.getResource("/styles/main.css").toExternalForm());
 
+            // Agregar atajo F12 para Debug Panel (excepto si ya estamos en debug)
+            if (!fxmlPath.contains("Debug")) {
+                setupDebugShortcut(scene);
+            }
+
             primaryStage.setTitle(title);
             primaryStage.setMaximized(false);
             primaryStage.setScene(scene);
@@ -68,6 +78,25 @@ public class Main extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Configura el atajo F12 para abrir el panel de debug.
+     */
+    private static void setupDebugShortcut(Scene scene) {
+        scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F12) {
+                openDebugPanel();
+                event.consume();
+            }
+        });
+    }
+
+    /**
+     * Abre el panel de debug.
+     */
+    public static void openDebugPanel() {
+        navigateTo("/views/Debug.fxml", "DEBUG PANEL - Testing");
     }
 
     @Override
