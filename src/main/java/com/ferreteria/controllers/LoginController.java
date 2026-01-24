@@ -4,6 +4,7 @@ import com.ferreteria.Main;
 import com.ferreteria.models.User;
 import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.models.dao.UserDAO;
+import com.ferreteria.utils.AppLogger;
 import com.ferreteria.utils.AuthenticationException;
 import com.ferreteria.utils.SessionManager;
 
@@ -138,12 +139,14 @@ public class LoginController {
             loginButton.setDisable(true);
             User user = authenticate(username, password);
             SessionManager.getInstance().setCurrentUser(user);
+            AppLogger.logLogin(username);
             navigateToDashboard();
         } catch (AuthenticationException e) {
+            AppLogger.logLoginFailed(username, e.getMessage());
             showError(e.getMessage());
         } catch (Exception e) {
+            AppLogger.error("Error de conexión en login", e);
             showError("Error de conexión");
-            e.printStackTrace();
         } finally {
             loginButton.setDisable(false);
         }

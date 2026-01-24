@@ -1,6 +1,7 @@
 package com.ferreteria.models.dao;
 
 import com.ferreteria.models.User;
+import com.ferreteria.utils.AppLogger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -104,9 +105,12 @@ public class UserDAO {
 
             ResultSet keys = pstmt.getGeneratedKeys();
             if (keys.next()) {
-                return findById(keys.getInt(1)).orElse(user);
+                int newId = keys.getInt(1);
+                AppLogger.logCreate("User", newId);
+                return findById(newId).orElse(user);
             }
         } catch (SQLException e) {
+            AppLogger.error("USUARIOS", "Error creando usuario", e);
             throw new RuntimeException("Error guardando usuario", e);
         }
         return user;
@@ -122,7 +126,9 @@ public class UserDAO {
             pstmt.setBoolean(4, user.isActive());
             pstmt.setInt(5, user.getId());
             pstmt.executeUpdate();
+            AppLogger.logUpdate("User", user.getId());
         } catch (SQLException e) {
+            AppLogger.error("USUARIOS", "Error actualizando usuario #" + user.getId(), e);
             throw new RuntimeException("Error actualizando usuario", e);
         }
         return user;
@@ -134,7 +140,9 @@ public class UserDAO {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
+            AppLogger.info("USUARIOS", "Usuario #" + id + " desactivado");
         } catch (SQLException e) {
+            AppLogger.error("USUARIOS", "Error desactivando usuario #" + id, e);
             throw new RuntimeException("Error eliminando usuario", e);
         }
     }
@@ -146,7 +154,9 @@ public class UserDAO {
             pstmt.setString(1, newPasswordHash);
             pstmt.setInt(2, userId);
             pstmt.executeUpdate();
+            AppLogger.info("USUARIOS", "Contraseña actualizada para usuario #" + userId);
         } catch (SQLException e) {
+            AppLogger.error("USUARIOS", "Error actualizando contraseña", e);
             throw new RuntimeException("Error actualizando contraseña", e);
         }
     }
@@ -157,7 +167,9 @@ public class UserDAO {
             PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
+            AppLogger.logDelete("User", id);
         } catch (SQLException e) {
+            AppLogger.error("USUARIOS", "Error eliminando usuario permanentemente", e);
             throw new RuntimeException("Error eliminando usuario permanentemente", e);
         }
     }

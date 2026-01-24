@@ -2,6 +2,7 @@ package com.ferreteria.controllers;
 
 import com.ferreteria.Main;
 import com.ferreteria.models.User;
+import com.ferreteria.utils.AppLogger;
 import com.ferreteria.utils.SessionManager;
 
 import javafx.fxml.FXML;
@@ -63,6 +64,7 @@ public class NavbarController {
     @FXML
     public void handleDashboard() {
         if (!"dashboard".equals(currentView)) {
+            AppLogger.info("NAV", "Navegando a Dashboard");
             Main.navigateTo("/views/Dashboard.fxml", "Sistema Ferreteria - Dashboard");
         }
     }
@@ -70,6 +72,7 @@ public class NavbarController {
     @FXML
     public void handleProducts() {
         if (!"productos".equals(currentView)) {
+            AppLogger.info("NAV", "Navegando a Productos");
             Main.navigateTo("/views/Products.fxml", "Sistema Ferreteria - Productos");
         }
     }
@@ -77,6 +80,7 @@ public class NavbarController {
     @FXML
     public void handleSales() {
         if (!"sales".equals(currentView) && !"ventas".equals(currentView)) {
+            AppLogger.info("NAV", "Navegando a Ventas");
             Main.navigateTo("/views/Sales.fxml", "Sistema Ferreteria - Ventas");
         }
     }
@@ -84,6 +88,7 @@ public class NavbarController {
     @FXML
     public void handleReports() {
         if (!"reportes".equals(currentView)) {
+            AppLogger.info("NAV", "Navegando a Reportes");
             Main.navigateTo("/views/Reports.fxml", "Sistema Ferreteria - Reportes");
         }
     }
@@ -94,12 +99,17 @@ public class NavbarController {
             return;
         }
         if (!"usuarios".equals(currentView)) {
+            AppLogger.info("NAV", "Navegando a Usuarios");
             Main.navigateTo("/views/Users.fxml", "Sistema Ferreteria - Usuarios");
         }
     }
 
     @FXML
     public void handleLogout() {
+        User user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            AppLogger.logLogout(user.getUsername());
+        }
         SessionManager.getInstance().logout();
         Main.navigateTo("/views/Login.fxml", "Ferreteria - Sistema de Gestion");
     }

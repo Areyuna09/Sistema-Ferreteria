@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private static Stage primaryStage;
+    private static Stage debugStage;
 
     @Override
     public void start(Stage stage) {
@@ -93,10 +94,35 @@ public class Main extends Application {
     }
 
     /**
-     * Abre el panel de debug.
+     * Abre el panel de debug en ventana separada.
      */
     public static void openDebugPanel() {
-        navigateTo("/views/Debug.fxml", "DEBUG PANEL - Testing");
+        if (debugStage != null && debugStage.isShowing()) {
+            debugStage.toFront();
+            return;
+        }
+
+        try {
+            Parent root = FXMLLoader.load(Main.class.getResource("/views/Debug.fxml"));
+            Scene scene = new Scene(root, 1000, 600);
+            scene.getStylesheets().add(Main.class.getResource("/styles/main.css").toExternalForm());
+
+            debugStage = new Stage();
+            debugStage.setTitle("DEBUG PANEL - Logs & Testing");
+            debugStage.setScene(scene);
+            debugStage.setMinWidth(800);
+            debugStage.setMinHeight(500);
+            debugStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void closeDebugPanel() {
+        if (debugStage != null) {
+            debugStage.close();
+            debugStage = null;
+        }
     }
 
     @Override

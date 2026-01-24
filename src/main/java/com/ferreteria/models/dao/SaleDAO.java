@@ -3,6 +3,7 @@ package com.ferreteria.models.dao;
 import com.ferreteria.models.Sale;
 import com.ferreteria.models.SaleItem;
 import com.ferreteria.models.SalePayment;
+import com.ferreteria.utils.AppLogger;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -57,10 +58,12 @@ public class SaleDAO {
             }
 
             conn.commit();
+            AppLogger.logSale(saleId, sale.getTotal().toString());
             return findById(saleId).orElse(sale);
 
         } catch (SQLException e) {
             rollback(conn);
+            AppLogger.error("VENTAS", "Error creando venta: " + e.getMessage(), e);
             throw new RuntimeException("Error creating sale: " + e.getMessage(), e);
         } finally {
             setAutoCommitTrue(conn);
@@ -100,9 +103,11 @@ public class SaleDAO {
             }
 
             conn.commit();
+            AppLogger.logSaleCancelled(saleId);
 
         } catch (SQLException e) {
             rollback(conn);
+            AppLogger.error("VENTAS", "Error anulando venta #" + saleId, e);
             throw new RuntimeException("Error cancelling sale: " + e.getMessage(), e);
         } finally {
             setAutoCommitTrue(conn);
@@ -144,9 +149,11 @@ public class SaleDAO {
             pstmt.executeUpdate();
 
             conn.commit();
+            AppLogger.logDelete("Sale", saleId);
 
         } catch (SQLException e) {
             rollback(conn);
+            AppLogger.error("VENTAS", "Error eliminando venta #" + saleId, e);
             throw new RuntimeException("Error deleting sale: " + e.getMessage(), e);
         } finally {
             setAutoCommitTrue(conn);

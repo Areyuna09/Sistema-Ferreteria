@@ -107,6 +107,26 @@
                         </VBox>
                     </Tab>
 
+                    <!-- Tab Logs -->
+                    <Tab text="Logs del Sistema" closable="false">
+                        <VBox spacing="12">
+                            <padding>
+                                <Insets top="12"/>
+                            </padding>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Logs en tiempo real:" style="-fx-text-fill: #a855f7; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="Limpiar Logs" onAction="#handleLimpiarLogs"
+                                        style="-fx-background-color: #444; -fx-text-fill: white; -fx-padding: 6 12; -fx-background-radius: 4;"/>
+                                <Button text="Abrir Archivo" onAction="#handleAbrirArchivoLog"
+                                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-padding: 6 12; -fx-background-radius: 4;"/>
+                            </HBox>
+                            <TextArea fx:id="logsOutput" VBox.vgrow="ALWAYS"
+                                      editable="false" wrapText="true"
+                                      style="-fx-control-inner-background: #0a0a0a; -fx-text-fill: #a855f7; -fx-font-family: 'Consolas', monospace; -fx-font-size: 11px; -fx-border-color: #333; -fx-border-radius: 6;"/>
+                        </VBox>
+                    </Tab>
+
                     <!-- Tab Datos Rápidos -->
                     <Tab text="Datos Rapidos" closable="false">
                         <VBox spacing="12">

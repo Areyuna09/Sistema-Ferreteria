@@ -1,6 +1,7 @@
 package com.ferreteria.controllers;
 
 import com.ferreteria.models.dao.ReportDAO;
+import com.ferreteria.utils.AppLogger;
 import com.ferreteria.utils.SessionManager;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -196,10 +197,15 @@ public class ReportsController {
                         updateChart(reportDAO.getDailySales(selectedPeriod));
                         showReportSections();
                         enableExportButtons();
+
+                        // Log de reporte generado
+                        AppLogger.info("REPORTES", "Reporte generado para " + selectedPeriod.getMonth() + " " + selectedPeriod.getYear() +
+                            " - Ventas: " + stats.get("totalVentas") + ", Total: $" + stats.get("totalRecaudado"));
                     });
 
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Error al generar reporte", e);
+                    AppLogger.error("REPORTES", "Error al generar reporte: " + e.getMessage(), e);
                     Platform.runLater(() -> showError("Error al generar el reporte: " + e.getMessage()));
                 }
             }).start();
@@ -435,12 +441,14 @@ public class ReportsController {
 
     @FXML
     private void handleExportPDF() {
+        AppLogger.info("REPORTES", "Intento de exportación a PDF para " + selectedPeriod);
         showInfo("Funcionalidad de exportación a PDF en desarrollo");
         // TODO: Implementar exportación con iText o PDFBox
     }
 
     @FXML
     private void handleExportExcel() {
+        AppLogger.info("REPORTES", "Intento de exportación a Excel para " + selectedPeriod);
         showInfo("Funcionalidad de exportación a Excel en desarrollo");
         // TODO: Implementar exportación con Apache POI
     }
