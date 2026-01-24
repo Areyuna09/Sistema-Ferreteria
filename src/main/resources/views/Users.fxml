@@ -43,13 +43,20 @@
                     <!-- Campo: Password -->
                     <VBox spacing="6">
                         <Label text="Contraseña" styleClass="field-label"/>
-                        <PasswordField fx:id="passwordField" promptText="Minimo 6 caracteres..." styleClass="form-field"/>
+                        <StackPane>
+                            <PasswordField fx:id="passwordField" promptText="Minimo 6 caracteres..." styleClass="form-field"/>
+                            <TextField fx:id="passwordVisible" promptText="Minimo 6 caracteres..." styleClass="form-field" visible="false"/>
+                        </StackPane>
                     </VBox>
 
                     <!-- Campo: Confirmar Password -->
                     <VBox spacing="6">
                         <Label text="Confirmar Contraseña" styleClass="field-label"/>
-                        <PasswordField fx:id="confirmPasswordField" promptText="Repetir contraseña..." styleClass="form-field"/>
+                        <StackPane>
+                            <PasswordField fx:id="confirmPasswordField" promptText="Repetir contraseña..." styleClass="form-field"/>
+                            <TextField fx:id="confirmPasswordVisible" promptText="Repetir contraseña..." styleClass="form-field" visible="false"/>
+                        </StackPane>
+                        <CheckBox fx:id="showPasswordCheck" text="Mostrar contraseñas"/>
                     </VBox>
 
                     <!-- Campo: Rol -->

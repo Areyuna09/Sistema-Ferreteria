@@ -93,9 +93,16 @@
                 <!-- Contraseña -->
                 <VBox spacing="8">
                     <Label text="CONTRASEÑA" styleClass="field-label-glass"/>
-                    <PasswordField fx:id="passwordField"
+                    <StackPane>
+                        <PasswordField fx:id="passwordField"
+                                       promptText="Tu contraseña"
+                                       styleClass="field-glass"/>
+                        <TextField fx:id="passwordVisible"
                                    promptText="Tu contraseña"
-                                   styleClass="field-glass"/>
+                                   styleClass="field-glass"
+                                   visible="false"/>
+                    </StackPane>
+                    <CheckBox fx:id="showPasswordCheck" text="Mostrar contraseña" styleClass="show-password-check"/>
                 </VBox>
 
                 <!-- Error -->

@@ -30,6 +30,8 @@ public class LoginController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField passwordVisible;
+    @FXML private CheckBox showPasswordCheck;
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
     @FXML private ImageView backgroundImage;
@@ -46,9 +48,26 @@ public class LoginController {
     public void initialize() {
         errorLabel.setVisible(false);
         passwordField.setOnAction(e -> handleLogin());
+        passwordVisible.setOnAction(e -> handleLogin());
 
+        setupShowPassword();
         setupBackground();
         playEntryAnimations();
+    }
+
+    private void setupShowPassword() {
+        passwordVisible.textProperty().bindBidirectional(passwordField.textProperty());
+        showPasswordCheck.selectedProperty().addListener((obs, oldVal, show) -> {
+            passwordField.setVisible(!show);
+            passwordVisible.setVisible(show);
+            if (show) {
+                passwordVisible.requestFocus();
+                passwordVisible.positionCaret(passwordVisible.getText().length());
+            } else {
+                passwordField.requestFocus();
+                passwordField.positionCaret(passwordField.getText().length());
+            }
+        });
     }
 
     private void setupBackground() {

@@ -30,7 +30,10 @@ public class UsersController {
     @FXML private TextField usernameField;
     @FXML private TextField fullNameField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField passwordVisible;
     @FXML private PasswordField confirmPasswordField;
+    @FXML private TextField confirmPasswordVisible;
+    @FXML private CheckBox showPasswordCheck;
     @FXML private ComboBox<String> roleCombo;
     @FXML private Label messageLabel;
     @FXML private Button btnDelete;
@@ -65,8 +68,21 @@ public class UsersController {
         usersList = FXCollections.observableArrayList();
 
         setupRoleCombo();
+        setupShowPassword();
         setupTable();
         loadUsers();
+    }
+
+    private void setupShowPassword() {
+        passwordVisible.textProperty().bindBidirectional(passwordField.textProperty());
+        confirmPasswordVisible.textProperty().bindBidirectional(confirmPasswordField.textProperty());
+
+        showPasswordCheck.selectedProperty().addListener((obs, oldVal, show) -> {
+            passwordField.setVisible(!show);
+            passwordVisible.setVisible(show);
+            confirmPasswordField.setVisible(!show);
+            confirmPasswordVisible.setVisible(show);
+        });
     }
 
     private void setupRoleCombo() {
@@ -140,6 +156,10 @@ public class UsersController {
         fullNameField.setText(user.getFullName());
         passwordField.clear();
         confirmPasswordField.clear();
+        passwordField.setPromptText("Dejar vacio para mantener actual");
+        confirmPasswordField.setPromptText("Dejar vacio para mantener actual");
+        passwordVisible.setPromptText("Dejar vacio para mantener actual");
+        confirmPasswordVisible.setPromptText("Dejar vacio para mantener actual");
 
         String role = user.getRole().getValue();
         roleCombo.setValue(role.substring(0, 1).toUpperCase() + role.substring(1));
@@ -276,7 +296,12 @@ public class UsersController {
         fullNameField.clear();
         passwordField.clear();
         confirmPasswordField.clear();
+        passwordField.setPromptText("Minimo 6 caracteres...");
+        confirmPasswordField.setPromptText("Repetir contraseña...");
+        passwordVisible.setPromptText("Minimo 6 caracteres...");
+        confirmPasswordVisible.setPromptText("Repetir contraseña...");
         roleCombo.setValue("Vendedor");
+        showPasswordCheck.setSelected(false);
 
         btnDelete.setVisible(false);
         btnDelete.setText("Eliminar");
