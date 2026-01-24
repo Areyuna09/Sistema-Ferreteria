@@ -19,6 +19,7 @@ public class NavbarController {
     @FXML private Button btnVentas;
     @FXML private Button btnReportes;
     @FXML private Button btnUsuarios;
+    @FXML private Button btnSettings;
     @FXML private Label userNameLabel;
     @FXML private Label userRoleLabel;
 
@@ -49,6 +50,7 @@ public class NavbarController {
         btnVentas.getStyleClass().remove("nav-button-active");
         btnReportes.getStyleClass().remove("nav-button-active");
         btnUsuarios.getStyleClass().remove("nav-button-active");
+        btnSettings.getStyleClass().remove("nav-button-active");
 
         // Activar el correspondiente
         switch (viewName.toLowerCase()) {
@@ -57,6 +59,7 @@ public class NavbarController {
             case "ventas", "sales" -> btnVentas.getStyleClass().add("nav-button-active");
             case "reportes", "reports" -> btnReportes.getStyleClass().add("nav-button-active");
             case "usuarios", "users" -> btnUsuarios.getStyleClass().add("nav-button-active");
+            case "settings", "configuracion" -> btnSettings.getStyleClass().add("nav-button-active");
         }
     }
 
@@ -97,6 +100,13 @@ public class NavbarController {
             // TODO: Main.navigateTo("/views/Users.fxml", "Sistema Ferreteria - Usuarios");
         }
     }
+    @FXML
+    public void handleSettings() {
+        if (!"settings".equals(currentView)) {
+            Main.navigateTo("/views/Settings.fxml", "Sistema Ferreteria - Configuración");
+        }
+    }
+
 
     @FXML
     public void handleLogout() {

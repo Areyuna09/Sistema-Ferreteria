@@ -25,6 +25,7 @@
         <Button fx:id="btnProductos" text="Productos" onAction="#handleProducts" styleClass="nav-button"/>
         <Button fx:id="btnVentas" text="Ventas" onAction="#handleSales" styleClass="nav-button"/>
         <Button fx:id="btnReportes" text="Reportes" onAction="#handleReports" styleClass="nav-button"/>
+        <Button fx:id="btnSettings" text="Configuración" onAction="#handleSettings" styleClass="nav-button"/>
         <Button fx:id="btnUsuarios" text="Usuarios" onAction="#handleUsers" styleClass="nav-button"/>
     </HBox>
 

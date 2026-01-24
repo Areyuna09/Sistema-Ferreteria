@@ -1,14 +1,14 @@
 package com.ferreteria.controllers;
 
+import com.ferreteria.models.Sale;
+import com.ferreteria.models.SaleItem;
+import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.models.dao.ReportDAO;
-import com.ferreteria.utils.SessionManager;
+import com.ferreteria.models.dao.SaleDAO;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.chart.BarChart;
@@ -18,14 +18,12 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
-import javafx.geometry.Pos;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.Month;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.logging.Level;
@@ -311,7 +309,7 @@ public class ReportsController {
             emptyChart.setAlignment(javafx.geometry.Pos.CENTER);
             emptyChart.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-padding: 60;");
             
-            Label icon = new Label("Sin Datos");
+            Label icon = new Label("📊");
             icon.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;");
             
             Label message = new Label("No hay ventas registradas en este mes");
@@ -329,7 +327,7 @@ public class ReportsController {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         
-        xAxis.setLabel("Dia del Mes");
+        xAxis.setLabel("Día del Mes");
         yAxis.setLabel("Monto (ARS)");
         
         BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
@@ -346,7 +344,7 @@ public class ReportsController {
             String day = String.valueOf(entry.getKey());
             double amount = entry.getValue().doubleValue();
             series.getData().add(new XYChart.Data<>(day, amount));
-            LOGGER.info("Dia " + day + ": $" + amount);
+            LOGGER.info("Día " + day + ": $" + amount);
         }
         
         barChart.getData().add(series);
@@ -380,7 +378,6 @@ public class ReportsController {
      * Muestra estado de carga mientras se generan reportes
      */
     private void showLoadingState() {
-        // Aquí podrías mostrar un spinner o mensaje de "Cargando..."
         LOGGER.info("Cargando datos del reporte...");
     }
 
@@ -399,15 +396,15 @@ public class ReportsController {
         String methodLower = method.toLowerCase();
         switch (methodLower) {
             case "efectivo":
-                return "EFEC";
+                return "💵";
             case "tarjeta_debito":
-                return "T-DEB";
+                return "💳";
             case "tarjeta_credito":
-                return "T-CRE";
+                return "💳";
             case "transferencia":
-                return "TRANS";
+                return "🏦";
             default:
-                return "PAGO";
+                return "💰";
         }
     }
 
@@ -420,9 +417,9 @@ public class ReportsController {
             case "efectivo":
                 return "Efectivo";
             case "tarjeta_debito":
-                return "Tarjeta Debito";
+                return "Tarjeta Débito";
             case "tarjeta_credito":
-                return "Tarjeta Credito";
+                return "Tarjeta Crédito";
             case "transferencia":
                 return "Transferencia";
             default:
@@ -431,21 +428,138 @@ public class ReportsController {
     }
 
     // ==================== MÉTODOS DE EXPORTACIÓN ====================
-    // (Se implementarán después)
 
     @FXML
     private void handleExportPDF() {
         showInfo("Funcionalidad de exportación a PDF en desarrollo");
-        // TODO: Implementar exportación con iText o PDFBox
     }
 
     @FXML
     private void handleExportExcel() {
         showInfo("Funcionalidad de exportación a Excel en desarrollo");
-        // TODO: Implementar exportación con Apache POI
     }
 
-    // Navegación manejada por NavbarController
+    // ==================== ANULACIÓN DE VENTAS ====================
+
+    /**
+     * Maneja la búsqueda de una venta para anular.
+     * Busca por ID de venta.
+     */
+    @FXML
+    private void handleSearchSaleToCancel() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Buscar Venta");
+        dialog.setHeaderText("Anular Venta");
+        dialog.setContentText("Ingrese el ID de la venta:");
+        
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().trim().isEmpty()) {
+            try {
+                int saleId = Integer.parseInt(result.get().trim());
+                showSaleCancellationDialog(saleId);
+            } catch (NumberFormatException e) {
+                showError("ID inválido. Debe ingresar un número.");
+            }
+        }
+    }
+
+    /**
+     * Muestra el diálogo de confirmación para anular una venta.
+     * Verifica que la venta exista y no esté anulada antes de mostrar el diálogo.
+     * 
+     * @param saleId ID de la venta a anular
+     */
+    private void showSaleCancellationDialog(int saleId) {
+        SaleDAO saleDAO = new SaleDAO(DatabaseConfig.getInstance());
+        
+        // Buscar la venta
+        Optional<Sale> saleOpt = saleDAO.findById(saleId);
+        
+        if (saleOpt.isEmpty()) {
+            showError("No se encontró una venta con ID: " + saleId);
+            return;
+        }
+        
+        Sale sale = saleOpt.get();
+        
+        // Verificar que no esté ya anulada
+        if (sale.isCancelled()) {
+            showWarning("Esta venta ya está anulada.");
+            return;
+        }
+        
+        // Construir mensaje de confirmación con detalles
+        StringBuilder message = new StringBuilder();
+        message.append("DETALLES DE LA VENTA:\n\n");
+        message.append("ID: ").append(sale.getId()).append("\n");
+        message.append("Fecha: ").append(
+            sale.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+        ).append("\n");
+        message.append("Vendedor: ").append(sale.getUserName() != null ? sale.getUserName() : "N/A").append("\n");
+        message.append("Total: ").append(currencyFormat.format(sale.getTotal())).append("\n\n");
+        
+        message.append("PRODUCTOS:\n");
+        for (SaleItem item : sale.getItems()) {
+            message.append("• ").append(item.getDisplayName())
+                   .append(" x").append(item.getQuantity())
+                   .append(" = ").append(currencyFormat.format(item.getSubtotal()))
+                   .append("\n");
+        }
+        
+        message.append("\n⚠️ ADVERTENCIA:\n");
+        message.append("• El stock de los productos será revertido\n");
+        message.append("• Esta acción no se puede deshacer\n");
+        message.append("• La venta quedará marcada como ANULADA\n\n");
+        message.append("¿Está seguro que desea anular esta venta?");
+        
+        // Mostrar diálogo de confirmación
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Confirmar Anulación");
+        confirmDialog.setHeaderText("Anular Venta #" + saleId);
+        confirmDialog.setContentText(message.toString());
+        
+        // Personalizar botones
+        ButtonType btnConfirmar = new ButtonType("Sí, Anular Venta");
+        ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirmDialog.getButtonTypes().setAll(btnConfirmar, btnCancelar);
+        
+        Optional<ButtonType> confirmation = confirmDialog.showAndWait();
+        
+        if (confirmation.isPresent() && confirmation.get() == btnConfirmar) {
+            cancelSale(saleId);
+        }
+    }
+
+    /**
+     * Anula una venta y revierte el stock de los productos.
+     * Ejecuta la operación en una transacción para garantizar consistencia.
+     * 
+     * @param saleId ID de la venta a anular
+     */
+    private void cancelSale(int saleId) {
+        SaleDAO saleDAO = new SaleDAO(DatabaseConfig.getInstance());
+        
+        try {
+            // Ejecutar anulación (SaleDAO maneja la transacción internamente)
+            saleDAO.cancel(saleId);
+            
+            // Mostrar mensaje de éxito
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Éxito");
+            successAlert.setHeaderText("Venta Anulada Correctamente");
+            successAlert.setContentText(
+                "La venta #" + saleId + " ha sido anulada.\n" +
+                "El stock de los productos ha sido revertido."
+            );
+            successAlert.showAndWait();
+            
+            LOGGER.info("Venta #" + saleId + " anulada correctamente");
+            
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Error al anular venta #" + saleId, e);
+            showError("Error al anular la venta:\n" + e.getMessage());
+        }
+    }
 
     // ==================== UTILIDADES UI ====================
 

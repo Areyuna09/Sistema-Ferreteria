@@ -55,6 +55,26 @@
                     </VBox>
                 </HBox>
 
+                <!-- SECCIÓN DE ANULACIÓN DE VENTAS -->
+                <VBox spacing="16" styleClass="cancel-section">
+                    <Label text="Gestión de Ventas" styleClass="section-title"/>
+                    
+                    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="cancel-panel">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="ANULAR VENTA" styleClass="cancel-title"/>
+                            <Label text="Busque una venta por su ID para anularla y revertir el stock automáticamente" styleClass="cancel-description"/>
+                        </VBox>
+                        
+                        <Separator orientation="VERTICAL"/>
+                        
+                        <VBox spacing="8" alignment="CENTER">
+                            <Label text="🔍" styleClass="cancel-icon"/>
+                            <Button text="Buscar y Anular Venta" onAction="#handleSearchSaleToCancel" styleClass="cancel-button" prefWidth="200"/>
+                            <Label text="⚠️ Acción irreversible" styleClass="cancel-warning"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
                 <HBox spacing="20" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
                     <VBox styleClass="stat-card card-blue">
                         <Label text="Total" styleClass="card-icon"/>
@@ -108,7 +128,7 @@
                 </VBox>
 
                 <VBox alignment="CENTER" spacing="16" styleClass="empty-state" fx:id="emptyStateContainer" managed="true" visible="true">
-                    <Label text="Reportes" styleClass="empty-icon"/>
+                    <Label text="📊" styleClass="empty-icon"/>
                     <Label text="Selecciona un mes y año para generar el reporte" styleClass="empty-text"/>
                     <Label text="Los reportes muestran ventas, productos más vendidos y métodos de pago" styleClass="empty-subtext"/>
                 </VBox>

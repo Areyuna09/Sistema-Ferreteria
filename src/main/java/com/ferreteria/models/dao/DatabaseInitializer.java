@@ -25,6 +25,7 @@ public class DatabaseInitializer {
             createTables(conn);
             createIndexes(conn);
             createDefaultAdmin(conn);
+            applyMigrations(conn);  // Linea agregada para el email
             System.out.println("Base de datos inicializada: " + config.getDbPath());
         } catch (SQLException e) {
             throw new RuntimeException("Error inicializando base de datos", e);
@@ -199,6 +200,28 @@ public class DatabaseInitializer {
             pstmt.setString(4, "Administrador");
             pstmt.executeUpdate();
             System.out.println("Usuario admin creado");
+        }
+    }
+      /**
+     * Aplica migraciones necesarias a la base de datos.
+     * Agrega el campo email a business_config si no existe.
+     */
+    private void applyMigrations(Connection conn) throws SQLException {
+        try {
+            // Verificar si existe la columna email en business_config
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet columns = meta.getColumns(null, null, "business_config", "email");
+            
+            if (!columns.next()) {
+                // La columna no existe, agregarla
+                Statement stmt = conn.createStatement();
+                stmt.execute("ALTER TABLE business_config ADD COLUMN email VARCHAR(100)");
+                System.out.println("✓ Columna 'email' agregada a business_config");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error aplicando migraciones: " + e.getMessage());
+            // No lanzar excepción, continuar
         }
     }
 }

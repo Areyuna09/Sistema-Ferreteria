@@ -552,3 +552,77 @@
 .payment-card:last-child {
     -fx-margin: 0 0 40 0;
 }
+/* ============================================
+   SECCIÓN DE ANULACIÓN DE VENTAS
+   ============================================ */
+
+.cancel-section {
+    -fx-padding: 0;
+}
+
+.cancel-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-padding: 32 40;
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.1), 16, 0, 0, 4);
+    -fx-border-color: rgba(220, 38, 38, 0.2);
+    -fx-border-width: 2;
+    -fx-border-radius: 18;
+}
+
+.cancel-panel:hover {
+    -fx-border-color: rgba(220, 38, 38, 0.4);
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.15), 20, 0, 0, 6);
+}
+
+.cancel-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #dc2626;
+    -fx-letter-spacing: 0.5px;
+}
+
+.cancel-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-wrap-text: true;
+    -fx-max-width: 450;
+    -fx-line-spacing: 2;
+}
+
+.cancel-icon {
+    -fx-font-size: 48px;
+    -fx-padding: 0 0 8 0;
+}
+
+.cancel-button {
+    -fx-background-color: linear-gradient(to bottom, #dc2626, #b91c1c);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 16 24;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.3), 10, 0, 0, 4);
+}
+
+.cancel-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #b91c1c, #991b1b);
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.4), 14, 0, 0, 6);
+    -fx-translate-y: -2;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.cancel-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #991b1b, #7f1d1d);
+    -fx-translate-y: 0;
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.5), 8, 0, 0, 2);
+}
+
+.cancel-warning {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f97316;
+    -fx-font-style: italic;
+}
