@@ -257,17 +257,18 @@ public class NewProductDialogController {
                     
                     // Insertar variante del producto
                     String variantSql = """
-                        INSERT INTO product_variants (product_id, sale_price, cost_price, stock, min_stock, active, created_at)
-                        VALUES (?, ?, ?, ?, ?, 1, datetime('now'))
+                        INSERT INTO product_variants (product_id, variant_name, sale_price, cost_price, stock, min_stock, active, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'))
                         """;
                     
                     try (PreparedStatement variantStmt = conn.prepareStatement(variantSql)) {
                         variantStmt.setInt(1, productId);
-                        variantStmt.setBigDecimal(2, new BigDecimal(priceField.getText()));
-                        variantStmt.setBigDecimal(3, costField.getText().trim().isEmpty() ? 
+                        variantStmt.setString(2, "Default");
+                        variantStmt.setBigDecimal(3, new BigDecimal(priceField.getText()));
+                        variantStmt.setBigDecimal(4, costField.getText().trim().isEmpty() ? 
                             BigDecimal.ZERO : new BigDecimal(costField.getText()));
-                        variantStmt.setInt(4, Integer.parseInt(stockField.getText()));
-                        variantStmt.setInt(5, minStockField.getText().trim().isEmpty() ? 
+                        variantStmt.setInt(5, Integer.parseInt(stockField.getText()));
+                        variantStmt.setInt(6, minStockField.getText().trim().isEmpty() ? 
                             5 : Integer.parseInt(minStockField.getText()));
                         
                         variantStmt.executeUpdate();

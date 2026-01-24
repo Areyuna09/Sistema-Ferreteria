@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,20 +39,44 @@ public class ProductsController {
     @FXML private TableColumn<Product, BigDecimal> priceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
     @FXML private TableColumn<Product, Void> actionsColumn;
-    
-    // Nuevos elementos de la navbar
-    @FXML private Label welcomeLabel;
-    @FXML private Label roleLabel;
     @FXML private Label dateLabel;
+    @FXML private NavbarController navbarController;
 
     @FXML
     public void initialize() {
         System.out.println("=== INICIALIZANDO PRODUCTSCONTROLLER ===");
+        if (navbarController != null) {
+            navbarController.setActiveView("productos");
+        }
+        
+        // Configurar fecha y zona horaria de San Juan
+        setupDateTimeLabel();
+        
         setupTableColumns();
         setupSearchField();
-        setupNavbar();
         loadProducts();
         System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
+    }
+
+    private void setupDateTimeLabel() {
+        try {
+            // Zona horaria de San Juan, Argentina
+            ZoneId sanJuanZone = ZoneId.of("America/Argentina/San_Juan");
+            ZonedDateTime sanJuanDateTime = ZonedDateTime.now(sanJuanZone);
+            
+            // Formato para mostrar fecha y hora
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm");
+            String formattedDateTime = sanJuanDateTime.format(formatter);
+            
+            // Actualizar el label
+            dateLabel.setText("Zona Horaria: San Juan, Argentina\n" + formattedDateTime);
+            dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-alignment: center-right;");
+            
+        } catch (Exception e) {
+            System.err.println("Error configurando zona horaria: " + e.getMessage());
+            // Fallback a fecha local
+            dateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm")));
+        }
     }
 
     private void setupTableColumns() {
@@ -444,88 +470,7 @@ public class ProductsController {
         }
     }
 
-    @FXML
-    public void handleBack() {
-        navigateToDashboard();
-    }
-
-    private void navigateToDashboard() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/views/Dashboard.fxml"));
-            Scene scene = new Scene(root, 1200, 800);
-            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-
-            Stage stage = (Stage) productsTable.getScene().getWindow();
-            stage.setTitle("Sistema Ferretería - Dashboard");
-            stage.setScene(scene);
-            stage.setResizable(true);
-            stage.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setupNavbar() {
-        try {
-            // Configurar información del usuario
-            var session = SessionManager.getInstance();
-            if (session.getCurrentUser() != null) {
-                welcomeLabel.setText(session.getCurrentUser().getFullName());
-                roleLabel.setText(session.getCurrentUser().getRole().toString());
-            }
-            
-            // Configurar fecha actual
-            dateLabel.setText(java.time.LocalDateTime.now().format(
-                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-            ));
-            
-        } catch (Exception e) {
-            System.err.println("Error configurando navbar: " + e.getMessage());
-        }
-    }
-    
-    @FXML
-    public void handleSales() {
-        showAlert("Información", "Módulo de Ventas en desarrollo");
-    }
-    
-    @FXML
-    public void handleReports() {
-        showAlert("Información", "Módulo de Reportes en desarrollo");
-    }
-    
-    @FXML
-    public void handleUsers() {
-        showAlert("Información", "Módulo de Usuarios en desarrollo");
-    }
-    
-    @FXML
-    public void handleLogout() {
-        try {
-            SessionManager.getInstance().logout();
-            navigateToLogin();
-        } catch (Exception e) {
-            System.err.println("Error cerrando sesión: " + e.getMessage());
-            showAlert("Error", "No se pudo cerrar la sesión");
-        }
-    }
-    
-    private void navigateToLogin() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
-            Scene scene = new Scene(root, 1100, 650);
-            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-
-            Stage stage = (Stage) productsTable.getScene().getWindow();
-            stage.setTitle("Ferreteria - Login");
-            stage.setScene(scene);
-            stage.setMinWidth(950);
-            stage.setMinHeight(600);
-            stage.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    // Navegación manejada por NavbarController
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
