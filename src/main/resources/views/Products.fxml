@@ -31,7 +31,7 @@
                 <!-- Barra de búsqueda y botones -->
                 <VBox spacing="16">
                     <HBox alignment="CENTER_LEFT" spacing="16">
-                        <TextField fx:id="searchField" prefWidth="400" promptText="🔍 Buscar producto por código, nombre o categoría..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+                        <TextField fx:id="searchField" prefWidth="400" promptText="🔍 Buscar producto por ID, código, nombre, categoría o ubicación..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
                         <Button mnemonicParsing="false" onAction="#handleNewProduct" styleClass="action-button, success" text="+ Nuevo Producto" />
                         <Button mnemonicParsing="false" onAction="#handleRefresh" styleClass="action-button, primary" text="🔄 Recargar" />
                     </HBox>
@@ -44,6 +44,7 @@
                        <TableColumn fx:id="codeColumn" prefWidth="100.0" text="Código" />
                        <TableColumn fx:id="nameColumn" prefWidth="250.0" text="Nombre" />
                        <TableColumn fx:id="categoryColumn" prefWidth="150.0" text="Categoría" />
+                       <TableColumn fx:id="locationColumn" prefWidth="120.0" text="Ubicación" />
                        <TableColumn fx:id="priceColumn" prefWidth="120.0" text="Precio" />
                        <TableColumn fx:id="stockColumn" prefWidth="80.0" text="Stock" />
                        <TableColumn fx:id="actionsColumn" prefWidth="150.0" text="Acciones" />
