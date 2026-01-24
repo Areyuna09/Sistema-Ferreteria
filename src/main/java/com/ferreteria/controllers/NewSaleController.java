@@ -3,7 +3,9 @@ package com.ferreteria.controllers;
 import com.ferreteria.Main;
 import com.ferreteria.models.*;
 import com.ferreteria.models.dao.*;
+import com.ferreteria.utils.DateTimePickerDialog;
 import com.ferreteria.utils.SessionManager;
+import com.ferreteria.utils.TicketGenerator;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -14,6 +16,8 @@ import javafx.collections.FXCollections;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,23 +46,29 @@ public class NewSaleController {
     @FXML private Label itemsCountLabel;
     @FXML private Label totalLabel;
 
-    @FXML private ToggleButton btnEfectivo;
-    @FXML private ToggleButton btnTarjeta;
-    @FXML private ToggleButton btnTransferencia;
-    @FXML private ToggleGroup paymentGroup;
-    @FXML private HBox efectivoBox;
+    @FXML private CheckBox chkEfectivo;
+    @FXML private CheckBox chkTarjeta;
+    @FXML private CheckBox chkTransferencia;
+    @FXML private TextField montoEfectivo;
+    @FXML private TextField montoTarjeta;
+    @FXML private TextField montoTransferencia;
+    @FXML private HBox efectivoVueltoBox;
     @FXML private TextField recibidoField;
     @FXML private Label cambioLabel;
+    @FXML private Label pagoValidacionLabel;
     @FXML private TextField notasField;
     @FXML private Button confirmarBtn;
+    @FXML private Button btnCambiarFecha;
 
     private ProductVariantDAO variantDAO;
     private SaleDAO saleDAO;
 
     private ProductVariant productoSeleccionado;
     private List<CartItem> carrito = new ArrayList<>();
+    private LocalDateTime fechaVentaPersonalizada = null;
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm");
+    private final ZoneId sanJuanZone = ZoneId.of("America/Argentina/San_Juan");
 
     @FXML
     public void initialize() {
@@ -71,17 +81,36 @@ public class NewSaleController {
     }
 
     private void setupUI() {
-        fechaLabel.setText(LocalDateTime.now().format(dateFormatter));
+        // Zona horaria de San Juan, Argentina
+        ZonedDateTime now = ZonedDateTime.now(sanJuanZone);
+        fechaVentaPersonalizada = now.toLocalDateTime();
+
+        actualizarFechaLabel();
 
         User user = SessionManager.getInstance().getCurrentUser();
         if (user != null) {
             vendedorLabel.setText(user.getFullName());
-            turnoLabel.setText("Turno: " + (LocalDateTime.now().getHour() < 14 ? "Mañana" : "Tarde"));
+            turnoLabel.setText("Turno: " + (now.getHour() < 14 ? "Mañana" : "Tarde"));
         }
 
         // Cargar productos iniciales (últimos agregados o más vendidos)
         List<ProductVariant> productos = variantDAO.listarDisponibles();
         productosListView.setItems(FXCollections.observableArrayList(productos));
+    }
+
+    private void actualizarFechaLabel() {
+        if (fechaVentaPersonalizada != null) {
+            fechaLabel.setText(fechaVentaPersonalizada.format(dateFormatter));
+        }
+    }
+
+    @FXML
+    public void handleCambiarFecha() {
+        DateTimePickerDialog.showForNewSale(fechaVentaPersonalizada)
+            .ifPresent(newDateTime -> {
+                fechaVentaPersonalizada = newDateTime;
+                actualizarFechaLabel();
+            });
     }
 
     private void setupProductList() {
@@ -137,10 +166,120 @@ public class NewSaleController {
     }
 
     private void setupPaymentToggle() {
-        paymentGroup.selectedToggleProperty().addListener((obs, old, newVal) -> {
-            efectivoBox.setVisible(btnEfectivo.isSelected());
-            efectivoBox.setManaged(btnEfectivo.isSelected());
-        });
+        // Cuando cambia cualquier checkbox, actualizar UI
+        chkEfectivo.selectedProperty().addListener((obs, old, selected) -> actualizarUIPagos());
+        chkTarjeta.selectedProperty().addListener((obs, old, selected) -> actualizarUIPagos());
+        chkTransferencia.selectedProperty().addListener((obs, old, selected) -> actualizarUIPagos());
+
+        // Validar cuando cambian los montos (solo si hay múltiples métodos)
+        montoEfectivo.textProperty().addListener((obs, old, newVal) -> validarPagosMultiples());
+        montoTarjeta.textProperty().addListener((obs, old, newVal) -> validarPagosMultiples());
+        montoTransferencia.textProperty().addListener((obs, old, newVal) -> validarPagosMultiples());
+
+        // Estado inicial
+        actualizarUIPagos();
+    }
+
+    private int contarMetodosSeleccionados() {
+        int count = 0;
+        if (chkEfectivo.isSelected()) count++;
+        if (chkTarjeta.isSelected()) count++;
+        if (chkTransferencia.isSelected()) count++;
+        return count;
+    }
+
+    private void actualizarUIPagos() {
+        int metodosSeleccionados = contarMetodosSeleccionados();
+        BigDecimal total = calcularTotal();
+        String totalStr = String.format("%.2f", total);
+
+        // Mostrar campos de monto para los métodos seleccionados
+        montoEfectivo.setVisible(chkEfectivo.isSelected());
+        montoEfectivo.setManaged(chkEfectivo.isSelected());
+        montoTarjeta.setVisible(chkTarjeta.isSelected());
+        montoTarjeta.setManaged(chkTarjeta.isSelected());
+        montoTransferencia.setVisible(chkTransferencia.isSelected());
+        montoTransferencia.setManaged(chkTransferencia.isSelected());
+
+        // Si hay un solo método, autocompletar con el total
+        if (metodosSeleccionados == 1) {
+            if (chkEfectivo.isSelected()) montoEfectivo.setText(totalStr);
+            if (chkTarjeta.isSelected()) montoTarjeta.setText(totalStr);
+            if (chkTransferencia.isSelected()) montoTransferencia.setText(totalStr);
+        }
+
+        // Recibido/Vuelto solo visible si efectivo está seleccionado
+        efectivoVueltoBox.setVisible(chkEfectivo.isSelected());
+        efectivoVueltoBox.setManaged(chkEfectivo.isSelected());
+
+        // Limpiar campos si se deselecciona
+        if (!chkEfectivo.isSelected()) {
+            montoEfectivo.clear();
+            recibidoField.clear();
+            cambioLabel.setText("$0.00");
+        }
+        if (!chkTarjeta.isSelected()) montoTarjeta.clear();
+        if (!chkTransferencia.isSelected()) montoTransferencia.clear();
+
+        validarPagosMultiples();
+    }
+
+    private void validarPagosMultiples() {
+        BigDecimal total = calcularTotal();
+        int metodosSeleccionados = contarMetodosSeleccionados();
+
+        // Si el carrito está vacío, no mostrar validación
+        if (total.compareTo(BigDecimal.ZERO) == 0) {
+            pagoValidacionLabel.setText("");
+            return;
+        }
+
+        if (metodosSeleccionados == 0) {
+            pagoValidacionLabel.setText("Seleccione un método de pago");
+            pagoValidacionLabel.setStyle("-fx-text-fill: #dc2626;");
+            return;
+        }
+
+        // Si hay un solo método, no necesita validar montos
+        if (metodosSeleccionados == 1) {
+            pagoValidacionLabel.setText("");
+            return;
+        }
+
+        // Múltiples métodos: validar que la suma sea igual al total
+        BigDecimal sumaPagos = BigDecimal.ZERO;
+        if (chkEfectivo.isSelected()) {
+            sumaPagos = sumaPagos.add(parseMonto(montoEfectivo.getText()));
+        }
+        if (chkTarjeta.isSelected()) {
+            sumaPagos = sumaPagos.add(parseMonto(montoTarjeta.getText()));
+        }
+        if (chkTransferencia.isSelected()) {
+            sumaPagos = sumaPagos.add(parseMonto(montoTransferencia.getText()));
+        }
+
+        BigDecimal diferencia = total.subtract(sumaPagos);
+
+        if (diferencia.compareTo(BigDecimal.ZERO) > 0) {
+            pagoValidacionLabel.setText("Faltan: $" + String.format("%.2f", diferencia));
+            pagoValidacionLabel.setStyle("-fx-text-fill: #dc2626;");
+        } else if (diferencia.compareTo(BigDecimal.ZERO) < 0) {
+            pagoValidacionLabel.setText("Sobran: $" + String.format("%.2f", diferencia.abs()));
+            pagoValidacionLabel.setStyle("-fx-text-fill: #f59e0b;");
+        } else {
+            pagoValidacionLabel.setText("OK");
+            pagoValidacionLabel.setStyle("-fx-text-fill: #22c55e;");
+        }
+    }
+
+    private BigDecimal parseMonto(String text) {
+        try {
+            String clean = text.replace("$", "").replace(",", "").trim();
+            if (clean.isEmpty()) return BigDecimal.ZERO;
+            return new BigDecimal(clean);
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
+        }
     }
 
     private void seleccionarProducto(ProductVariant producto) {
@@ -204,8 +343,8 @@ public class NewSaleController {
 
         // Verificar stock disponible considerando lo que ya está en el carrito
         int enCarrito = carrito.stream()
-            .filter(i -> i.variante.getId() == productoSeleccionado.getId())
-            .mapToInt(i -> i.cantidad)
+            .filter(i -> i.getVariant().getId() == productoSeleccionado.getId())
+            .mapToInt(i -> i.getQuantity())
             .sum();
 
         if (cantidad + enCarrito > productoSeleccionado.getStock()) {
@@ -218,12 +357,12 @@ public class NewSaleController {
 
         // Buscar si ya existe en el carrito
         CartItem existente = carrito.stream()
-            .filter(i -> i.variante.getId() == productoSeleccionado.getId())
+            .filter(i -> i.getVariant().getId() == productoSeleccionado.getId())
             .findFirst()
             .orElse(null);
 
         if (existente != null) {
-            existente.cantidad += cantidad;
+            existente.incrementQuantity(cantidad);
         } else {
             carrito.add(new CartItem(productoSeleccionado, cantidad));
         }
@@ -259,11 +398,14 @@ public class NewSaleController {
 
         // Actualizar totales
         BigDecimal subtotal = calcularTotal();
-        int totalItems = carrito.stream().mapToInt(i -> i.cantidad).sum();
+        int totalItems = carrito.stream().mapToInt(i -> i.getQuantity()).sum();
 
         subtotalLabel.setText("$" + String.format("%,.2f", subtotal));
         itemsCountLabel.setText(String.valueOf(totalItems));
         totalLabel.setText("$" + String.format("%,.2f", subtotal));
+
+        // Actualizar montos de pago (autocompleta si hay un solo método)
+        actualizarUIPagos();
 
         // Habilitar/deshabilitar botón confirmar
         confirmarBtn.setDisable(carrito.isEmpty());
@@ -276,12 +418,12 @@ public class NewSaleController {
         container.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;");
 
         VBox info = new VBox(2);
-        Label nombre = new Label(item.variante.getDisplayName());
+        Label nombre = new Label(item.getVariant().getDisplayName());
         nombre.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
         nombre.setWrapText(true);
         nombre.setMaxWidth(180);
 
-        Label precio = new Label("$" + String.format("%,.2f", item.variante.getSalePrice()) + " c/u");
+        Label precio = new Label("$" + String.format("%,.2f", item.getVariant().getSalePrice()) + " c/u");
         precio.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
 
         info.getChildren().addAll(nombre, precio);
@@ -291,21 +433,21 @@ public class NewSaleController {
         Button btnMenos = new Button("-");
         btnMenos.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 4; -fx-min-width: 28; -fx-min-height: 28;");
         btnMenos.setOnAction(e -> {
-            if (item.cantidad > 1) {
-                item.cantidad--;
+            if (item.getQuantity() > 1) {
+                item.decrementQuantity();
                 actualizarCarritoUI();
             }
         });
 
-        Label cantLabel = new Label(String.valueOf(item.cantidad));
+        Label cantLabel = new Label(String.valueOf(item.getQuantity()));
         cantLabel.setStyle("-fx-font-weight: bold; -fx-min-width: 30; -fx-alignment: center;");
         cantLabel.setAlignment(Pos.CENTER);
 
         Button btnMas = new Button("+");
         btnMas.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 4; -fx-min-width: 28; -fx-min-height: 28;");
         btnMas.setOnAction(e -> {
-            if (item.cantidad < item.variante.getStock()) {
-                item.cantidad++;
+            if (item.getQuantity() < item.getVariant().getStock()) {
+                item.incrementQuantity(1);
                 actualizarCarritoUI();
             }
         });
@@ -314,7 +456,7 @@ public class NewSaleController {
         qtyBox.setAlignment(Pos.CENTER);
 
         // Subtotal
-        BigDecimal subtotal = item.variante.getSalePrice().multiply(BigDecimal.valueOf(item.cantidad));
+        BigDecimal subtotal = item.getSubtotal();
         Label subtotalLbl = new Label("$" + String.format("%,.2f", subtotal));
         subtotalLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #0f172a; -fx-min-width: 70; -fx-alignment: center-right;");
 
@@ -332,7 +474,7 @@ public class NewSaleController {
 
     private BigDecimal calcularTotal() {
         return carrito.stream()
-            .map(i -> i.variante.getSalePrice().multiply(BigDecimal.valueOf(i.cantidad)))
+            .map(CartItem::getSubtotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -383,35 +525,69 @@ public class NewSaleController {
             return;
         }
 
-        // Determinar método de pago
-        SalePayment.PaymentMethod metodo = SalePayment.PaymentMethod.CASH;
-        if (btnTarjeta.isSelected()) {
-            metodo = SalePayment.PaymentMethod.DEBIT_CARD;
-        } else if (btnTransferencia.isSelected()) {
-            metodo = SalePayment.PaymentMethod.TRANSFER;
+        BigDecimal total = calcularTotal();
+        int metodosSeleccionados = contarMetodosSeleccionados();
+
+        // Validar que al menos un método de pago esté seleccionado
+        if (metodosSeleccionados == 0) {
+            showAlert("Error", "Seleccione al menos un método de pago", Alert.AlertType.WARNING);
+            return;
         }
 
-        BigDecimal total = calcularTotal();
+        // Crear pagos usando los montos ingresados
+        List<SalePayment> pagos = new ArrayList<>();
+        BigDecimal sumaPagos = BigDecimal.ZERO;
 
-        // Validar pago en efectivo
-        if (btnEfectivo.isSelected()) {
-            try {
-                String text = recibidoField.getText().replace("$", "").replace(",", "").trim();
-                if (!text.isEmpty()) {
-                    BigDecimal recibido = new BigDecimal(text);
-                    if (recibido.compareTo(total) < 0) {
-                        showAlert("Pago Insuficiente", "El monto recibido es menor al total", Alert.AlertType.WARNING);
-                        return;
-                    }
-                }
-            } catch (NumberFormatException ignored) {}
+        if (chkEfectivo.isSelected()) {
+            BigDecimal montoEf = parseMonto(montoEfectivo.getText());
+            if (montoEf.compareTo(BigDecimal.ZERO) > 0) {
+                sumaPagos = sumaPagos.add(montoEf);
+                pagos.add(new SalePayment.Builder()
+                    .paymentMethod(SalePayment.PaymentMethod.CASH)
+                    .amount(montoEf)
+                    .build());
+            }
+        }
+
+        if (chkTarjeta.isSelected()) {
+            BigDecimal montoTj = parseMonto(montoTarjeta.getText());
+            if (montoTj.compareTo(BigDecimal.ZERO) > 0) {
+                sumaPagos = sumaPagos.add(montoTj);
+                pagos.add(new SalePayment.Builder()
+                    .paymentMethod(SalePayment.PaymentMethod.DEBIT_CARD)
+                    .amount(montoTj)
+                    .build());
+            }
+        }
+
+        if (chkTransferencia.isSelected()) {
+            BigDecimal montoTr = parseMonto(montoTransferencia.getText());
+            if (montoTr.compareTo(BigDecimal.ZERO) > 0) {
+                sumaPagos = sumaPagos.add(montoTr);
+                pagos.add(new SalePayment.Builder()
+                    .paymentMethod(SalePayment.PaymentMethod.TRANSFER)
+                    .amount(montoTr)
+                    .build());
+            }
+        }
+
+        // Validar que la suma de pagos cubra el total
+        if (sumaPagos.compareTo(total) < 0) {
+            showAlert("Pago Insuficiente",
+                String.format("Faltan $%.2f para completar el pago", total.subtract(sumaPagos)),
+                Alert.AlertType.WARNING);
+            return;
         }
 
         // Confirmar
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmar Venta");
         confirm.setHeaderText("Total: $" + String.format("%,.2f", total));
-        confirm.setContentText("¿Confirmar la venta?");
+        String detallesPago = pagos.stream()
+            .map(p -> p.getPaymentMethod().getDisplayName() + ": $" + String.format("%.2f", p.getAmount()))
+            .reduce((a, b) -> a + " + " + b)
+            .orElse("");
+        confirm.setContentText("Pagos: " + detallesPago + "\n¿Confirmar la venta?");
 
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return;
@@ -422,44 +598,59 @@ public class NewSaleController {
             List<SaleItem> items = new ArrayList<>();
             for (CartItem item : carrito) {
                 items.add(new SaleItem.Builder()
-                    .variantId(item.variante.getId())
-                    .quantity(item.cantidad)
-                    .unitPrice(item.variante.getSalePrice())
-                    .subtotal(item.variante.getSalePrice().multiply(BigDecimal.valueOf(item.cantidad)))
-                    .productName(item.variante.getProductName())
-                    .variantName(item.variante.getVariantName())
+                    .variantId(item.getVariantId())
+                    .quantity(item.getQuantity())
+                    .unitPrice(item.getVariant().getSalePrice())
+                    .subtotal(item.getSubtotal())
+                    .productName(item.getVariant().getProductName())
+                    .variantName(item.getVariant().getVariantName())
                     .build());
             }
 
-            // Crear pago
-            SalePayment pago = new SalePayment.Builder()
-                .paymentMethod(metodo)
-                .amount(total)
-                .build();
-
-            // Crear venta
+            // Crear venta con múltiples pagos
             User user = SessionManager.getInstance().getCurrentUser();
-            Sale sale = new Sale.Builder()
+            Sale.Builder saleBuilder = new Sale.Builder()
                 .userId(user.getId())
                 .total(total)
                 .status("completed")
                 .notes(notasField.getText())
-                .items(items)
-                .addPayment(pago)
-                .build();
+                .createdAt(fechaVentaPersonalizada)
+                .items(items);
+
+            for (SalePayment pago : pagos) {
+                saleBuilder.addPayment(pago);
+            }
+
+            Sale sale = saleBuilder.build();
 
             // Guardar
             Sale createdSale = saleDAO.create(sale);
 
-            // Mostrar ticket
+            // Actualizar fecha si es personalizada
+            if (fechaVentaPersonalizada != null) {
+                saleDAO.updateDateTime(createdSale.getId(), fechaVentaPersonalizada);
+            }
+
+            // Mostrar ticket con la fecha personalizada
+            createdSale = new Sale.Builder()
+                .id(createdSale.getId())
+                .userId(createdSale.getUserId())
+                .total(createdSale.getTotal())
+                .status(createdSale.getStatus())
+                .notes(createdSale.getNotes())
+                .createdAt(fechaVentaPersonalizada)
+                .items(createdSale.getItems())
+                .build();
             mostrarTicket(createdSale);
 
             // Limpiar para nueva venta
             carrito.clear();
             actualizarCarritoUI();
-            recibidoField.clear();
-            notasField.clear();
-            cambioLabel.setText("$0.00");
+            limpiarFormularioPago();
+
+            // Resetear fecha a la hora actual
+            fechaVentaPersonalizada = ZonedDateTime.now(sanJuanZone).toLocalDateTime();
+            actualizarFechaLabel();
 
         } catch (Exception e) {
             showAlert("Error", "No se pudo crear la venta: " + e.getMessage(), Alert.AlertType.ERROR);
@@ -467,43 +658,22 @@ public class NewSaleController {
         }
     }
 
+    private void limpiarFormularioPago() {
+        chkEfectivo.setSelected(true);
+        chkTarjeta.setSelected(false);
+        chkTransferencia.setSelected(false);
+        montoEfectivo.clear();
+        montoTarjeta.clear();
+        montoTransferencia.clear();
+        recibidoField.clear();
+        notasField.clear();
+        cambioLabel.setText("$0.00");
+        pagoValidacionLabel.setText("");
+    }
+
     private void mostrarTicket(Sale sale) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("═══════════════════════════════\n");
-        sb.append("         FERRETERIA\n");
-        sb.append("═══════════════════════════════\n\n");
-        sb.append("Venta #").append(sale.getId()).append("\n");
-        sb.append("Fecha: ").append(sale.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
-        sb.append("Vendedor: ").append(SessionManager.getInstance().getCurrentUser().getFullName()).append("\n\n");
-
-        sb.append("───────────────────────────────\n");
-        sale.getItems().forEach(item -> {
-            sb.append(String.format("%s\n  %d x $%,.2f = $%,.2f\n",
-                item.getDisplayName(),
-                item.getQuantity(),
-                item.getUnitPrice(),
-                item.getSubtotal()));
-        });
-
-        sb.append("───────────────────────────────\n");
-        sb.append(String.format("TOTAL: $%,.2f\n", sale.getTotal()));
-        sb.append("───────────────────────────────\n\n");
-        sb.append("    ¡Gracias por su compra!\n");
-        sb.append("═══════════════════════════════\n");
-
-        Alert ticket = new Alert(Alert.AlertType.INFORMATION);
-        ticket.setTitle("Venta Completada");
-        ticket.setHeaderText("Venta #" + sale.getId() + " registrada exitosamente");
-
-        TextArea textArea = new TextArea(sb.toString());
-        textArea.setEditable(false);
-        textArea.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
-        textArea.setPrefRowCount(18);
-        textArea.setPrefColumnCount(35);
-
-        ticket.getDialogPane().setContent(textArea);
-        ticket.getDialogPane().setMinWidth(400);
-        ticket.showAndWait();
+        String vendorName = SessionManager.getInstance().getCurrentUser().getFullName();
+        TicketGenerator.showTicketDialog(sale, vendorName);
     }
 
     @FXML
@@ -529,16 +699,4 @@ public class NewSaleController {
         alert.showAndWait();
     }
 
-    /**
-     * Internal class for cart items.
-     */
-    private static class CartItem {
-        ProductVariant variante;
-        int cantidad;
-
-        CartItem(ProductVariant variante, int cantidad) {
-            this.variante = variante;
-            this.cantidad = cantidad;
-        }
-    }
 }

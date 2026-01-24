@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,10 +48,30 @@ public class ProductsController {
         if (navbarController != null) {
             navbarController.setActiveView("productos");
         }
+        setupDateLabel();
         setupTableColumns();
         setupSearchField();
         loadProducts();
         System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
+    }
+
+    private void setupDateLabel() {
+        if (dateLabel != null) {
+            try {
+                // Zona horaria de San Juan, Argentina
+                ZoneId sanJuanZone = ZoneId.of("America/Argentina/San_Juan");
+                ZonedDateTime sanJuanDateTime = ZonedDateTime.now(sanJuanZone);
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm");
+                String formattedDateTime = sanJuanDateTime.format(formatter);
+
+                dateLabel.setText("San Juan, Argentina | " + formattedDateTime);
+            } catch (Exception e) {
+                // Fallback a fecha local
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                dateLabel.setText(LocalDateTime.now().format(formatter));
+            }
+        }
     }
 
     private void setupTableColumns() {

@@ -34,8 +34,8 @@ public class SalePaymentDAO {
      */
     public SalePayment create(Connection conn, int saleId, SalePayment payment) throws SQLException {
         String sql = """
-            INSERT INTO sale_payments (sale_id, payment_method, amount, reference)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO sale_payments (sale_id, payment_method, amount, reference, created_at)
+            VALUES (?, ?, ?, ?, datetime('now', 'localtime'))
         """;
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pstmt.setInt(1, saleId);
@@ -198,6 +198,26 @@ public class SalePaymentDAO {
             throw new RuntimeException("Error counting payments by method", e);
         }
         return 0;
+    }
+
+    /**
+     * Updates a payment's method and amount.
+     *
+     * @param paymentId ID of the payment
+     * @param method new payment method
+     * @param amount new amount
+     */
+    public void update(int paymentId, PaymentMethod method, BigDecimal amount) {
+        String sql = "UPDATE sale_payments SET payment_method = ?, amount = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setString(1, method.getValue());
+            pstmt.setBigDecimal(2, amount);
+            pstmt.setInt(3, paymentId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating payment: " + e.getMessage(), e);
+        }
     }
 
     /**

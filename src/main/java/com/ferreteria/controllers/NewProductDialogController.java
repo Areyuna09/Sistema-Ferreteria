@@ -236,7 +236,7 @@ public class NewProductDialogController {
         // Insertar producto
         String productSql = """
             INSERT INTO products (code, name, description, category_id, location, active, created_at)
-            VALUES (?, ?, ?, ?, ?, 1, datetime('now'))
+            VALUES (?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
             """;
         
         try (PreparedStatement pstmt = conn.prepareStatement(productSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -256,20 +256,25 @@ public class NewProductDialogController {
                     int productId = generatedKeys.getInt(1);
                     
                     // Insertar variante del producto
+                    String code = codeField.getText().trim();
+                    String sku = code.isEmpty() ? "SKU-" + productId : code + "-STD";
+
                     String variantSql = """
-                        INSERT INTO product_variants (product_id, sale_price, cost_price, stock, min_stock, active, created_at)
-                        VALUES (?, ?, ?, ?, ?, 1, datetime('now'))
+                        INSERT INTO product_variants (product_id, sku, variant_name, sale_price, cost_price, stock, min_stock, active, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
                         """;
-                    
+
                     try (PreparedStatement variantStmt = conn.prepareStatement(variantSql)) {
                         variantStmt.setInt(1, productId);
-                        variantStmt.setBigDecimal(2, new BigDecimal(priceField.getText()));
-                        variantStmt.setBigDecimal(3, costField.getText().trim().isEmpty() ? 
+                        variantStmt.setString(2, sku);
+                        variantStmt.setString(3, "Estándar");
+                        variantStmt.setBigDecimal(4, new BigDecimal(priceField.getText()));
+                        variantStmt.setBigDecimal(5, costField.getText().trim().isEmpty() ?
                             BigDecimal.ZERO : new BigDecimal(costField.getText()));
-                        variantStmt.setInt(4, Integer.parseInt(stockField.getText()));
-                        variantStmt.setInt(5, minStockField.getText().trim().isEmpty() ? 
+                        variantStmt.setInt(6, Integer.parseInt(stockField.getText()));
+                        variantStmt.setInt(7, minStockField.getText().trim().isEmpty() ?
                             5 : Integer.parseInt(minStockField.getText()));
-                        
+
                         variantStmt.executeUpdate();
                     }
                 }
@@ -345,7 +350,7 @@ public class NewProductDialogController {
         }
         
         // Crear nueva categoría si no existe
-        String insertSql = "INSERT INTO categories (name, active, created_at) VALUES (?, 1, datetime('now'))";
+        String insertSql = "INSERT INTO categories (name, active, created_at) VALUES (?, 1, datetime('now', 'localtime'))";
         try (PreparedStatement pstmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, categoryName.trim());
             pstmt.executeUpdate();

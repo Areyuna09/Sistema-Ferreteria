@@ -110,6 +110,119 @@ public class SaleDAO {
     }
 
     /**
+     * Deletes a cancelled sale permanently.
+     * Only cancelled sales can be deleted.
+     *
+     * @param saleId ID of the sale to delete
+     * @throws RuntimeException if sale doesn't exist or is not cancelled
+     */
+    public void delete(int saleId) {
+        Connection conn = null;
+        try {
+            conn = config.getConnection();
+            conn.setAutoCommit(false);
+
+            // Verify it exists and is cancelled
+            Sale sale = findById(saleId)
+                .orElseThrow(() -> new RuntimeException("Sale not found: " + saleId));
+
+            if (!sale.isCancelled()) {
+                throw new RuntimeException("Only cancelled sales can be deleted");
+            }
+
+            // Delete in order: payments, items, then sale
+            PreparedStatement pstmt = conn.prepareStatement("DELETE FROM sale_payments WHERE sale_id = ?");
+            pstmt.setInt(1, saleId);
+            pstmt.executeUpdate();
+
+            pstmt = conn.prepareStatement("DELETE FROM sale_items WHERE sale_id = ?");
+            pstmt.setInt(1, saleId);
+            pstmt.executeUpdate();
+
+            pstmt = conn.prepareStatement("DELETE FROM sales WHERE id = ?");
+            pstmt.setInt(1, saleId);
+            pstmt.executeUpdate();
+
+            conn.commit();
+
+        } catch (SQLException e) {
+            rollback(conn);
+            throw new RuntimeException("Error deleting sale: " + e.getMessage(), e);
+        } finally {
+            setAutoCommitTrue(conn);
+        }
+    }
+
+    /**
+     * Updates a sale's date/time.
+     *
+     * @param saleId ID of the sale to update
+     * @param newDateTime new date/time for the sale
+     * @throws RuntimeException if sale doesn't exist
+     */
+    public void updateDateTime(int saleId, LocalDateTime newDateTime) {
+        String sql = "UPDATE sales SET created_at = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setString(1, newDateTime.toString().replace("T", " "));
+            pstmt.setInt(2, saleId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating sale date: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Updates a sale's notes.
+     *
+     * @param saleId ID of the sale to update
+     * @param notes new notes for the sale
+     */
+    public void updateNotes(int saleId, String notes) {
+        String sql = "UPDATE sales SET notes = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setString(1, notes);
+            pstmt.setInt(2, saleId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating sale notes: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Updates a sale's total.
+     *
+     * @param saleId ID of the sale to update
+     * @param newTotal new total amount
+     */
+    public void updateTotal(int saleId, BigDecimal newTotal) {
+        String sql = "UPDATE sales SET total = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setBigDecimal(1, newTotal);
+            pstmt.setInt(2, saleId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating sale total: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Gets the SaleItemDAO for direct item operations.
+     */
+    public SaleItemDAO getItemDAO() {
+        return itemDAO;
+    }
+
+    /**
+     * Gets the SalePaymentDAO for direct payment operations.
+     */
+    public SalePaymentDAO getPaymentDAO() {
+        return paymentDAO;
+    }
+
+    /**
      * Finds a sale by its ID with all its details.
      *
      * @param id ID of the sale
@@ -543,8 +656,8 @@ public class SaleDAO {
 
     private int insertSale(Connection conn, Sale sale) throws SQLException {
         String sql = """
-            INSERT INTO sales (user_id, total, status, notes)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO sales (user_id, total, status, notes, created_at)
+            VALUES (?, ?, ?, ?, datetime('now', 'localtime'))
         """;
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pstmt.setInt(1, sale.getUserId());
