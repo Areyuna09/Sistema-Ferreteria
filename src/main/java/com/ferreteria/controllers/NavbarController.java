@@ -94,7 +94,7 @@ public class NavbarController {
             return;
         }
         if (!"usuarios".equals(currentView)) {
-            // TODO: Main.navigateTo("/views/Users.fxml", "Sistema Ferreteria - Usuarios");
+            Main.navigateTo("/views/Users.fxml", "Sistema Ferreteria - Usuarios");
         }
     }
 

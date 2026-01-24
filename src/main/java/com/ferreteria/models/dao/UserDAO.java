@@ -139,6 +139,29 @@ public class UserDAO {
         }
     }
 
+    public void updatePassword(int userId, String newPasswordHash) {
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setString(1, newPasswordHash);
+            pstmt.setInt(2, userId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error actualizando contraseña", e);
+        }
+    }
+
+    public void deletePermanently(int id) {
+        String sql = "DELETE FROM users WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error eliminando usuario permanentemente", e);
+        }
+    }
+
     public boolean existsByUsername(String username) {
         return findByUsername(username).isPresent();
     }
