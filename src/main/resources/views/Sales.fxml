@@ -43,7 +43,7 @@
                     <Label text="Ventas del Mes" styleClass="card-label"/>
                 </VBox>
                 <VBox styleClass="stat-card card-purple" HBox.hgrow="ALWAYS">
-                    <Label text="🧾" styleClass="card-icon"/>
+                    <Label text="#" styleClass="card-icon"/>
                     <Label fx:id="cantidadHoyLabel" text="0" styleClass="card-value"/>
                     <Label text="Transacciones Hoy" styleClass="card-label"/>
                 </VBox>
