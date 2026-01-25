@@ -32,7 +32,6 @@ public class ProductsController {
 
     @FXML private TableView<Product> productsTable;
     @FXML private TextField searchField;
-    @FXML private TableColumn<Product, Integer> idColumn;
     @FXML private TableColumn<Product, String> codeColumn;
     @FXML private TableColumn<Product, String> nameColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
@@ -76,7 +75,6 @@ public class ProductsController {
     }
 
     private void setupTableColumns() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         codeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
@@ -124,33 +122,13 @@ public class ProductsController {
         List<Product> filteredProducts = new ArrayList<>();
         
         for (Product product : allProducts) {
-            String idStr = String.valueOf(product.getId());
-            String stockStr = String.valueOf(product.getStock());
-            String searchTextTrim = searchText.trim();
-            
-            // Detectar si es búsqueda numérica (solo números)
-            boolean isNumericSearch = searchTextTrim.matches("\\d+");
-            
-            if (isNumericSearch) {
-                // Búsqueda numérica: ID y Stock (exactos)
-                boolean idMatch = idStr.equals(searchTextTrim);
-                boolean stockMatch = stockStr.equals(searchTextTrim);
-                
-                if (idMatch || stockMatch) {
-                    filteredProducts.add(product);
-                }
-            } else {
-                // Búsqueda de texto: código, nombre, categoría, ubicación
-                boolean codeMatch = product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText);
-                boolean nameMatch = product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText);
-                boolean categoryMatch = product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText);
-                boolean locationMatch = product.getLocation() != null && product.getLocation().toLowerCase().contains(lowerSearchText);
-                
-                boolean matches = codeMatch || nameMatch || categoryMatch || locationMatch;
-                
-                if (matches) {
-                    filteredProducts.add(product);
-                }
+            boolean codeMatch = product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText);
+            boolean nameMatch = product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText);
+            boolean categoryMatch = product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText);
+            boolean locationMatch = product.getLocation() != null && product.getLocation().toLowerCase().contains(lowerSearchText);
+
+            if (codeMatch || nameMatch || categoryMatch || locationMatch) {
+                filteredProducts.add(product);
             }
         }
         

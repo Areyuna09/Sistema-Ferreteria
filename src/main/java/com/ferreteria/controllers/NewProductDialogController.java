@@ -167,6 +167,12 @@ public class NewProductDialogController {
     private boolean isInputValid() {
         String errorMessage = "";
 
+        // Validar código único
+        String code = codeField.getText().trim();
+        if (!code.isEmpty() && isCodeDuplicate(code)) {
+            errorMessage += "El código '" + code + "' ya existe en otro producto.\n";
+        }
+
         if (nameField.getText() == null || nameField.getText().trim().isEmpty()) {
             errorMessage += "El nombre del producto es requerido.\n";
         }
@@ -240,7 +246,12 @@ public class NewProductDialogController {
             """;
         
         try (PreparedStatement pstmt = conn.prepareStatement(productSql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, codeField.getText().trim());
+            String code = codeField.getText().trim();
+            if (code.isEmpty()) {
+                pstmt.setNull(1, java.sql.Types.VARCHAR);
+            } else {
+                pstmt.setString(1, code);
+            }
             pstmt.setString(2, nameField.getText().trim());
             pstmt.setString(3, descriptionArea.getText().trim());
             pstmt.setInt(4, categoryId);
@@ -254,25 +265,21 @@ public class NewProductDialogController {
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int productId = generatedKeys.getInt(1);
-                    
-                    // Insertar variante del producto
-                    String code = codeField.getText().trim();
-                    String sku = code.isEmpty() ? "SKU-" + productId : code + "-STD";
 
+                    // Insertar variante del producto
                     String variantSql = """
-                        INSERT INTO product_variants (product_id, sku, variant_name, sale_price, cost_price, stock, min_stock, active, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
+                        INSERT INTO product_variants (product_id, variant_name, sale_price, cost_price, stock, min_stock, active, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
                         """;
 
                     try (PreparedStatement variantStmt = conn.prepareStatement(variantSql)) {
                         variantStmt.setInt(1, productId);
-                        variantStmt.setString(2, sku);
-                        variantStmt.setString(3, "Estándar");
-                        variantStmt.setBigDecimal(4, new BigDecimal(priceField.getText()));
-                        variantStmt.setBigDecimal(5, costField.getText().trim().isEmpty() ?
+                        variantStmt.setString(2, "Estándar");
+                        variantStmt.setBigDecimal(3, new BigDecimal(priceField.getText()));
+                        variantStmt.setBigDecimal(4, costField.getText().trim().isEmpty() ?
                             BigDecimal.ZERO : new BigDecimal(costField.getText()));
-                        variantStmt.setInt(6, Integer.parseInt(stockField.getText()));
-                        variantStmt.setInt(7, minStockField.getText().trim().isEmpty() ?
+                        variantStmt.setInt(5, Integer.parseInt(stockField.getText()));
+                        variantStmt.setInt(6, minStockField.getText().trim().isEmpty() ?
                             5 : Integer.parseInt(minStockField.getText()));
 
                         variantStmt.executeUpdate();
@@ -296,15 +303,20 @@ public class NewProductDialogController {
             """;
         
         int categoryId = getOrCreateCategory(categoryComboBox.getValue());
-        
+        String code = codeField.getText().trim();
+
         try (PreparedStatement pstmt = conn.prepareStatement(productSql)) {
-            pstmt.setString(1, codeField.getText().trim());
+            if (code.isEmpty()) {
+                pstmt.setNull(1, java.sql.Types.VARCHAR);
+            } else {
+                pstmt.setString(1, code);
+            }
             pstmt.setString(2, nameField.getText().trim());
             pstmt.setString(3, descriptionArea.getText().trim());
             pstmt.setInt(4, categoryId);
             pstmt.setString(5, locationField.getText().trim());
             pstmt.setInt(6, editingProduct.getId());
-            
+
             pstmt.executeUpdate();
         }
         
@@ -363,6 +375,28 @@ public class NewProductDialogController {
         }
         
         return 1; // Categoría por defecto si todo falla
+    }
+
+    private boolean isCodeDuplicate(String code) {
+        try {
+            var conn = DatabaseConfig.getInstance().getConnection();
+            String sql = "SELECT id FROM products WHERE code = ? AND active = 1";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, code);
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    int existingId = rs.getInt("id");
+                    // Si estamos editando, permitir el mismo código del producto actual
+                    if (editingProduct != null && editingProduct.getId() == existingId) {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error verificando código duplicado: " + e.getMessage());
+        }
+        return false;
     }
 
     private void showAlert(String title, String message) {
