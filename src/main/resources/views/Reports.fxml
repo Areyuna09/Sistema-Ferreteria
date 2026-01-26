@@ -55,25 +55,76 @@
                     </VBox>
                 </HBox>
 
-                <!-- SECCIÓN DE ANULACIÓN DE VENTAS -->
-                <VBox spacing="16" styleClass="cancel-section">
-                    <Label text="Gestión de Ventas" styleClass="section-title"/>
+                <VBox spacing="16" styleClass="management-section">
+                    <Label text="Gestion de Ventas" styleClass="section-title"/>
                     
-                    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="cancel-panel">
-                        <VBox spacing="8" HBox.hgrow="ALWAYS">
-                            <Label text="ANULAR VENTA" styleClass="cancel-title"/>
-                            <Label text="Busque una venta por su ID para anularla y revertir el stock automáticamente" styleClass="cancel-description"/>
+                    <VBox spacing="12" styleClass="search-panel">
+                        <Label text="Buscar Ventas" styleClass="subsection-title"/>
+                        
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="ID de Venta" styleClass="input-label"/>
+                                <TextField fx:id="searchSaleIdField" promptText="Ej: 123" prefWidth="120" styleClass="search-field"/>
+                            </VBox>
+                            
+                            <VBox spacing="4">
+                                <Label text="Fecha" styleClass="input-label"/>
+                                <DatePicker fx:id="searchDatePicker" promptText="Seleccionar fecha" prefWidth="160" styleClass="search-field"/>
+                            </VBox>
+                            
+                            <VBox spacing="4">
+                                <Label text="Monto Aproximado" styleClass="input-label"/>
+                                <TextField fx:id="searchAmountField" promptText="Ej: 5000.00" prefWidth="140" styleClass="search-field"/>
+                            </VBox>
+                            
+                            <Region HBox.hgrow="SOMETIMES"/>
+                            
+                            <VBox spacing="4" alignment="BOTTOM_LEFT">
+                                <Label text=" "/>
+                                <HBox spacing="8">
+                                    <Button text="Buscar" onAction="#handleSearchSales" styleClass="search-button" prefWidth="120"/>
+                                    <Button text="Limpiar" onAction="#handleClearSearchFilters" styleClass="clear-button" prefWidth="100"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                        
+                        <Separator/>
+                        
+                        <VBox spacing="8">
+                            <Label text="Resultados de Busqueda" styleClass="results-label"/>
+                            
+                            <TableView fx:id="salesSearchTable" styleClass="sales-search-table" prefHeight="300">
+                                <columns>
+                                    <TableColumn text="ID" fx:id="searchIdColumn" prefWidth="80"/>
+                                    <TableColumn text="Fecha y Hora" fx:id="searchDateColumn" prefWidth="180"/>
+                                    <TableColumn text="Total" fx:id="searchTotalColumn" prefWidth="120"/>
+                                    <TableColumn text="Estado" fx:id="searchStatusColumn" prefWidth="120"/>
+                                    <TableColumn text="Vendedor" fx:id="searchSellerColumn" prefWidth="180"/>
+                                    <TableColumn text="Acciones" fx:id="searchActionsColumn" prefWidth="200"/>
+                                </columns>
+                                <placeholder>
+                                    <VBox alignment="CENTER" spacing="12" style="-fx-padding: 40;">
+                                        <Label text="No hay resultados" style="-fx-text-fill: #64748b;"/>
+                                        <Label text="Use los filtros arriba para buscar ventas" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
+                                    </VBox>
+                                </placeholder>
+                            </TableView>
                         </VBox>
                         
-                        <Separator orientation="VERTICAL"/>
-                        
-                        <VBox spacing="8" alignment="CENTER">
-                            <Label text="🔍" styleClass="cancel-icon"/>
-                            <Button text="Buscar y Anular Venta" onAction="#handleSearchSaleToCancel" styleClass="cancel-button" prefWidth="200"/>
-                            <Label text="⚠️ Acción irreversible" styleClass="cancel-warning"/>
+                        <VBox spacing="8" styleClass="warning-box">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="INFORMACION IMPORTANTE:" styleClass="warning-title"/>
+                            </HBox>
+                            <VBox spacing="4" style="-fx-padding: 0 0 0 10;">
+                                <Label text="ANULAR: Marca la venta como anulada y revierte el stock de los productos" styleClass="warning-text"/>
+                                <Label text="ELIMINAR: Borra PERMANENTEMENTE la venta del historial (irreversible)" styleClass="warning-text"/>
+                                <Label text="Se recomienda ANULAR antes de eliminar para mantener trazabilidad" styleClass="warning-text"/>
+                            </VBox>
                         </VBox>
-                    </HBox>
+                    </VBox>
                 </VBox>
+
+                <Separator/>
 
                 <HBox spacing="20" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
                     <VBox styleClass="stat-card card-blue">
@@ -128,9 +179,8 @@
                 </VBox>
 
                 <VBox alignment="CENTER" spacing="16" styleClass="empty-state" fx:id="emptyStateContainer" managed="true" visible="true">
-                    <Label text="📊" styleClass="empty-icon"/>
                     <Label text="Selecciona un mes y año para generar el reporte" styleClass="empty-text"/>
-                    <Label text="Los reportes muestran ventas, productos más vendidos y métodos de pago" styleClass="empty-subtext"/>
+                    <Label text="Los reportes muestran ventas, productos mas vendidos y metodos de pago" styleClass="empty-subtext"/>
                 </VBox>
 
             </VBox>
