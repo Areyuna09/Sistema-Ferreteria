@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ferreteria.controllers.SettingsController"
+            styleClass="settings-root">
+
+    <top>
+        <fx:include fx:id="navbar" source="components/Navbar.fxml"/>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox styleClass="main-content" spacing="32">
+                <padding>
+                    <Insets top="40" right="60" bottom="60" left="60"/>
+                </padding>
+
+                <!-- Encabezado -->
+                <VBox spacing="8">
+                    <Label text="⚙️ Configuración del Negocio" styleClass="page-title"/>
+                    <Label text="Configure los datos de su negocio para reportes y documentos" styleClass="page-subtitle"/>
+                    <Label fx:id="lastUpdatedLabel" text=" " styleClass="last-updated"/>
+                </VBox>
+
+                <!-- Formulario -->
+                <VBox spacing="24" styleClass="config-form">
+                    
+                    <!-- Nombre del Negocio (REQUERIDO) -->
+                    <VBox spacing="8">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="Nombre del Negocio" styleClass="field-label"/>
+                            <Label text="*" styleClass="required-indicator"/>
+                        </HBox>
+                        <TextField fx:id="businessNameField" 
+                                   promptText="Ej: Ferretería El Martillo"
+                                   styleClass="config-field"/>
+                        <Label text="Este nombre aparecerá en reportes y documentos" styleClass="field-hint"/>
+                    </VBox>
+
+                    <!-- CUIT (Opcional) -->
+                    <VBox spacing="8">
+                        <Label text="CUIT" styleClass="field-label"/>
+                        <TextField fx:id="cuitField" 
+                                   promptText="XX-XXXXXXXX-X"
+                                   styleClass="config-field"
+                                   maxWidth="300"/>
+                        <Label text="Formato: 20-12345678-9 (opcional)" styleClass="field-hint"/>
+                    </VBox>
+
+                    <!-- Dirección (Opcional) -->
+                    <VBox spacing="8">
+                        <Label text="Dirección" styleClass="field-label"/>
+                        <TextArea fx:id="addressArea" 
+                                  promptText="Calle, Número, Ciudad, Provincia"
+                                  styleClass="config-area"
+                                  prefRowCount="3"
+                                  wrapText="true"/>
+                        <Label text="Dirección completa del local (opcional)" styleClass="field-hint"/>
+                    </VBox>
+
+                    <!-- Teléfono (Opcional) -->
+                    <VBox spacing="8">
+                        <Label text="Teléfono" styleClass="field-label"/>
+                        <TextField fx:id="phoneField" 
+                                   promptText="Ej: (011) 4567-8900"
+                                   styleClass="config-field"
+                                   maxWidth="300"/>
+                        <Label text="Teléfono de contacto (opcional)" styleClass="field-hint"/>
+                    </VBox>
+
+                    <!-- Email (Opcional) -->
+                    <VBox spacing="8">
+                        <Label text="Email" styleClass="field-label"/>
+                        <TextField fx:id="emailField" 
+                                   promptText="contacto@negocio.com"
+                                   styleClass="config-field"
+                                   maxWidth="400"/>
+                        <Label text="Email de contacto del negocio (opcional)" styleClass="field-hint"/>
+                    </VBox>
+
+                    <!-- Separador -->
+                    <Separator/>
+
+                    <!-- Botones de Acción -->
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+                        <Button text="💾 Guardar Configuración" 
+                                onAction="#handleSave" 
+                                fx:id="saveButton"
+                                styleClass="save-button"
+                                prefWidth="220"/>
+                        
+                        <Button text="↻ Restablecer" 
+                                onAction="#handleReset" 
+                                styleClass="reset-button"
+                                prefWidth="150"/>
+                        
+                        <Region HBox.hgrow="ALWAYS"/>
+                        
+                        <VBox alignment="CENTER_RIGHT" spacing="4">
+                            <Label text="* Campos requeridos" styleClass="required-note"/>
+                            <Label text="Los demás campos son opcionales" styleClass="optional-note"/>
+                        </VBox>
+                    </HBox>
+
+                </VBox>
+
+                <!-- Información adicional -->
+                <VBox spacing="12" styleClass="info-panel">
+                    <Label text="ℹ️ Información" styleClass="info-title"/>
+                    <VBox spacing="6">
+                        <Label text="• Solo existe una configuración del negocio" styleClass="info-text"/>
+                        <Label text="• Los datos se utilizarán en reportes PDF y tickets" styleClass="info-text"/>
+                        <Label text="• El CUIT debe tener formato: XX-XXXXXXXX-X" styleClass="info-text"/>
+                        <Label text="• Todos los campos son opcionales excepto el nombre" styleClass="info-text"/>
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

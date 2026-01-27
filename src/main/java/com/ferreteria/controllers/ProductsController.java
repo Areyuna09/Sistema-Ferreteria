@@ -19,8 +19,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,6 @@ public class ProductsController {
     @FXML private TableColumn<Product, String> codeColumn;
     @FXML private TableColumn<Product, String> nameColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
-    @FXML private TableColumn<Product, String> locationColumn;
     @FXML private TableColumn<Product, BigDecimal> priceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
     @FXML private TableColumn<Product, Void> actionsColumn;
@@ -49,35 +46,10 @@ public class ProductsController {
         if (navbarController != null) {
             navbarController.setActiveView("productos");
         }
-        
-        // Configurar fecha y zona horaria de San Juan
-        setupDateTimeLabel();
-        
         setupTableColumns();
         setupSearchField();
         loadProducts();
         System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
-    }
-
-    private void setupDateTimeLabel() {
-        try {
-            // Zona horaria de San Juan, Argentina
-            ZoneId sanJuanZone = ZoneId.of("America/Argentina/San_Juan");
-            ZonedDateTime sanJuanDateTime = ZonedDateTime.now(sanJuanZone);
-            
-            // Formato para mostrar fecha y hora
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm");
-            String formattedDateTime = sanJuanDateTime.format(formatter);
-            
-            // Actualizar el label
-            dateLabel.setText("Zona Horaria: San Juan, Argentina\n" + formattedDateTime);
-            dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-alignment: center-right;");
-            
-        } catch (Exception e) {
-            System.err.println("Error configurando zona horaria: " + e.getMessage());
-            // Fallback a fecha local
-            dateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm")));
-        }
     }
 
     private void setupTableColumns() {
@@ -85,7 +57,6 @@ public class ProductsController {
         codeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         stockColumn.setCellValueFactory(new PropertyValueFactory<>("stock"));
 
@@ -129,33 +100,13 @@ public class ProductsController {
         List<Product> filteredProducts = new ArrayList<>();
         
         for (Product product : allProducts) {
-            String idStr = String.valueOf(product.getId());
-            String stockStr = String.valueOf(product.getStock());
-            String searchTextTrim = searchText.trim();
-            
-            // Detectar si es búsqueda numérica (solo números)
-            boolean isNumericSearch = searchTextTrim.matches("\\d+");
-            
-            if (isNumericSearch) {
-                // Búsqueda numérica: ID y Stock (exactos)
-                boolean idMatch = idStr.equals(searchTextTrim);
-                boolean stockMatch = stockStr.equals(searchTextTrim);
+            boolean matches = 
+                (product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText)) ||
+                (product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText)) ||
+                (product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText));
                 
-                if (idMatch || stockMatch) {
-                    filteredProducts.add(product);
-                }
-            } else {
-                // Búsqueda de texto: código, nombre, categoría, ubicación
-                boolean codeMatch = product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText);
-                boolean nameMatch = product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText);
-                boolean categoryMatch = product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText);
-                boolean locationMatch = product.getLocation() != null && product.getLocation().toLowerCase().contains(lowerSearchText);
-                
-                boolean matches = codeMatch || nameMatch || categoryMatch || locationMatch;
-                
-                if (matches) {
-                    filteredProducts.add(product);
-                }
+            if (matches) {
+                filteredProducts.add(product);
             }
         }
         

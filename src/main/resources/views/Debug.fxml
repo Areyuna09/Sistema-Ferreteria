@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ferreteria.controllers.DebugController"
+            style="-fx-background-color: #1e1e1e;">
+
+    <!-- Header -->
+    <top>
+        <HBox style="-fx-background-color: #323232; -fx-padding: 12 20;" alignment="CENTER_LEFT" spacing="16">
+            <Button text="X Cerrar" onAction="#handleCerrar"
+                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 4;"/>
+            <Label text="DEBUG PANEL" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #22c55e;"/>
+            <Label text="- Testing de Metodos (similar a Swagger)" style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Limpiar Consola" onAction="#handleLimpiarConsola"
+                    style="-fx-background-color: #444; -fx-text-fill: white; -fx-padding: 6 12; -fx-background-radius: 4;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox spacing="0">
+            <!-- Panel Izquierdo: Endpoints -->
+            <VBox prefWidth="320" style="-fx-background-color: #252526; -fx-border-color: #3c3c3c; -fx-border-width: 0 1 0 0;">
+                <padding>
+                    <Insets top="16" right="12" bottom="16" left="12"/>
+                </padding>
+
+                <!-- Selector de Módulo -->
+                <VBox spacing="8">
+                    <Label text="MODULO" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #0ea5e9;"/>
+                    <ComboBox fx:id="moduloCombo" maxWidth="Infinity" onAction="#handleModuloChange"
+                              style="-fx-background-color: #3c3c3c; -fx-font-size: 14px; -fx-font-weight: bold; -fx-border-color: #0ea5e9; -fx-border-radius: 4; -fx-background-radius: 4;"/>
+                </VBox>
+
+                <Separator style="-fx-background-color: #3c3c3c;"/>
+
+                <!-- Lista de Métodos -->
+                <VBox spacing="8" VBox.vgrow="ALWAYS">
+                    <Label text="METODOS DISPONIBLES" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #22c55e;"/>
+                    <ListView fx:id="metodosListView" VBox.vgrow="ALWAYS"
+                              style="-fx-background-color: #1a1a1a; -fx-border-color: #22c55e; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+                </VBox>
+
+                <Separator style="-fx-background-color: #3c3c3c;"/>
+
+                <!-- Parámetros -->
+                <VBox spacing="8" fx:id="parametrosBox">
+                    <Label text="PARAMETROS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+                    <VBox fx:id="parametrosContainer" spacing="6" style="-fx-background-color: #2a2a2a; -fx-background-radius: 6; -fx-padding: 10;">
+                        <Label text="Selecciona un metodo" style="-fx-text-fill: #888; -fx-font-size: 12px;"/>
+                    </VBox>
+                </VBox>
+
+                <Separator style="-fx-background-color: #3c3c3c;"/>
+
+                <!-- Botón Ejecutar -->
+                <Button fx:id="ejecutarBtn" text="EJECUTAR" onAction="#handleEjecutar" maxWidth="Infinity" prefHeight="40"
+                        style="-fx-background-color: #0ea5e9; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 4;"
+                        disable="true"/>
+            </VBox>
+
+            <!-- Panel Derecho: Consola de Resultados -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: #1e1e1e;">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+
+                <!-- Tabs: Resultados / SQL -->
+                <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS" style="-fx-background-color: #1e1e1e;">
+                    <!-- Tab Resultados -->
+                    <Tab text="Consola" closable="false">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="12"/>
+                            </padding>
+                            <TextArea fx:id="consolaOutput" VBox.vgrow="ALWAYS"
+                                      editable="false" wrapText="true"
+                                      style="-fx-control-inner-background: #0d0d0d; -fx-text-fill: #22c55e; -fx-font-family: 'Consolas', 'Monaco', monospace; -fx-font-size: 12px;"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- Tab SQL -->
+                    <Tab text="SQL Directo" closable="false">
+                        <VBox spacing="12">
+                            <padding>
+                                <Insets top="12"/>
+                            </padding>
+                            <Label text="Ejecutar query SQL directo (SELECT solamente por seguridad):"
+                                   style="-fx-text-fill: #f59e0b; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            <TextArea fx:id="sqlInput" prefHeight="100" wrapText="true" promptText="SELECT * FROM sales LIMIT 10;"
+                                      style="-fx-control-inner-background: #1a1a1a; -fx-text-fill: #22c55e; -fx-font-family: 'Consolas', monospace; -fx-font-size: 13px; -fx-border-color: #22c55e; -fx-border-radius: 6;"/>
+                            <HBox spacing="10">
+                                <Button text="Ejecutar SQL" onAction="#handleEjecutarSQL"
+                                        style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 4;"/>
+                                <Button text="Ver Tablas" onAction="#handleVerTablas"
+                                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-padding: 8 16; -fx-background-radius: 4;"/>
+                                <Button text="Ver Estructura" onAction="#handleVerEstructura"
+                                        style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-padding: 8 16; -fx-background-radius: 4;"/>
+                            </HBox>
+                            <TextArea fx:id="sqlOutput" VBox.vgrow="ALWAYS"
+                                      editable="false" wrapText="true"
+                                      style="-fx-control-inner-background: #0a0a0a; -fx-text-fill: #4ade80; -fx-font-family: 'Consolas', monospace; -fx-font-size: 13px; -fx-border-color: #333; -fx-border-radius: 6;"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- Tab Datos Rápidos -->
+                    <Tab text="Datos Rapidos" closable="false">
+                        <VBox spacing="12">
+                            <padding>
+                                <Insets top="12"/>
+                            </padding>
+                            <Label text="Acciones rapidas para testing:" style="-fx-text-fill: #0ea5e9; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            <HBox spacing="10">
+                                <Button text="Crear Productos Demo" onAction="#handleCrearProductosDemo"
+                                        style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 16; -fx-background-radius: 4;"/>
+                                <Button text="Crear Venta Test" onAction="#handleCrearVentaTest"
+                                        style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 16; -fx-background-radius: 4;"/>
+                                <Button text="Stats del Sistema" onAction="#handleVerStats"
+                                        style="-fx-background-color: #0ea5e9; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 16; -fx-background-radius: 4;"/>
+                            </HBox>
+                            <TextArea fx:id="datosOutput" VBox.vgrow="ALWAYS"
+                                      editable="false" wrapText="true"
+                                      style="-fx-control-inner-background: #0a0a0a; -fx-text-fill: #fbbf24; -fx-font-family: 'Consolas', monospace; -fx-font-size: 13px; -fx-border-color: #333; -fx-border-radius: 6;"/>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+            </VBox>
+        </HBox>
+    </center>
+
+</BorderPane>
