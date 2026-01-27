@@ -66,31 +66,35 @@
                <!-- Cards de Estadisticas -->
 <HBox spacing="24" alignment="CENTER">
     <!-- Card Productos -->
-    <VBox styleClass="stat-card card-blue">
-        <Label text="📦" styleClass="card-icon"/>
+    <VBox styleClass="stat-card card-blue" HBox.hgrow="ALWAYS">
+        <Label text="📦" styleClass="stat-icon"/>
         <Label fx:id="totalProductsLabel" text="0" styleClass="card-value"/>
         <Label text="Total Productos" styleClass="card-label"/>
+        <Label text="Activos en inventario" styleClass="card-description"/>
     </VBox>
 
     <!-- Card Stock Bajo -->
-    <VBox styleClass="stat-card card-orange">
-        <Label text="⚠" styleClass="card-icon"/>
+    <VBox styleClass="stat-card card-orange" HBox.hgrow="ALWAYS">
+        <Label text="⚠️" styleClass="stat-icon"/>
         <Label fx:id="lowStockLabel" text="0" styleClass="card-value"/>
         <Label text="Stock Bajo" styleClass="card-label"/>
+        <Label text="Requieren reorden" styleClass="card-description"/>
     </VBox>
 
     <!-- Card Ventas Hoy -->
-    <VBox styleClass="stat-card card-green">
-        <Label text="💵" styleClass="card-icon"/>
-        <Label fx:id="todaySalesLabel" text="0" styleClass="card-value"/>
-        <Label text="Ventas del Dia" styleClass="card-label"/>
+    <VBox styleClass="stat-card card-green" HBox.hgrow="ALWAYS">
+        <Label text="💰" styleClass="stat-icon"/>
+        <Label fx:id="todaySalesLabel" text="0.00" styleClass="card-value"/>
+        <Label text="Ventas Hoy" styleClass="card-label"/>
+        <Label text="Ventas realizadas" styleClass="card-description"/>
     </VBox>
 
     <!-- Card Usuarios -->
-    <VBox styleClass="stat-card card-purple">
-        <Label text="👥" styleClass="card-icon"/>
+    <VBox styleClass="stat-card card-purple" HBox.hgrow="ALWAYS">
+        <Label text="👥" styleClass="stat-icon"/>
         <Label fx:id="totalUsersLabel" text="0" styleClass="card-value"/>
         <Label text="Usuarios Activos" styleClass="card-label"/>
+        <Label text="Trabajando en el sistema" styleClass="card-description"/>
     </VBox>
 </HBox>
 
@@ -98,10 +102,10 @@
                 <VBox spacing="16">
                     <Label text="Acciones Rapidas" styleClass="section-title"/>
                     <HBox spacing="16">
-                        <Button text="+ Nueva Venta" styleClass="action-button success" onAction="#handleSales"/>
-<Button text="+ Nuevo Producto" styleClass="action-button accent" onAction="#handleProducts"/>
-                        <Button text="Ver Inventario" styleClass="action-button" onAction="#handleProducts"/>
-                        <Button text="Generar Reporte" styleClass="action-button" onAction="#handleReports"/>
+                        <Button text="💰 Nueva Venta" styleClass="action-button success" onAction="#handleSales"/>
+                        <Button text="📦 Nuevo Producto" styleClass="action-button accent" onAction="#handleProducts"/>
+                        <Button text="📋 Ver Inventario" styleClass="action-button" onAction="#handleProducts"/>
+                        <Button text="📊 Generar Reporte" styleClass="action-button" onAction="#handleReports"/>
                     </HBox>
                 </VBox>
 
