@@ -4,6 +4,7 @@ import com.ferreteria.Main;
 import com.ferreteria.models.Sale;
 import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.models.dao.SaleDAO;
+import com.ferreteria.utils.SaleEditDialog;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -148,12 +149,16 @@ public class SalesController {
         colAcciones.setCellFactory(column -> new TableCell<>() {
             private final Button btnVer = new Button("Ver");
             private final Button btnAnular = new Button("Anular");
-            private final HBox container = new HBox(8, btnVer, btnAnular);
+            private final Button btnEliminar = new Button("Eliminar");
+            private final HBox container = new HBox(6);
 
             {
                 container.setAlignment(Pos.CENTER);
                 btnVer.getStyleClass().addAll("action-button-small", "accent");
+                btnVer.setStyle("-fx-font-size: 10px; -fx-padding: 4 8;");
                 btnAnular.getStyleClass().addAll("action-button-small", "danger");
+                btnAnular.setStyle("-fx-font-size: 10px; -fx-padding: 4 8;");
+                btnEliminar.setStyle("-fx-background-color: #7f1d1d; -fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 4 8; -fx-background-radius: 4;");
 
                 btnVer.setOnAction(e -> {
                     Sale sale = getTableView().getItems().get(getIndex());
@@ -164,6 +169,11 @@ public class SalesController {
                     Sale sale = getTableView().getItems().get(getIndex());
                     handleCancelSale(sale);
                 });
+
+                btnEliminar.setOnAction(e -> {
+                    Sale sale = getTableView().getItems().get(getIndex());
+                    handleDeleteSale(sale);
+                });
             }
 
             @Override
@@ -173,7 +183,16 @@ public class SalesController {
                     setGraphic(null);
                 } else {
                     Sale sale = getTableView().getItems().get(getIndex());
-                    btnAnular.setDisable(sale.isCancelled());
+                    container.getChildren().clear();
+                    container.getChildren().add(btnVer);
+
+                    if (sale.isCancelled()) {
+                        // Venta anulada: mostrar solo Ver y Eliminar
+                        container.getChildren().add(btnEliminar);
+                    } else {
+                        // Venta activa: mostrar Ver y Anular
+                        container.getChildren().add(btnAnular);
+                    }
                     setGraphic(container);
                 }
             }
@@ -320,35 +339,13 @@ public class SalesController {
         }
 
         Sale s = saleCompleta.get();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Venta #").append(s.getId()).append("\n");
-        sb.append("Fecha: ").append(s.getCreatedAt().format(dateFormatter)).append("\n");
-        sb.append("Vendedor: ").append(s.getUserName()).append("\n");
-        sb.append("Estado: ").append(s.isCompleted() ? "Completada" : "Anulada").append("\n\n");
+        SaleEditDialog editDialog = new SaleEditDialog(s, saleDAO);
 
-        sb.append("--- ITEMS ---\n");
-        s.getItems().forEach(item -> {
-            sb.append(String.format("• %s x%d = $%,.2f\n",
-                item.getDisplayName(),
-                item.getQuantity(),
-                item.getSubtotal()));
-        });
-
-        sb.append("\n--- PAGOS ---\n");
-        s.getPayments().forEach(pago -> {
-            sb.append(String.format("• %s: $%,.2f\n",
-                pago.getPaymentMethodDisplayName(),
-                pago.getAmount()));
-        });
-
-        sb.append("\n").append("TOTAL: $").append(String.format("%,.2f", s.getTotal()));
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Detalle de Venta");
-        alert.setHeaderText("Venta #" + s.getId());
-        alert.setContentText(sb.toString());
-        alert.getDialogPane().setMinWidth(400);
-        alert.showAndWait();
+        if (editDialog.showAndWait()) {
+            showAlert("Éxito", "Venta actualizada correctamente", Alert.AlertType.INFORMATION);
+            loadStats();
+            loadSales();
+        }
     }
 
     private void handleCancelSale(Sale sale) {
@@ -371,6 +368,30 @@ public class SalesController {
                 loadSales();
             } catch (Exception e) {
                 showAlert("Error", "No se pudo anular la venta: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    private void handleDeleteSale(Sale sale) {
+        if (!sale.isCancelled()) {
+            showAlert("Aviso", "Solo se pueden eliminar ventas anuladas", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar Eliminación");
+        confirm.setHeaderText("¿Eliminar permanentemente la venta #" + sale.getId() + "?");
+        confirm.setContentText("Esta acción no se puede deshacer. ¿Continuar?");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                saleDAO.delete(sale.getId());
+                showAlert("Éxito", "Venta eliminada correctamente", Alert.AlertType.INFORMATION);
+                loadStats();
+                loadSales();
+            } catch (Exception e) {
+                showAlert("Error", "No se pudo eliminar la venta: " + e.getMessage(), Alert.AlertType.ERROR);
             }
         }
     }

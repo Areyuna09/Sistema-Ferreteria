@@ -1,6 +1,7 @@
 package com.ferreteria.controllers;
 
 import com.ferreteria.models.dao.ReportDAO;
+import com.ferreteria.utils.AppLogger;
 import com.ferreteria.utils.SessionManager;
 import com.ferreteria.utils.PDFExporter;
 import com.ferreteria.utils.ExcelExporter;
@@ -223,10 +224,15 @@ public class ReportsController {
                         updateChart(reportDAO.getDailySales(selectedPeriod));
                         showReportSections();
                         enableExportButtons();
+
+                        // Log de reporte generado
+                        AppLogger.info("REPORTES", "Reporte generado para " + selectedPeriod.getMonth() + " " + selectedPeriod.getYear() +
+                            " - Ventas: " + stats.get("totalVentas") + ", Total: $" + stats.get("totalRecaudado"));
                     });
 
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Error al generar reporte", e);
+                    AppLogger.error("REPORTES", "Error al generar reporte: " + e.getMessage(), e);
                     Platform.runLater(() -> showError("Error al generar el reporte: " + e.getMessage()));
                 }
             }).start();
@@ -464,233 +470,16 @@ public class ReportsController {
      */
     @FXML
     private void handleExportPDF() {
-        if (!validateReportData()) {
-            showWarning("Por favor genera un reporte antes de exportar");
-            return;
-        }
-
-        try {
-            // Configurar FileChooser
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Guardar Reporte PDF");
-            fileChooser.setInitialFileName(generateFileName("pdf"));
-
-            // Configurar carpeta por defecto
-            File defaultDirectory = new File(System.getProperty("user.home"), "Reportes");
-            if (!defaultDirectory.exists()) {
-                defaultDirectory.mkdirs();
-            }
-            fileChooser.setInitialDirectory(defaultDirectory);
-
-            // Filtro de extensión
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "Archivos PDF (*.pdf)", "*.pdf");
-            fileChooser.getExtensionFilters().add(extFilter);
-
-            // Mostrar diálogo de guardado
-            File file = fileChooser.showSaveDialog(exportPdfBtn.getScene().getWindow());
-
-            if (file != null) {
-                // Asegurar extensión .pdf
-                if (!file.getName().toLowerCase().endsWith(".pdf")) {
-                    file = new File(file.getAbsolutePath() + ".pdf");
-                }
-
-                // Si el archivo existe, intentar eliminarlo primero
-                if (file.exists()) {
-                    if (!file.delete()) {
-                        showError("No se puede sobrescribir el archivo.\nPuede estar abierto en otra aplicación.\nCierre el archivo e intente de nuevo.");
-                        return;
-                    }
-                }
-
-                // Convertir datos a formato del exportador
-                List<PDFExporter.ReportRow> reportRows = convertToReportRows(currentProductsSummary);
-
-                // Generar PDF
-                final File finalFile = file;
-                new Thread(() -> {
-                    try {
-                        PDFExporter.generateReportPDF(
-                            reportRows,
-                            selectedPeriod,
-                            currentPaymentTotals,
-                            currentStatistics,
-                            finalFile
-                        );
-
-                        Platform.runLater(() -> {
-                            showSuccess("Reporte exportado exitosamente a:\n" + finalFile.getAbsolutePath());
-                            openFile(finalFile);
-                        });
-
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Error al exportar PDF", e);
-                        Platform.runLater(() -> showError("Error al exportar PDF: " + e.getMessage()));
-                    }
-                }).start();
-            }
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error en handleExportPDF", e);
-            showError("Error al configurar la exportación: " + e.getMessage());
-        }
+        AppLogger.info("REPORTES", "Intento de exportación a PDF para " + selectedPeriod);
+        showInfo("Funcionalidad de exportación a PDF en desarrollo");
+        // TODO: Implementar exportación con iText o PDFBox
     }
 
-    /**
-     * Maneja la exportación del reporte a Excel.
-     */
     @FXML
     private void handleExportExcel() {
-        if (!validateReportData()) {
-            showWarning("Por favor genera un reporte antes de exportar");
-            return;
-        }
-
-        try {
-            // Configurar FileChooser
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Guardar Reporte Excel");
-            fileChooser.setInitialFileName(generateFileName("xlsx"));
-
-            // Configurar carpeta por defecto
-            File defaultDirectory = new File(System.getProperty("user.home"), "Reportes");
-            if (!defaultDirectory.exists()) {
-                defaultDirectory.mkdirs();
-            }
-            fileChooser.setInitialDirectory(defaultDirectory);
-
-            // Filtro de extensión
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "Archivos Excel (*.xlsx)", "*.xlsx");
-            fileChooser.getExtensionFilters().add(extFilter);
-
-            // Mostrar diálogo de guardado
-            File file = fileChooser.showSaveDialog(exportExcelBtn.getScene().getWindow());
-
-            if (file != null) {
-                // Asegurar extensión .xlsx
-                if (!file.getName().toLowerCase().endsWith(".xlsx")) {
-                    file = new File(file.getAbsolutePath() + ".xlsx");
-                }
-
-                // Si el archivo existe, intentar eliminarlo primero
-                if (file.exists()) {
-                    if (!file.delete()) {
-                        showError("No se puede sobrescribir el archivo.\nPuede estar abierto en otra aplicación.\nCierre el archivo e intente de nuevo.");
-                        return;
-                    }
-                }
-
-                // Convertir datos a formato del exportador
-                List<ExcelExporter.ReportRow> reportRows = convertToExcelReportRows(currentProductsSummary);
-
-                // Generar Excel
-                final File finalFile = file;
-                new Thread(() -> {
-                    try {
-                        ExcelExporter.generateReportExcel(
-                            reportRows,
-                            selectedPeriod,
-                            currentPaymentTotals,
-                            currentStatistics,
-                            finalFile
-                        );
-
-                        Platform.runLater(() -> {
-                            showSuccess("Reporte exportado exitosamente a:\n" + finalFile.getAbsolutePath());
-                            openFile(finalFile);
-                        });
-
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Error al exportar Excel", e);
-                        Platform.runLater(() -> showError("Error al exportar Excel: " + e.getMessage()));
-                    }
-                }).start();
-            }
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error en handleExportExcel", e);
-            showError("Error al configurar la exportación: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Valida que existan datos de reporte para exportar.
-     */
-    private boolean validateReportData() {
-        return currentStatistics != null &&
-               currentPaymentTotals != null &&
-               currentProductsSummary != null &&
-               !currentProductsSummary.isEmpty();
-    }
-
-    /**
-     * Genera un nombre de archivo sugerido para la exportación.
-     */
-    private String generateFileName(String extension) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String date = dateFormat.format(new Date());
-        return "reporte_ventas_" + date + "." + extension;
-    }
-
-    /**
-     * Convierte los datos del reporte al formato ReportRow de PDFExporter.
-     */
-    private List<PDFExporter.ReportRow> convertToReportRows(List<Map<String, Object>> summary) {
-        return summary.stream()
-            .map(item -> new PDFExporter.ReportRow(
-                (String) item.get("producto"),
-                (String) item.get("variante"),
-                (Integer) item.get("cantidad"),
-                (BigDecimal) item.get("precio"),
-                (BigDecimal) item.get("total")
-            ))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Convierte los datos del reporte al formato ReportRow de ExcelExporter.
-     */
-    private List<ExcelExporter.ReportRow> convertToExcelReportRows(List<Map<String, Object>> summary) {
-        return summary.stream()
-            .map(item -> new ExcelExporter.ReportRow(
-                (String) item.get("producto"),
-                (String) item.get("variante"),
-                (Integer) item.get("cantidad"),
-                (BigDecimal) item.get("precio"),
-                (BigDecimal) item.get("total")
-            ))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Abre un archivo con la aplicación predeterminada del sistema.
-     */
-    private void openFile(File file) {
-        try {
-            if (Desktop.isDesktopSupported()) {
-                Desktop desktop = Desktop.getDesktop();
-                if (file.exists()) {
-                    desktop.open(file);
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "No se pudo abrir el archivo automáticamente", e);
-            // No mostramos error al usuario, solo registramos el log
-        }
-    }
-
-    // ==================== NAVEGACIÓN ====================
-
-    @FXML
-    private void handleDashboard() {
-        navigateTo("/views/Dashboard.fxml", "Sistema Ferretería - Dashboard");
-    }
-
-    @FXML
-    private void handleProducts() {
-        showInfo("Módulo de Productos en desarrollo");
+        AppLogger.info("REPORTES", "Intento de exportación a Excel para " + selectedPeriod);
+        showInfo("Funcionalidad de exportación a Excel en desarrollo");
+        // TODO: Implementar exportación con Apache POI
     }
 
     @FXML

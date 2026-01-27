@@ -31,8 +31,8 @@ public class SaleItemDAO {
      */
     public SaleItem create(Connection conn, int saleId, SaleItem item) throws SQLException {
         String sql = """
-            INSERT INTO sale_items (sale_id, variant_id, quantity, unit_price, subtotal)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO sale_items (sale_id, variant_id, quantity, unit_price, subtotal, created_at)
+            VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
         """;
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pstmt.setInt(1, saleId);
@@ -184,6 +184,65 @@ public class SaleItemDAO {
             throw new RuntimeException("Error getting best sellers", e);
         }
         return products;
+    }
+
+    /**
+     * Updates quantity and subtotal of a sale item.
+     *
+     * @param itemId ID of the item to update
+     * @param newQuantity new quantity
+     * @param newSubtotal new subtotal
+     */
+    public void updateQuantity(int itemId, int newQuantity, BigDecimal newSubtotal) {
+        String sql = "UPDATE sale_items SET quantity = ?, subtotal = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setInt(1, newQuantity);
+            pstmt.setBigDecimal(2, newSubtotal);
+            pstmt.setInt(3, itemId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating sale item: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Updates the product variant of a sale item (change the product).
+     *
+     * @param itemId ID of the item to update
+     * @param newVariantId new variant ID
+     * @param newUnitPrice new unit price
+     * @param quantity current quantity
+     */
+    public void updateVariant(int itemId, int newVariantId, BigDecimal newUnitPrice, int quantity) {
+        BigDecimal newSubtotal = newUnitPrice.multiply(BigDecimal.valueOf(quantity));
+        String sql = "UPDATE sale_items SET variant_id = ?, unit_price = ?, subtotal = ? WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setInt(1, newVariantId);
+            pstmt.setBigDecimal(2, newUnitPrice);
+            pstmt.setBigDecimal(3, newSubtotal);
+            pstmt.setInt(4, itemId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating sale item variant: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Deletes a sale item.
+     *
+     * @param itemId ID of the item to delete
+     */
+    public void delete(int itemId) {
+        String sql = "DELETE FROM sale_items WHERE id = ?";
+        try {
+            PreparedStatement pstmt = config.getConnection().prepareStatement(sql);
+            pstmt.setInt(1, itemId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting sale item: " + e.getMessage(), e);
+        }
     }
 
     private SaleItem mapResultSet(ResultSet rs) throws SQLException {

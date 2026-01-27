@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +32,10 @@ public class ProductsController {
 
     @FXML private TableView<Product> productsTable;
     @FXML private TextField searchField;
-    @FXML private TableColumn<Product, Integer> idColumn;
     @FXML private TableColumn<Product, String> codeColumn;
     @FXML private TableColumn<Product, String> nameColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
+    @FXML private TableColumn<Product, String> locationColumn;
     @FXML private TableColumn<Product, BigDecimal> priceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
     @FXML private TableColumn<Product, Void> actionsColumn;
@@ -46,17 +48,37 @@ public class ProductsController {
         if (navbarController != null) {
             navbarController.setActiveView("productos");
         }
+        setupDateLabel();
         setupTableColumns();
         setupSearchField();
         loadProducts();
         System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
     }
 
+    private void setupDateLabel() {
+        if (dateLabel != null) {
+            try {
+                // Zona horaria de San Juan, Argentina
+                ZoneId sanJuanZone = ZoneId.of("America/Argentina/San_Juan");
+                ZonedDateTime sanJuanDateTime = ZonedDateTime.now(sanJuanZone);
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE dd/MM/yyyy - HH:mm");
+                String formattedDateTime = sanJuanDateTime.format(formatter);
+
+                dateLabel.setText("San Juan, Argentina | " + formattedDateTime);
+            } catch (Exception e) {
+                // Fallback a fecha local
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                dateLabel.setText(LocalDateTime.now().format(formatter));
+            }
+        }
+    }
+
     private void setupTableColumns() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         codeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         stockColumn.setCellValueFactory(new PropertyValueFactory<>("stock"));
 
@@ -100,12 +122,12 @@ public class ProductsController {
         List<Product> filteredProducts = new ArrayList<>();
         
         for (Product product : allProducts) {
-            boolean matches = 
-                (product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText)) ||
-                (product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText)) ||
-                (product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText));
-                
-            if (matches) {
+            boolean codeMatch = product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText);
+            boolean nameMatch = product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText);
+            boolean categoryMatch = product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText);
+            boolean locationMatch = product.getLocation() != null && product.getLocation().toLowerCase().contains(lowerSearchText);
+
+            if (codeMatch || nameMatch || categoryMatch || locationMatch) {
                 filteredProducts.add(product);
             }
         }

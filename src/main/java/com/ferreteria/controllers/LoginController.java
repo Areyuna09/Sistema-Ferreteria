@@ -4,6 +4,7 @@ import com.ferreteria.Main;
 import com.ferreteria.models.User;
 import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.models.dao.UserDAO;
+import com.ferreteria.utils.AppLogger;
 import com.ferreteria.utils.AuthenticationException;
 import com.ferreteria.utils.SessionManager;
 
@@ -30,6 +31,8 @@ public class LoginController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField passwordVisible;
+    @FXML private CheckBox showPasswordCheck;
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
     @FXML private ImageView backgroundImage;
@@ -46,9 +49,26 @@ public class LoginController {
     public void initialize() {
         errorLabel.setVisible(false);
         passwordField.setOnAction(e -> handleLogin());
+        passwordVisible.setOnAction(e -> handleLogin());
 
+        setupShowPassword();
         setupBackground();
         playEntryAnimations();
+    }
+
+    private void setupShowPassword() {
+        passwordVisible.textProperty().bindBidirectional(passwordField.textProperty());
+        showPasswordCheck.selectedProperty().addListener((obs, oldVal, show) -> {
+            passwordField.setVisible(!show);
+            passwordVisible.setVisible(show);
+            if (show) {
+                passwordVisible.requestFocus();
+                passwordVisible.positionCaret(passwordVisible.getText().length());
+            } else {
+                passwordField.requestFocus();
+                passwordField.positionCaret(passwordField.getText().length());
+            }
+        });
     }
 
     private void setupBackground() {
@@ -119,12 +139,14 @@ public class LoginController {
             loginButton.setDisable(true);
             User user = authenticate(username, password);
             SessionManager.getInstance().setCurrentUser(user);
+            AppLogger.logLogin(username);
             navigateToDashboard();
         } catch (AuthenticationException e) {
+            AppLogger.logLoginFailed(username, e.getMessage());
             showError(e.getMessage());
         } catch (Exception e) {
+            AppLogger.error("Error de conexión en login", e);
             showError("Error de conexión");
-            e.printStackTrace();
         } finally {
             loginButton.setDisable(false);
         }
