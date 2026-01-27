@@ -1,6 +1,8 @@
 package com.ferreteria.models.dao;
 
 import com.ferreteria.models.Sale;
+import com.ferreteria.models.SaleItem;
+import com.ferreteria.models.SalePayment;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -13,7 +15,7 @@ import java.util.logging.Logger;
 /**
  * DAO para consultas de reportes y estadísticas de ventas.
  * Proporciona métodos para obtener datos agregados por período.
- *
+ * 
  * @author Sistema Ferretería
  * @version 1.0
  */
@@ -27,7 +29,7 @@ public class ReportDAO {
 
     /**
      * Obtiene todas las ventas de un mes específico
-     *
+     * 
      * @param yearMonth Mes y año a consultar (formato: YYYY-MM)
      * @return Lista de ventas del mes
      */
@@ -42,9 +44,9 @@ public class ReportDAO {
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-
+            
             stmt.setString(1, yearMonth.toString());
-
+            
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Sale sale = new Sale.Builder()
@@ -54,29 +56,20 @@ public class ReportDAO {
                         .total(rs.getBigDecimal("total"))
                         .status(rs.getString("status"))
                         .notes(rs.getString("notes"))
-                        .createdAt(parseDateTime(rs.getString("created_at")))
+                        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
                         .build();
-
+                    
                     sales.add(sale);
                 }
             }
-
+            
             LOGGER.info("Ventas encontradas para " + yearMonth + ": " + sales.size());
-
+            
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error al obtener ventas por mes", e);
         }
 
         return sales;
-    }
-
-    private LocalDateTime parseDateTime(String dateStr) {
-        if (dateStr == null) return LocalDateTime.now();
-        try {
-            return LocalDateTime.parse(dateStr.replace(" ", "T"));
-        } catch (Exception e) {
-            return LocalDateTime.now();
-        }
     }
 
     /**

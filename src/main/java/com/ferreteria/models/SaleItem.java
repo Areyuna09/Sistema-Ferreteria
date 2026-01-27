@@ -4,146 +4,111 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Model representing an item/detail of a sale.
- * Maps to the 'sale_items' table in the database.
+ * Representa un item/producto dentro de una venta.
+ * Cada item tiene informacion del producto, cantidad y precios.
+ * 
+ * @author Sistema Ferreteria
+ * @version 1.0
  */
 public class SaleItem {
+    private Integer id;
+    private Integer saleId;
+    private Integer variantId;
+    private String productName;
+    private String variantName;
+    private Integer quantity;
+    private BigDecimal unitPrice;
+    private BigDecimal subtotal;
+    private LocalDateTime createdAt;
 
-    private final int id;
-    private final int saleId;
-    private final int variantId;
-    private final int quantity;
-    private final BigDecimal unitPrice;
-    private final BigDecimal subtotal;
-    private final LocalDateTime createdAt;
-
-    // Additional fields to display product info (not persisted)
-    private final String productName;
-    private final String variantName;
-
-    private SaleItem(Builder builder) {
-        this.id = builder.id;
-        this.saleId = builder.saleId;
-        this.variantId = builder.variantId;
-        this.quantity = builder.quantity;
-        this.unitPrice = builder.unitPrice;
-        this.subtotal = builder.subtotal;
-        this.createdAt = builder.createdAt;
-        this.productName = builder.productName;
-        this.variantName = builder.variantName;
+    public SaleItem() {
+        this.quantity = 1;
+        this.unitPrice = BigDecimal.ZERO;
+        this.subtotal = BigDecimal.ZERO;
     }
 
-    // Getters
-    public int getId() { return id; }
-    public int getSaleId() { return saleId; }
-    public int getVariantId() { return variantId; }
-    public int getQuantity() { return quantity; }
-    public BigDecimal getUnitPrice() { return unitPrice; }
-    public BigDecimal getSubtotal() { return subtotal; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public String getProductName() { return productName; }
-    public String getVariantName() { return variantName; }
-
-    /**
-     * Gets the complete item description for display.
-     * @return product name with its variant
-     */
-    public String getDisplayName() {
-        if (variantName != null && !variantName.isBlank()) {
-            return productName + " - " + variantName;
-        }
-        return productName != null ? productName : "Product #" + variantId;
+    public Integer getId() {
+        return id;
     }
 
-    /**
-     * Calculates subtotal based on quantity and unit price.
-     * @return quantity * unitPrice
-     */
-    public BigDecimal calculateSubtotal() {
-        return unitPrice.multiply(BigDecimal.valueOf(quantity));
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    // Builder Pattern
-    public static class Builder {
-        private int id;
-        private int saleId;
-        private int variantId;
-        private int quantity = 1;
-        private BigDecimal unitPrice = BigDecimal.ZERO;
-        private BigDecimal subtotal = BigDecimal.ZERO;
-        private LocalDateTime createdAt = LocalDateTime.now();
-        private String productName;
-        private String variantName;
+    public Integer getSaleId() {
+        return saleId;
+    }
 
-        public Builder id(int id) {
-            this.id = id;
-            return this;
-        }
+    public void setSaleId(Integer saleId) {
+        this.saleId = saleId;
+    }
 
-        public Builder saleId(int saleId) {
-            this.saleId = saleId;
-            return this;
-        }
+    public Integer getVariantId() {
+        return variantId;
+    }
 
-        public Builder variantId(int variantId) {
-            this.variantId = variantId;
-            return this;
-        }
+    public void setVariantId(Integer variantId) {
+        this.variantId = variantId;
+    }
 
-        public Builder quantity(int quantity) {
-            this.quantity = quantity;
-            return this;
-        }
+    public String getProductName() {
+        return productName;
+    }
 
-        public Builder unitPrice(BigDecimal unitPrice) {
-            this.unitPrice = unitPrice;
-            return this;
-        }
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
-        public Builder subtotal(BigDecimal subtotal) {
-            this.subtotal = subtotal;
-            return this;
-        }
+    public String getVariantName() {
+        return variantName;
+    }
 
-        public Builder createdAt(LocalDateTime createdAt) {
-            this.createdAt = createdAt;
-            return this;
-        }
+    public void setVariantName(String variantName) {
+        this.variantName = variantName;
+    }
 
-        public Builder productName(String productName) {
-            this.productName = productName;
-            return this;
-        }
+    public Integer getQuantity() {
+        return quantity;
+    }
 
-        public Builder variantName(String variantName) {
-            this.variantName = variantName;
-            return this;
-        }
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+        calculateSubtotal();
+    }
 
-        /**
-         * Automatically calculates subtotal before building.
-         * @return this builder with calculated subtotal
-         */
-        public Builder calculateSubtotal() {
-            this.subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
-            return this;
-        }
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
 
-        public SaleItem build() {
-            validate();
-            return new SaleItem(this);
-        }
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+        calculateSubtotal();
+    }
 
-        private void validate() {
-            if (variantId <= 0) {
-                throw new IllegalArgumentException("Product variant is required");
-            }
-            if (quantity <= 0) {
-                throw new IllegalArgumentException("Quantity must be greater than 0");
-            }
-            if (unitPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException("Unit price cannot be negative");
-            }
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    private void calculateSubtotal() {
+        if (quantity != null && unitPrice != null) {
+            this.subtotal = unitPrice.multiply(new BigDecimal(quantity));
         }
+    }
+
+    @Override
+    public String toString() {
+        return productName + " - " + variantName + " x" + quantity;
     }
 }

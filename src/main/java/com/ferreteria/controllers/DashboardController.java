@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * Controlador del Dashboard principal.
@@ -32,8 +33,14 @@ public class DashboardController {
         loadStats();
     }
 
-    private void loadDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM yyyy");
+    private void loadUserInfo() {
+        User user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            welcomeLabel.setText("Bienvenido, " + user.getFullName());
+            roleLabel.setText("Rol: " + user.getRole().getValue());
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM yyyy", new Locale("es", "ES"));
         dateLabel.setText(LocalDateTime.now().format(formatter));
     }
 
@@ -87,16 +94,74 @@ public class DashboardController {
     }
 
     @FXML
-    public void handleInventory() {
-        Main.navigateTo("/views/Products.fxml", "Sistema Ferreteria - Productos");
+    public void handleCategories() {
+        navigateTo("/views/Categories.fxml", "Sistema Ferretería - Categorías");
     }
 
     @FXML
-    public void handleGenerateReport() {
-        Main.navigateTo("/views/Reports.fxml", "Sistema Ferreteria - Reportes");
+    public void handleSales() {
+        System.out.println("Navegando a Ventas...");
+        // TODO: Implementar vista de ventas
     }
 
-    private void navigateToProducts() {
+    @FXML
+    public void handleReports() {
+        System.out.println("Navegando a Reportes...");
+        navigateTo("/views/Reports.fxml", "Sistema Ferretería - Reportes");
+    }
+
+    @FXML
+    public void handleUsers() {
+        if (!SessionManager.getInstance().isAdmin()) {
+            System.out.println("Acceso denegado: solo administradores");
+            return;
+        }
+        System.out.println("Navegando a Usuarios...");
+        // TODO: Implementar vista de usuarios
+    }
+
+    /**
+     * Navega a una vista específica
+     *
+     * @param fxmlPath Ruta del archivo FXML
+     * @param title Título de la ventana
+     */
+    private void navigateTo(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+
+            // Guardar estado actual de la ventana
+            boolean wasMaximized = stage.isMaximized();
+            double currentWidth = stage.getWidth();
+            double currentHeight = stage.getHeight();
+
+            Scene scene = new Scene(root, currentWidth, currentHeight);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+
+            // Agregar CSS adicional para reportes si es necesario
+            if (fxmlPath.contains("Reports")) {
+                scene.getStylesheets().add(getClass().getResource("/styles/reports.css").toExternalForm());
+            }
+
+            stage.setTitle(title);
+            stage.setResizable(true);
+            stage.setScene(scene);
+
+            // Restaurar estado maximizado si estaba maximizado
+            if (wasMaximized) {
+                stage.setMaximized(true);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al navegar a " + fxmlPath + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateToLogin() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/views/Products.fxml"));
             Scene scene = new Scene(root, 1200, 800);

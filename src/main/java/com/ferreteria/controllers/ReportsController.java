@@ -1,37 +1,42 @@
 package com.ferreteria.controllers;
 
-import com.ferreteria.models.Sale;
-import com.ferreteria.models.SaleItem;
-import com.ferreteria.models.dao.DatabaseConfig;
 import com.ferreteria.models.dao.ReportDAO;
-import com.ferreteria.models.dao.SaleDAO;
-
+import com.ferreteria.utils.SessionManager;
+import com.ferreteria.utils.PDFExporter;
+import com.ferreteria.utils.ExcelExporter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.geometry.Pos;
+import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.*;
 import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;
 import java.time.Month;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Controlador para la pantalla de reportes de ventas.
@@ -46,6 +51,11 @@ public class ReportsController {
     private final NumberFormat currencyFormat;
     private YearMonth selectedPeriod;
 
+    // Datos del reporte actual (para exportación)
+    private Map<String, Object> currentStatistics;
+    private Map<String, BigDecimal> currentPaymentTotals;
+    private List<Map<String, Object>> currentProductsSummary;
+
     // FXML - Filtros
     @FXML private ComboBox<String> monthCombo;
     @FXML private ComboBox<Integer> yearCombo;
@@ -55,7 +65,8 @@ public class ReportsController {
     @FXML private Button exportExcelBtn;
 
     // FXML - Navbar
-    @FXML private NavbarController navbarController;
+    @FXML private Label welcomeLabel;
+    @FXML private Label roleLabel;
 
     // FXML - Estadísticas
     @FXML private HBox statsContainer;
@@ -84,18 +95,6 @@ public class ReportsController {
     // FXML - Estado vacío
     @FXML private VBox emptyStateContainer;
 
-    // FXML - Gestión de Ventas (Anulación)
-    @FXML private TextField searchSaleIdField;
-    @FXML private DatePicker searchDatePicker;
-    @FXML private TextField searchAmountField;
-    @FXML private TableView<SaleSearchRow> salesSearchTable;
-    @FXML private TableColumn<SaleSearchRow, String> searchIdColumn;
-    @FXML private TableColumn<SaleSearchRow, String> searchDateColumn;
-    @FXML private TableColumn<SaleSearchRow, String> searchTotalColumn;
-    @FXML private TableColumn<SaleSearchRow, String> searchStatusColumn;
-    @FXML private TableColumn<SaleSearchRow, String> searchSellerColumn;
-    @FXML private TableColumn<SaleSearchRow, Void> searchActionsColumn;
-
     public ReportsController() {
         this.reportDAO = new ReportDAO();
         this.currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "AR"));
@@ -106,13 +105,21 @@ public class ReportsController {
      */
     @FXML
     private void initialize() {
-        if (navbarController != null) {
-            navbarController.setActiveView("reportes");
-        }
+        setupUserInfo();
         setupFilters();
         setupProductsTable();
-        setupSalesSearchTable();
         LOGGER.info("ReportsController inicializado correctamente");
+    }
+
+    /**
+     * Configura la información del usuario en la navbar
+     */
+    private void setupUserInfo() {
+        var currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            welcomeLabel.setText(currentUser.getFullName());
+            roleLabel.setText(currentUser.getRole().getValue());
+        }
     }
 
     /**
@@ -177,71 +184,6 @@ public class ReportsController {
     }
 
     /**
-     * Configura la tabla de búsqueda de ventas para anular/eliminar
-     */
-    private void setupSalesSearchTable() {
-        searchIdColumn.setCellValueFactory(new PropertyValueFactory<>("saleId"));
-        searchDateColumn.setCellValueFactory(new PropertyValueFactory<>("dateFormatted"));
-        searchTotalColumn.setCellValueFactory(new PropertyValueFactory<>("totalFormatted"));
-        searchStatusColumn.setCellValueFactory(new PropertyValueFactory<>("statusFormatted"));
-        searchSellerColumn.setCellValueFactory(new PropertyValueFactory<>("sellerName"));
-
-        // Estilo condicional para estado
-        searchStatusColumn.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    if ("Anulada".equals(item)) {
-                        setStyle("-fx-text-fill: #dc2626; -fx-font-weight: bold;");
-                    } else {
-                        setStyle("-fx-text-fill: #15803d; -fx-font-weight: bold;");
-                    }
-                }
-            }
-        });
-
-        // Columna de acciones
-        searchActionsColumn.setCellFactory(column -> new TableCell<>() {
-            private final Button btnAnular = new Button("Anular");
-            private final Button btnEliminar = new Button("Eliminar");
-            private final HBox container = new HBox(8, btnAnular, btnEliminar);
-
-            {
-                container.setAlignment(javafx.geometry.Pos.CENTER);
-                btnAnular.getStyleClass().addAll("action-button-small", "warning");
-                btnEliminar.getStyleClass().addAll("action-button-small", "danger");
-
-                btnAnular.setOnAction(e -> {
-                    SaleSearchRow row = getTableView().getItems().get(getIndex());
-                    handleCancelSaleFromSearch(row);
-                });
-
-                btnEliminar.setOnAction(e -> {
-                    SaleSearchRow row = getTableView().getItems().get(getIndex());
-                    handleDeleteSalePermanently(row);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    SaleSearchRow row = getTableView().getItems().get(getIndex());
-                    btnAnular.setDisable(row.isCancelled());
-                    setGraphic(container);
-                }
-            }
-        });
-    }
-
-    /**
      * Maneja la generación del reporte
      */
     @FXML
@@ -270,6 +212,11 @@ public class ReportsController {
 
                     // Actualizar UI en JavaFX thread
                     Platform.runLater(() -> {
+                        // Guardar datos para exportación
+                        currentStatistics = stats;
+                        currentPaymentTotals = paymentTotals;
+                        currentProductsSummary = productsSummary;
+
                         updateStatistics(stats);
                         updatePaymentMethods(paymentTotals);
                         updateProductsTable(productsSummary);
@@ -391,7 +338,7 @@ public class ReportsController {
             emptyChart.setAlignment(javafx.geometry.Pos.CENTER);
             emptyChart.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-padding: 60;");
             
-            Label icon = new Label("📊");
+            Label icon = new Label("Sin Datos");
             icon.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;");
             
             Label message = new Label("No hay ventas registradas en este mes");
@@ -409,7 +356,7 @@ public class ReportsController {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         
-        xAxis.setLabel("Día del Mes");
+        xAxis.setLabel("Dia del Mes");
         yAxis.setLabel("Monto (ARS)");
         
         BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
@@ -426,6 +373,7 @@ public class ReportsController {
             String day = String.valueOf(entry.getKey());
             double amount = entry.getValue().doubleValue();
             series.getData().add(new XYChart.Data<>(day, amount));
+            LOGGER.info("Dia " + day + ": $" + amount);
         }
         
         barChart.getData().add(series);
@@ -459,6 +407,7 @@ public class ReportsController {
      * Muestra estado de carga mientras se generan reportes
      */
     private void showLoadingState() {
+        // Aquí podrías mostrar un spinner o mensaje de "Cargando..."
         LOGGER.info("Cargando datos del reporte...");
     }
 
@@ -475,12 +424,18 @@ public class ReportsController {
      */
     private String getPaymentIcon(String method) {
         String methodLower = method.toLowerCase();
-        return switch (methodLower) {
-            case "efectivo" -> "💵";
-            case "tarjeta_debito", "tarjeta_credito" -> "💳";
-            case "transferencia" -> "🏦";
-            default -> "💰";
-        };
+        switch (methodLower) {
+            case "efectivo":
+                return "EFEC";
+            case "tarjeta_debito":
+                return "T-DEB";
+            case "tarjeta_credito":
+                return "T-CRE";
+            case "transferencia":
+                return "TRANS";
+            default:
+                return "PAGO";
+        }
     }
 
     /**
@@ -488,334 +443,327 @@ public class ReportsController {
      */
     private String formatPaymentMethod(String method) {
         String methodLower = method.toLowerCase();
-        return switch (methodLower) {
-            case "efectivo" -> "Efectivo";
-            case "tarjeta_debito" -> "Tarjeta Débito";
-            case "tarjeta_credito" -> "Tarjeta Crédito";
-            case "transferencia" -> "Transferencia";
-            default -> method;
-        };
+        switch (methodLower) {
+            case "efectivo":
+                return "Efectivo";
+            case "tarjeta_debito":
+                return "Tarjeta Debito";
+            case "tarjeta_credito":
+                return "Tarjeta Credito";
+            case "transferencia":
+                return "Transferencia";
+            default:
+                return method;
+        }
     }
 
     // ==================== MÉTODOS DE EXPORTACIÓN ====================
 
+    /**
+     * Maneja la exportación del reporte a PDF.
+     */
     @FXML
     private void handleExportPDF() {
-        showInfo("Funcionalidad de exportación a PDF en desarrollo");
-    }
-
-    @FXML
-    private void handleExportExcel() {
-        showInfo("Funcionalidad de exportación a Excel en desarrollo");
-    }
-
-    // ==================== ANULACIÓN Y ELIMINACIÓN DE VENTAS ====================
-
-    /**
-     * Busca ventas según los filtros aplicados
-     */
-    @FXML
-    private void handleSearchSales() {
-        String saleId = searchSaleIdField.getText().trim();
-        LocalDate date = searchDatePicker.getValue();
-        String amountStr = searchAmountField.getText().trim();
-
-        List<Sale> sales = new ArrayList<>();
-        SaleDAO saleDAO = new SaleDAO(DatabaseConfig.getInstance());
+        if (!validateReportData()) {
+            showWarning("Por favor genera un reporte antes de exportar");
+            return;
+        }
 
         try {
-            // Buscar por ID si está presente
-            if (!saleId.isEmpty()) {
-                try {
-                    int id = Integer.parseInt(saleId);
-                    Optional<Sale> saleOpt = saleDAO.findById(id);
-                    saleOpt.ifPresent(sales::add);
-                } catch (NumberFormatException e) {
-                    showError("ID de venta inválido");
-                    return;
-                }
-            }
-            // Buscar por fecha si está presente
-            else if (date != null) {
-                sales = saleDAO.findByDate(date);
-            }
-            // Mostrar todas las ventas recientes
-            else {
-                sales = saleDAO.findPaginated(50, 0);
-            }
+            // Configurar FileChooser
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Guardar Reporte PDF");
+            fileChooser.setInitialFileName(generateFileName("pdf"));
 
-            // Filtrar por monto si está presente
-            if (!amountStr.isEmpty()) {
-                try {
-                    BigDecimal amount = new BigDecimal(amountStr);
-                    final BigDecimal tolerance = new BigDecimal("10.00");
-                    sales = sales.stream()
-                        .filter(s -> s.getTotal().subtract(amount).abs().compareTo(tolerance) <= 0)
-                        .toList();
-                } catch (NumberFormatException e) {
-                    showError("Monto inválido");
-                    return;
-                }
+            // Configurar carpeta por defecto
+            File defaultDirectory = new File(System.getProperty("user.home"), "Reportes");
+            if (!defaultDirectory.exists()) {
+                defaultDirectory.mkdirs();
             }
+            fileChooser.setInitialDirectory(defaultDirectory);
 
-            // Mostrar resultados en la tabla
-            displaySalesResults(sales);
+            // Filtro de extensión
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                "Archivos PDF (*.pdf)", "*.pdf");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            // Mostrar diálogo de guardado
+            File file = fileChooser.showSaveDialog(exportPdfBtn.getScene().getWindow());
+
+            if (file != null) {
+                // Asegurar extensión .pdf
+                if (!file.getName().toLowerCase().endsWith(".pdf")) {
+                    file = new File(file.getAbsolutePath() + ".pdf");
+                }
+
+                // Si el archivo existe, intentar eliminarlo primero
+                if (file.exists()) {
+                    if (!file.delete()) {
+                        showError("No se puede sobrescribir el archivo.\nPuede estar abierto en otra aplicación.\nCierre el archivo e intente de nuevo.");
+                        return;
+                    }
+                }
+
+                // Convertir datos a formato del exportador
+                List<PDFExporter.ReportRow> reportRows = convertToReportRows(currentProductsSummary);
+
+                // Generar PDF
+                final File finalFile = file;
+                new Thread(() -> {
+                    try {
+                        PDFExporter.generateReportPDF(
+                            reportRows,
+                            selectedPeriod,
+                            currentPaymentTotals,
+                            currentStatistics,
+                            finalFile
+                        );
+
+                        Platform.runLater(() -> {
+                            showSuccess("Reporte exportado exitosamente a:\n" + finalFile.getAbsolutePath());
+                            openFile(finalFile);
+                        });
+
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error al exportar PDF", e);
+                        Platform.runLater(() -> showError("Error al exportar PDF: " + e.getMessage()));
+                    }
+                }).start();
+            }
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error buscando ventas", e);
-            showError("Error al buscar ventas: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error en handleExportPDF", e);
+            showError("Error al configurar la exportación: " + e.getMessage());
         }
     }
 
     /**
-     * Muestra los resultados de búsqueda en la tabla
-     */
-    private void displaySalesResults(List<Sale> sales) {
-        ObservableList<SaleSearchRow> rows = FXCollections.observableArrayList();
-
-        for (Sale sale : sales) {
-            rows.add(new SaleSearchRow(
-                sale.getId(),
-                sale.getCreatedAt(),
-                sale.getTotal(),
-                sale.getStatus(),
-                sale.getUserName() != null ? sale.getUserName() : "Usuario"
-            ));
-        }
-
-        salesSearchTable.setItems(rows);
-
-        if (sales.isEmpty()) {
-            showInfo("No se encontraron ventas con los criterios especificados");
-        }
-    }
-
-    /**
-     * Limpia los filtros de búsqueda
+     * Maneja la exportación del reporte a Excel.
      */
     @FXML
-    private void handleClearSearchFilters() {
-        searchSaleIdField.clear();
-        searchDatePicker.setValue(null);
-        searchAmountField.clear();
-        salesSearchTable.getItems().clear();
-    }
-
-    /**
-     * Anula una venta desde la tabla de búsqueda
-     */
-    private void handleCancelSaleFromSearch(SaleSearchRow row) {
-        if (row.isCancelled()) {
-            showWarning("Esta venta ya está anulada");
+    private void handleExportExcel() {
+        if (!validateReportData()) {
+            showWarning("Por favor genera un reporte antes de exportar");
             return;
         }
 
-        // Obtener venta completa
-        SaleDAO saleDAO = new SaleDAO(DatabaseConfig.getInstance());
-        Optional<Sale> saleOpt = saleDAO.findById(row.getSaleId());
-
-        if (saleOpt.isEmpty()) {
-            showError("No se encontró la venta");
-            return;
-        }
-
-        Sale sale = saleOpt.get();
-
-        // Mostrar diálogo de confirmación con detalles
-        showSaleCancellationDialog(sale);
-    }
-
-    /**
-     * Muestra el diálogo de confirmación para anular una venta
-     */
-    private void showSaleCancellationDialog(Sale sale) {
-        StringBuilder message = new StringBuilder();
-        message.append("DETALLES DE LA VENTA:\n\n");
-        message.append("ID: ").append(sale.getId()).append("\n");
-        message.append("Fecha: ").append(
-            sale.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
-        ).append("\n");
-        message.append("Vendedor: ").append(sale.getUserName() != null ? sale.getUserName() : "N/A").append("\n");
-        message.append("Total: ").append(currencyFormat.format(sale.getTotal())).append("\n\n");
-        
-        message.append("PRODUCTOS:\n");
-        for (SaleItem item : sale.getItems()) {
-            message.append("• ").append(item.getDisplayName())
-                   .append(" x").append(item.getQuantity())
-                   .append(" = ").append(currencyFormat.format(item.getSubtotal()))
-                   .append("\n");
-        }
-        
-        message.append("\n⚠️ ADVERTENCIA:\n");
-        message.append("• El stock de los productos será revertido\n");
-        message.append("• Esta acción no se puede deshacer\n");
-        message.append("• La venta quedará marcada como ANULADA\n\n");
-        message.append("¿Está seguro que desea anular esta venta?");
-        
-        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmDialog.setTitle("Confirmar Anulación");
-        confirmDialog.setHeaderText("Anular Venta #" + sale.getId());
-        confirmDialog.setContentText(message.toString());
-        
-        ButtonType btnConfirmar = new ButtonType("Sí, Anular Venta");
-        ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        confirmDialog.getButtonTypes().setAll(btnConfirmar, btnCancelar);
-        
-        Optional<ButtonType> confirmation = confirmDialog.showAndWait();
-        
-        if (confirmation.isPresent() && confirmation.get() == btnConfirmar) {
-            cancelSale(sale.getId());
-        }
-    }
-
-    /**
-     * Anula una venta y revierte el stock
-     */
-    private void cancelSale(int saleId) {
-        SaleDAO saleDAO = new SaleDAO(DatabaseConfig.getInstance());
-        
         try {
-            saleDAO.cancel(saleId);
-            
-            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-            successAlert.setTitle("Éxito");
-            successAlert.setHeaderText("Venta Anulada Correctamente");
-            successAlert.setContentText(
-                "La venta #" + saleId + " ha sido anulada.\n" +
-                "El stock de los productos ha sido revertido."
-            );
-            successAlert.showAndWait();
-            
-            LOGGER.info("Venta #" + saleId + " anulada correctamente");
-            
-            // Actualizar tabla de búsqueda
-            handleSearchSales();
-            
-        } catch (RuntimeException e) {
-            LOGGER.log(Level.SEVERE, "Error al anular venta #" + saleId, e);
-            showError("Error al anular la venta:\n" + e.getMessage());
-        }
-    }
+            // Configurar FileChooser
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Guardar Reporte Excel");
+            fileChooser.setInitialFileName(generateFileName("xlsx"));
 
-    /**
-     * Elimina definitivamente una venta del historial
-     */
-    private void handleDeleteSalePermanently(SaleSearchRow row) {
-        Alert confirmDialog = new Alert(Alert.AlertType.WARNING);
-        confirmDialog.setTitle("⚠️ ELIMINAR DEFINITIVAMENTE");
-        confirmDialog.setHeaderText("Eliminar Venta #" + row.getSaleId() + " del Historial");
-        
-        StringBuilder message = new StringBuilder();
-        message.append("🔴 ADVERTENCIA CRÍTICA 🔴\n\n");
-        message.append("Esta acción es IRREVERSIBLE y eliminará:\n\n");
-        message.append("✗ El registro de la venta\n");
-        message.append("✗ Todos los items/productos de la venta\n");
-        message.append("✗ Todos los pagos asociados\n");
-        message.append("✗ TODO el historial de esta transacción\n\n");
-        
-        if (!row.isCancelled()) {
-            message.append("⚠️ La venta NO está anulada.\n");
-            message.append("   Se recomienda anularla primero para revertir el stock.\n\n");
-        }
-        
-        message.append("Esta operación solo debe usarse para:\n");
-        message.append("• Ventas de prueba\n");
-        message.append("• Datos erróneos que deben ser removidos\n\n");
-        message.append("¿Está COMPLETAMENTE SEGURO de eliminar esta venta?");
-        
-        confirmDialog.setContentText(message.toString());
-        
-        ButtonType btnEliminar = new ButtonType("SÍ, ELIMINAR DEFINITIVAMENTE", ButtonBar.ButtonData.OK_DONE);
-        ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        confirmDialog.getButtonTypes().setAll(btnEliminar, btnCancelar);
-        
-        // Hacer el botón de eliminar más prominente
-        confirmDialog.getDialogPane().lookupButton(btnEliminar).setStyle(
-            "-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold;"
-        );
-        
-        Optional<ButtonType> result = confirmDialog.showAndWait();
-        
-        if (result.isPresent() && result.get() == btnEliminar) {
-            // Segunda confirmación
-            Alert secondConfirm = new Alert(Alert.AlertType.CONFIRMATION);
-            secondConfirm.setTitle("Confirmación Final");
-            secondConfirm.setHeaderText("¿Realmente desea continuar?");
-            secondConfirm.setContentText("Esta es su última oportunidad para cancelar.\n\nLa venta será eliminada permanentemente.");
-            
-            Optional<ButtonType> finalConfirm = secondConfirm.showAndWait();
-            
-            if (finalConfirm.isPresent() && finalConfirm.get() == ButtonType.OK) {
-                deleteSalePermanently(row.getSaleId());
+            // Configurar carpeta por defecto
+            File defaultDirectory = new File(System.getProperty("user.home"), "Reportes");
+            if (!defaultDirectory.exists()) {
+                defaultDirectory.mkdirs();
             }
+            fileChooser.setInitialDirectory(defaultDirectory);
+
+            // Filtro de extensión
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                "Archivos Excel (*.xlsx)", "*.xlsx");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            // Mostrar diálogo de guardado
+            File file = fileChooser.showSaveDialog(exportExcelBtn.getScene().getWindow());
+
+            if (file != null) {
+                // Asegurar extensión .xlsx
+                if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+                    file = new File(file.getAbsolutePath() + ".xlsx");
+                }
+
+                // Si el archivo existe, intentar eliminarlo primero
+                if (file.exists()) {
+                    if (!file.delete()) {
+                        showError("No se puede sobrescribir el archivo.\nPuede estar abierto en otra aplicación.\nCierre el archivo e intente de nuevo.");
+                        return;
+                    }
+                }
+
+                // Convertir datos a formato del exportador
+                List<ExcelExporter.ReportRow> reportRows = convertToExcelReportRows(currentProductsSummary);
+
+                // Generar Excel
+                final File finalFile = file;
+                new Thread(() -> {
+                    try {
+                        ExcelExporter.generateReportExcel(
+                            reportRows,
+                            selectedPeriod,
+                            currentPaymentTotals,
+                            currentStatistics,
+                            finalFile
+                        );
+
+                        Platform.runLater(() -> {
+                            showSuccess("Reporte exportado exitosamente a:\n" + finalFile.getAbsolutePath());
+                            openFile(finalFile);
+                        });
+
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error al exportar Excel", e);
+                        Platform.runLater(() -> showError("Error al exportar Excel: " + e.getMessage()));
+                    }
+                }).start();
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error en handleExportExcel", e);
+            showError("Error al configurar la exportación: " + e.getMessage());
         }
     }
 
     /**
-     * Ejecuta la eliminación definitiva de una venta
+     * Valida que existan datos de reporte para exportar.
      */
-    private void deleteSalePermanently(int saleId) {
-        Connection conn = null;
+    private boolean validateReportData() {
+        return currentStatistics != null &&
+               currentPaymentTotals != null &&
+               currentProductsSummary != null &&
+               !currentProductsSummary.isEmpty();
+    }
+
+    /**
+     * Genera un nombre de archivo sugerido para la exportación.
+     */
+    private String generateFileName(String extension) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String date = dateFormat.format(new Date());
+        return "reporte_ventas_" + date + "." + extension;
+    }
+
+    /**
+     * Convierte los datos del reporte al formato ReportRow de PDFExporter.
+     */
+    private List<PDFExporter.ReportRow> convertToReportRows(List<Map<String, Object>> summary) {
+        return summary.stream()
+            .map(item -> new PDFExporter.ReportRow(
+                (String) item.get("producto"),
+                (String) item.get("variante"),
+                (Integer) item.get("cantidad"),
+                (BigDecimal) item.get("precio"),
+                (BigDecimal) item.get("total")
+            ))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Convierte los datos del reporte al formato ReportRow de ExcelExporter.
+     */
+    private List<ExcelExporter.ReportRow> convertToExcelReportRows(List<Map<String, Object>> summary) {
+        return summary.stream()
+            .map(item -> new ExcelExporter.ReportRow(
+                (String) item.get("producto"),
+                (String) item.get("variante"),
+                (Integer) item.get("cantidad"),
+                (BigDecimal) item.get("precio"),
+                (BigDecimal) item.get("total")
+            ))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Abre un archivo con la aplicación predeterminada del sistema.
+     */
+    private void openFile(File file) {
         try {
-            conn = DatabaseConfig.getInstance().getConnection();
-            conn.setAutoCommit(false);
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                if (file.exists()) {
+                    desktop.open(file);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "No se pudo abrir el archivo automáticamente", e);
+            // No mostramos error al usuario, solo registramos el log
+        }
+    }
 
-            // 1. Eliminar pagos
-            try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM sale_payments WHERE sale_id = ?")) {
-                pstmt.setInt(1, saleId);
-                pstmt.executeUpdate();
+    // ==================== NAVEGACIÓN ====================
+
+    @FXML
+    private void handleDashboard() {
+        navigateTo("/views/Dashboard.fxml", "Sistema Ferretería - Dashboard");
+    }
+
+    @FXML
+    private void handleProducts() {
+        showInfo("Módulo de Productos en desarrollo");
+    }
+
+    @FXML
+    private void handleCategories() {
+        navigateTo("/views/Categories.fxml", "Sistema Ferretería - Categorías");
+    }
+
+    @FXML
+    private void handleSales() {
+        showInfo("Módulo de Ventas en desarrollo");
+    }
+
+    @FXML
+    private void handleUsers() {
+        showInfo("Módulo de Usuarios en desarrollo");
+    }
+
+    @FXML
+    private void handleLogout() {
+        SessionManager.getInstance().logout();
+        navigateTo("/views/Login.fxml", "Sistema Ferretería - Login");
+    }
+
+    /**
+     * Navega a una vista específica
+     *
+     * @param fxmlPath Ruta del archivo FXML
+     * @param title Título de la ventana
+     */
+    private void navigateTo(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) monthCombo.getScene().getWindow();
+
+            // Guardar estado actual de la ventana
+            boolean wasMaximized = stage.isMaximized();
+            double currentWidth = stage.getWidth();
+            double currentHeight = stage.getHeight();
+
+            Scene scene = new Scene(root, currentWidth, currentHeight);
+
+            // Cargar estilos base
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+
+            // Cargar estilos adicionales según la vista
+            if (fxmlPath.contains("Reports")) {
+                scene.getStylesheets().add(getClass().getResource("/styles/reports.css").toExternalForm());
             }
 
-            // 2. Eliminar items
-            try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM sale_items WHERE sale_id = ?")) {
-                pstmt.setInt(1, saleId);
-                pstmt.executeUpdate();
-            }
+            stage.setTitle(title);
 
-            // 3. Eliminar venta
-            try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM sales WHERE id = ?")) {
-                pstmt.setInt(1, saleId);
-                int affected = pstmt.executeUpdate();
-                
-                if (affected == 0) {
-                    throw new SQLException("No se pudo eliminar la venta");
+            // Ajustar ventana según destino
+            if (fxmlPath.contains("Login")) {
+                stage.setMaximized(false);
+                stage.setResizable(false);
+                stage.setScene(scene);
+                stage.setWidth(900);
+                stage.setHeight(600);
+                stage.centerOnScreen();
+            } else {
+                stage.setResizable(true);
+                stage.setScene(scene);
+                // Restaurar estado maximizado si estaba maximizado
+                if (wasMaximized) {
+                    stage.setMaximized(true);
                 }
             }
 
-            conn.commit();
-            
-            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-            successAlert.setTitle("Venta Eliminada");
-            successAlert.setHeaderText("Eliminación Exitosa");
-            successAlert.setContentText(
-                "La venta #" + saleId + " ha sido eliminada permanentemente del sistema.\n\n" +
-                "Esta operación no se puede deshacer."
-            );
-            successAlert.showAndWait();
-            
-            LOGGER.warning("Venta #" + saleId + " eliminada PERMANENTEMENTE del sistema");
-            
-            // Actualizar tabla de búsqueda
-            handleSearchSales();
-
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    LOGGER.log(Level.SEVERE, "Error en rollback", ex);
-                }
-            }
-            LOGGER.log(Level.SEVERE, "Error al eliminar venta permanentemente", e);
-            showError("Error al eliminar la venta:\n" + e.getMessage());
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                } catch (SQLException e) {
-                    LOGGER.log(Level.SEVERE, "Error restaurando autocommit", e);
-                }
-            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error al navegar a " + fxmlPath, e);
+            showError("Error al cargar la vista: " + e.getMessage());
         }
     }
 
@@ -845,7 +793,15 @@ public class ReportsController {
         alert.showAndWait();
     }
 
-    // ==================== CLASES INTERNAS ====================
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Éxito");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // ==================== CLASE INTERNA PARA TABLA ====================
 
     /**
      * Representa una fila en la tabla de productos vendidos
@@ -880,50 +836,6 @@ public class ReportsController {
         
         public String getTotalFormatted() {
             return currencyFormat.format(total);
-        }
-    }
-
-    /**
-     * Representa una fila en la tabla de búsqueda de ventas
-     */
-    public static class SaleSearchRow {
-        private final int saleId;
-        private final LocalDateTime createdAt;
-        private final BigDecimal total;
-        private final String status;
-        private final String sellerName;
-        private final NumberFormat currencyFormat;
-
-        public SaleSearchRow(int saleId, LocalDateTime createdAt, BigDecimal total, 
-                           String status, String sellerName) {
-            this.saleId = saleId;
-            this.createdAt = createdAt;
-            this.total = total;
-            this.status = status;
-            this.sellerName = sellerName;
-            this.currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "AR"));
-        }
-
-        public int getSaleId() { return saleId; }
-        public LocalDateTime getCreatedAt() { return createdAt; }
-        public BigDecimal getTotal() { return total; }
-        public String getStatus() { return status; }
-        public String getSellerName() { return sellerName; }
-        
-        public boolean isCancelled() {
-            return "cancelled".equals(status);
-        }
-        
-        public String getDateFormatted() {
-            return createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-        }
-        
-        public String getTotalFormatted() {
-            return currencyFormat.format(total);
-        }
-        
-        public String getStatusFormatted() {
-            return "completed".equals(status) ? "Completada" : "Anulada";
         }
     }
 }

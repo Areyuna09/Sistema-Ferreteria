@@ -4,133 +4,93 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Model representing a payment associated with a sale.
- * Allows combined payments (e.g., part cash, part card).
- * Maps to the 'sale_payments' table in the database.
+ * Representa un pago asociado a una venta.
+ * Soporta multiples metodos de pago por venta.
+ * 
+ * @author Sistema Ferreteria
+ * @version 1.0
  */
 public class SalePayment {
+    private Integer id;
+    private Integer saleId;
+    private String paymentMethod;
+    private BigDecimal amount;
+    private String reference;
+    private LocalDateTime createdAt;
 
-    private final int id;
-    private final int saleId;
-    private final PaymentMethod paymentMethod;
-    private final BigDecimal amount;
-    private final String reference;
-    private final LocalDateTime createdAt;
-
-    private SalePayment(Builder builder) {
-        this.id = builder.id;
-        this.saleId = builder.saleId;
-        this.paymentMethod = builder.paymentMethod;
-        this.amount = builder.amount;
-        this.reference = builder.reference;
-        this.createdAt = builder.createdAt;
+    public SalePayment() {
+        this.amount = BigDecimal.ZERO;
     }
 
-    // Getters
-    public int getId() { return id; }
-    public int getSaleId() { return saleId; }
-    public PaymentMethod getPaymentMethod() { return paymentMethod; }
-    public BigDecimal getAmount() { return amount; }
-    public String getReference() { return reference; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
-    /**
-     * Gets the payment method name for display.
-     * @return readable payment method name
-     */
-    public String getPaymentMethodDisplayName() {
-        return paymentMethod.getDisplayName();
+    public Integer getId() {
+        return id;
     }
 
-    /**
-     * Enum for supported payment methods.
-     */
-    public enum PaymentMethod {
-        CASH("efectivo", "Efectivo"),
-        DEBIT_CARD("tarjeta_debito", "Tarjeta de Débito"),
-        CREDIT_CARD("tarjeta_credito", "Tarjeta de Crédito"),
-        TRANSFER("transferencia", "Transferencia Bancaria"),
-        MERCADO_PAGO("mercado_pago", "Mercado Pago"),
-        CREDIT_ACCOUNT("cuenta_corriente", "Cuenta Corriente"),
-        OTHER("otro", "Otro");
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-        private final String value;
-        private final String displayName;
+    public Integer getSaleId() {
+        return saleId;
+    }
 
-        PaymentMethod(String value, String displayName) {
-            this.value = value;
-            this.displayName = displayName;
+    public void setSaleId(Integer saleId) {
+        this.saleId = saleId;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getFormattedPaymentMethod() {
+        if (paymentMethod == null) {
+            return "";
         }
-
-        public String getValue() { return value; }
-        public String getDisplayName() { return displayName; }
-
-        public static PaymentMethod fromValue(String value) {
-            for (PaymentMethod m : values()) {
-                if (m.value.equalsIgnoreCase(value)) {
-                    return m;
-                }
-            }
-            return OTHER;
+        
+        switch (paymentMethod.toLowerCase()) {
+            case "efectivo":
+                return "Efectivo";
+            case "tarjeta_debito":
+                return "Tarjeta Debito";
+            case "tarjeta_credito":
+                return "Tarjeta Credito";
+            case "transferencia":
+                return "Transferencia";
+            default:
+                return paymentMethod;
         }
     }
 
-    // Builder Pattern
-    public static class Builder {
-        private int id;
-        private int saleId;
-        private PaymentMethod paymentMethod = PaymentMethod.CASH;
-        private BigDecimal amount = BigDecimal.ZERO;
-        private String reference;
-        private LocalDateTime createdAt = LocalDateTime.now();
-
-        public Builder id(int id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder saleId(int saleId) {
-            this.saleId = saleId;
-            return this;
-        }
-
-        public Builder paymentMethod(PaymentMethod method) {
-            this.paymentMethod = method;
-            return this;
-        }
-
-        public Builder paymentMethod(String method) {
-            this.paymentMethod = PaymentMethod.fromValue(method);
-            return this;
-        }
-
-        public Builder amount(BigDecimal amount) {
-            this.amount = amount;
-            return this;
-        }
-
-        public Builder reference(String reference) {
-            this.reference = reference;
-            return this;
-        }
-
-        public Builder createdAt(LocalDateTime createdAt) {
-            this.createdAt = createdAt;
-            return this;
-        }
-
-        public SalePayment build() {
-            validate();
-            return new SalePayment(this);
-        }
-
-        private void validate() {
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Amount must be greater than 0");
-            }
-            if (paymentMethod == null) {
-                throw new IllegalArgumentException("Payment method is required");
-            }
-        }
+    @Override
+    public String toString() {
+        return getFormattedPaymentMethod() + ": $" + amount;
     }
 }
