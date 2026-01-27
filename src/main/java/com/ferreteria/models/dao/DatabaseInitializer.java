@@ -183,6 +183,11 @@ public class DatabaseInitializer {
         stmt.execute("CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status)");
         stmt.execute("CREATE INDEX IF NOT EXISTS idx_sale_items_sale ON sale_items(sale_id)");
         stmt.execute("CREATE INDEX IF NOT EXISTS idx_sale_payments_sale ON sale_payments(sale_id)");
+
+        // Índices para categorías y subcategorías
+        stmt.execute("CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name)");
+        stmt.execute("CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id)");
+        stmt.execute("CREATE INDEX IF NOT EXISTS idx_categories_active ON categories(active)");
     }
 
     private void createDefaultAdmin(Connection conn) throws SQLException {

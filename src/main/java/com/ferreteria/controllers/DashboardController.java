@@ -94,6 +94,11 @@ public class DashboardController {
     }
 
     @FXML
+    public void handleCategories() {
+        navigateTo("/views/Categories.fxml", "Sistema Ferretería - Categorías");
+    }
+
+    @FXML
     public void handleSales() {
         System.out.println("Navegando a Ventas...");
         // TODO: Implementar vista de ventas
@@ -117,7 +122,7 @@ public class DashboardController {
 
     /**
      * Navega a una vista específica
-     * 
+     *
      * @param fxmlPath Ruta del archivo FXML
      * @param title Título de la ventana
      */
@@ -125,21 +130,31 @@ public class DashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            
-            Scene scene = new Scene(root);
+
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+
+            // Guardar estado actual de la ventana
+            boolean wasMaximized = stage.isMaximized();
+            double currentWidth = stage.getWidth();
+            double currentHeight = stage.getHeight();
+
+            Scene scene = new Scene(root, currentWidth, currentHeight);
             scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-            
+
             // Agregar CSS adicional para reportes si es necesario
             if (fxmlPath.contains("Reports")) {
                 scene.getStylesheets().add(getClass().getResource("/styles/reports.css").toExternalForm());
             }
 
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
             stage.setTitle(title);
+            stage.setResizable(true);
             stage.setScene(scene);
-            stage.setMaximized(true); // Maximizar para mejor visualización de reportes
-            stage.centerOnScreen();
-            
+
+            // Restaurar estado maximizado si estaba maximizado
+            if (wasMaximized) {
+                stage.setMaximized(true);
+            }
+
         } catch (Exception e) {
             System.err.println("Error al navegar a " + fxmlPath + ": " + e.getMessage());
             e.printStackTrace();

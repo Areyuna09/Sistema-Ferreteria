@@ -27,6 +27,7 @@
             <HBox alignment="CENTER" spacing="6">
                 <Button text="Dashboard" styleClass="nav-button nav-button-active"/>
                 <Button text="Productos" onAction="#handleProducts" styleClass="nav-button"/>
+                <Button text="Categorias" onAction="#handleCategories" styleClass="nav-button"/>
                 <Button text="Ventas" onAction="#handleSales" styleClass="nav-button"/>
                 <Button text="Reportes" onAction="#handleReports" styleClass="nav-button"/>
                 <Button text="Usuarios" onAction="#handleUsers" styleClass="nav-button"/>

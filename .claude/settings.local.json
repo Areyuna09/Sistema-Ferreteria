@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn clean:*)",
+      "Bash(mvn compile:*)",
+      "Bash(mvn exec:java:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(tree:*)"
+    ]
+  }
+}
