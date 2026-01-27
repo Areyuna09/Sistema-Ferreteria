@@ -6,6 +6,7 @@ import com.ferreteria.models.SalePayment;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
@@ -293,5 +294,189 @@ public class ReportDAO {
         }
 
         return stats;
+    }
+
+    // ==================== MÉTODOS CON RANGO DE FECHAS ====================
+
+    /**
+     * Obtiene estadísticas generales por rango de fechas
+     *
+     * @param startDate Fecha inicial del rango
+     * @param endDate Fecha final del rango
+     * @return Mapa con diferentes métricas
+     */
+    public Map<String, Object> getStatsByDateRange(LocalDate startDate, LocalDate endDate) {
+        Map<String, Object> stats = new HashMap<>();
+        String query = "SELECT " +
+                      "COUNT(*) as total_ventas, " +
+                      "COALESCE(SUM(total), 0) as total_recaudado, " +
+                      "COALESCE(AVG(total), 0) as promedio_venta, " +
+                      "COALESCE(MAX(total), 0) as venta_maxima, " +
+                      "COALESCE(MIN(total), 0) as venta_minima " +
+                      "FROM sales " +
+                      "WHERE DATE(created_at) BETWEEN ? AND ?";
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, startDate.toString());
+            stmt.setString(2, endDate.toString());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("totalVentas", rs.getInt("total_ventas"));
+                    stats.put("totalRecaudado", rs.getBigDecimal("total_recaudado"));
+                    stats.put("promedioVenta", rs.getBigDecimal("promedio_venta"));
+                    stats.put("ventaMaxima", rs.getBigDecimal("venta_maxima"));
+                    stats.put("ventaMinima", rs.getBigDecimal("venta_minima"));
+                }
+            }
+
+            LOGGER.info("Estadísticas obtenidas para rango: " + startDate + " a " + endDate);
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener estadísticas por rango", e);
+            stats.put("totalVentas", 0);
+            stats.put("totalRecaudado", BigDecimal.ZERO);
+            stats.put("promedioVenta", BigDecimal.ZERO);
+            stats.put("ventaMaxima", BigDecimal.ZERO);
+            stats.put("ventaMinima", BigDecimal.ZERO);
+        }
+
+        return stats;
+    }
+
+    /**
+     * Obtiene resumen de productos vendidos por rango de fechas
+     *
+     * @param startDate Fecha inicial del rango
+     * @param endDate Fecha final del rango
+     * @return Lista de productos con cantidades y totales
+     */
+    public List<Map<String, Object>> getProductSalesSummaryByRange(LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> summary = new ArrayList<>();
+        String query = "SELECT " +
+                      "p.name as producto, " +
+                      "pv.variant_name as variante, " +
+                      "SUM(si.quantity) as cantidad_total, " +
+                      "si.unit_price as precio_unitario, " +
+                      "SUM(si.subtotal) as total_vendido " +
+                      "FROM sale_items si " +
+                      "INNER JOIN sales s ON si.sale_id = s.id " +
+                      "INNER JOIN product_variants pv ON si.variant_id = pv.id " +
+                      "INNER JOIN products p ON pv.product_id = p.id " +
+                      "WHERE DATE(s.created_at) BETWEEN ? AND ? " +
+                      "GROUP BY p.id, pv.id " +
+                      "ORDER BY total_vendido DESC";
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, startDate.toString());
+            stmt.setString(2, endDate.toString());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("producto", rs.getString("producto"));
+                    row.put("variante", rs.getString("variante"));
+                    row.put("cantidad", rs.getInt("cantidad_total"));
+                    row.put("precio", rs.getBigDecimal("precio_unitario"));
+                    row.put("total", rs.getBigDecimal("total_vendido"));
+
+                    summary.add(row);
+                }
+            }
+
+            LOGGER.info("Productos encontrados para rango: " + summary.size());
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener resumen de productos por rango", e);
+        }
+
+        return summary;
+    }
+
+    /**
+     * Obtiene totales por método de pago en un rango de fechas
+     *
+     * @param startDate Fecha inicial del rango
+     * @param endDate Fecha final del rango
+     * @return Mapa con método de pago y total recaudado
+     */
+    public Map<String, BigDecimal> getPaymentMethodTotalsByRange(LocalDate startDate, LocalDate endDate) {
+        Map<String, BigDecimal> totals = new LinkedHashMap<>();
+        String query = "SELECT " +
+                      "sp.payment_method, " +
+                      "SUM(sp.amount) as total " +
+                      "FROM sale_payments sp " +
+                      "INNER JOIN sales s ON sp.sale_id = s.id " +
+                      "WHERE DATE(s.created_at) BETWEEN ? AND ? " +
+                      "GROUP BY sp.payment_method " +
+                      "ORDER BY total DESC";
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, startDate.toString());
+            stmt.setString(2, endDate.toString());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String method = rs.getString("payment_method");
+                    BigDecimal total = rs.getBigDecimal("total");
+                    totals.put(method, total);
+                }
+            }
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener totales por método de pago", e);
+        }
+
+        return totals;
+    }
+
+    /**
+     * Obtiene ventas agrupadas por día para un rango de fechas (para gráficos)
+     *
+     * @param startDate Fecha inicial del rango
+     * @param endDate Fecha final del rango
+     * @return Mapa con fecha como string y total vendido
+     */
+    public Map<String, BigDecimal> getDailySalesByRange(LocalDate startDate, LocalDate endDate) {
+        Map<String, BigDecimal> dailySales = new LinkedHashMap<>();
+
+        LOGGER.info("Consultando ventas diarias para rango: " + startDate + " a " + endDate);
+
+        String query = "SELECT " +
+                      "DATE(s.created_at) as fecha, " +
+                      "SUM(s.total) as total " +
+                      "FROM sales s " +
+                      "WHERE DATE(s.created_at) BETWEEN ? AND ? " +
+                      "AND s.status = 'completed' " +
+                      "GROUP BY DATE(s.created_at) " +
+                      "ORDER BY fecha";
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, startDate.toString());
+            stmt.setString(2, endDate.toString());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String fecha = rs.getString("fecha");
+                    BigDecimal total = rs.getBigDecimal("total");
+                    dailySales.put(fecha, total);
+                }
+            }
+
+            LOGGER.info("Días con ventas encontrados: " + dailySales.size());
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener ventas diarias por rango", e);
+        }
+
+        return dailySales;
     }
 }

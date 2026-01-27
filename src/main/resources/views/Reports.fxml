@@ -53,30 +53,35 @@
                 <HBox alignment="CENTER_LEFT" spacing="20">
                     <VBox spacing="6">
                         <Label text="Reportes de Ventas" styleClass="page-title"/>
-                        <Label text="Analisis mensual de ventas productos y metodos de pago" styleClass="page-subtitle"/>
+                        <Label text="Analisis de ventas por rango de fechas, productos y metodos de pago" styleClass="page-subtitle"/>
                     </VBox>
                 </HBox>
 
                 <HBox styleClass="filter-panel" spacing="20" alignment="CENTER_LEFT">
                     <VBox spacing="6">
-                        <Label text="MES" styleClass="filter-label"/>
-                        <ComboBox fx:id="monthCombo" styleClass="filter-combo" promptText="Seleccionar mes"/>
+                        <Label text="TIPO DE RANGO" styleClass="filter-label"/>
+                        <ComboBox fx:id="rangeTypeCombo" styleClass="filter-combo" promptText="Seleccionar rango" prefWidth="160"/>
                     </VBox>
-                    
+
                     <VBox spacing="6">
-                        <Label text="AÑO" styleClass="filter-label"/>
-                        <ComboBox fx:id="yearCombo" styleClass="filter-combo" promptText="Seleccionar año"/>
+                        <Label text="FECHA DESDE" styleClass="filter-label"/>
+                        <DatePicker fx:id="startDatePicker" styleClass="filter-combo" promptText="Desde" prefWidth="150"/>
                     </VBox>
-                    
+
+                    <VBox spacing="6">
+                        <Label text="FECHA HASTA" styleClass="filter-label"/>
+                        <DatePicker fx:id="endDatePicker" styleClass="filter-combo" promptText="Hasta" prefWidth="150"/>
+                    </VBox>
+
                     <Region HBox.hgrow="SOMETIMES"/>
-                    
+
                     <VBox alignment="BOTTOM_LEFT" spacing="6">
                         <Label text=" "/>
                         <Button text="Generar Reporte" onAction="#handleGenerateReport" styleClass="action-button" prefWidth="180"/>
                     </VBox>
-                    
+
                     <Separator orientation="VERTICAL"/>
-                    
+
                     <VBox alignment="BOTTOM_LEFT" spacing="6">
                         <Label text=" "/>
                         <HBox spacing="8">
@@ -140,7 +145,7 @@
 
                 <VBox alignment="CENTER" spacing="16" styleClass="empty-state" fx:id="emptyStateContainer" managed="true" visible="true">
                     <Label text="Reportes" styleClass="empty-icon"/>
-                    <Label text="Selecciona un mes y año para generar el reporte" styleClass="empty-text"/>
+                    <Label text="Selecciona un rango de fechas para generar el reporte" styleClass="empty-text"/>
                     <Label text="Los reportes muestran ventas productos mas vendidos y metodos de pago" styleClass="empty-subtext"/>
                 </VBox>
 

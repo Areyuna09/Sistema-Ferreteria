@@ -30,9 +30,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,14 +54,20 @@ public class ReportsController {
     private final NumberFormat currencyFormat;
     private YearMonth selectedPeriod;
 
+    // Rango de fechas seleccionado
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String currentRangeType;
+
     // Datos del reporte actual (para exportación)
     private Map<String, Object> currentStatistics;
     private Map<String, BigDecimal> currentPaymentTotals;
     private List<Map<String, Object>> currentProductsSummary;
 
     // FXML - Filtros
-    @FXML private ComboBox<String> monthCombo;
-    @FXML private ComboBox<Integer> yearCombo;
+    @FXML private ComboBox<String> rangeTypeCombo;
+    @FXML private DatePicker startDatePicker;
+    @FXML private DatePicker endDatePicker;
 
     // FXML - Botones
     @FXML private Button exportPdfBtn;
@@ -106,7 +115,7 @@ public class ReportsController {
     @FXML
     private void initialize() {
         setupUserInfo();
-        setupFilters();
+        setupRangeFilters();
         setupProductsTable();
         LOGGER.info("ReportsController inicializado correctamente");
     }
@@ -123,29 +132,90 @@ public class ReportsController {
     }
 
     /**
-     * Configura los ComboBox de filtros (mes y año)
+     * Configura los filtros de rango de fechas
      */
-    private void setupFilters() {
-        // Llenar combo de meses
-        ObservableList<String> months = FXCollections.observableArrayList();
-        for (Month month : Month.values()) {
-            String monthName = month.getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
-            months.add(monthName.substring(0, 1).toUpperCase() + monthName.substring(1));
-        }
-        monthCombo.setItems(months);
-        
-        // Seleccionar mes actual por defecto
-        int currentMonth = YearMonth.now().getMonthValue();
-        monthCombo.getSelectionModel().select(currentMonth - 1);
+    private void setupRangeFilters() {
+        // Opciones de tipo de rango
+        ObservableList<String> rangeTypes = FXCollections.observableArrayList(
+            "Hoy",
+            "Esta Semana",
+            "Este Mes",
+            "Este Año",
+            "Personalizado"
+        );
+        rangeTypeCombo.setItems(rangeTypes);
 
-        // Llenar combo de años (últimos 5 años)
-        ObservableList<Integer> years = FXCollections.observableArrayList();
-        int currentYear = YearMonth.now().getYear();
-        for (int i = 0; i < 5; i++) {
-            years.add(currentYear - i);
+        // Listener para cambio de tipo de rango
+        rangeTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                updateDatePickersForRange(newVal);
+            }
+        });
+
+        // Configurar DatePickers
+        startDatePicker.setValue(LocalDate.now());
+        endDatePicker.setValue(LocalDate.now());
+
+        // Seleccionar "Este Mes" por defecto
+        rangeTypeCombo.getSelectionModel().select(2);
+    }
+
+    /**
+     * Actualiza los DatePickers según el tipo de rango seleccionado
+     */
+    private void updateDatePickersForRange(String rangeType) {
+        LocalDate today = LocalDate.now();
+        currentRangeType = rangeType;
+
+        switch (rangeType) {
+            case "Hoy":
+                startDate = today;
+                endDate = today;
+                startDatePicker.setValue(today);
+                endDatePicker.setValue(today);
+                startDatePicker.setDisable(true);
+                endDatePicker.setDisable(true);
+                break;
+
+            case "Esta Semana":
+                startDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                endDate = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+                startDatePicker.setValue(startDate);
+                endDatePicker.setValue(endDate);
+                startDatePicker.setDisable(true);
+                endDatePicker.setDisable(true);
+                break;
+
+            case "Este Mes":
+                startDate = today.withDayOfMonth(1);
+                endDate = today.with(TemporalAdjusters.lastDayOfMonth());
+                startDatePicker.setValue(startDate);
+                endDatePicker.setValue(endDate);
+                startDatePicker.setDisable(true);
+                endDatePicker.setDisable(true);
+                // Actualizar selectedPeriod para compatibilidad con exportación
+                selectedPeriod = YearMonth.from(today);
+                break;
+
+            case "Este Año":
+                startDate = today.withDayOfYear(1);
+                endDate = today.with(TemporalAdjusters.lastDayOfYear());
+                startDatePicker.setValue(startDate);
+                endDatePicker.setValue(endDate);
+                startDatePicker.setDisable(true);
+                endDatePicker.setDisable(true);
+                break;
+
+            case "Personalizado":
+                startDatePicker.setDisable(false);
+                endDatePicker.setDisable(false);
+                // Usar las fechas actuales de los pickers
+                startDate = startDatePicker.getValue();
+                endDate = endDatePicker.getValue();
+                break;
         }
-        yearCombo.setItems(years);
-        yearCombo.getSelectionModel().select(0); // Año actual
+
+        LOGGER.info("Rango actualizado: " + rangeType + " (" + startDate + " a " + endDate + ")");
     }
 
     /**
@@ -193,22 +263,31 @@ public class ReportsController {
         }
 
         try {
-            // Obtener período seleccionado
-            int monthIndex = monthCombo.getSelectionModel().getSelectedIndex() + 1;
-            int year = yearCombo.getValue();
-            selectedPeriod = YearMonth.of(year, monthIndex);
+            // Obtener fechas de los DatePickers (por si es personalizado)
+            if ("Personalizado".equals(currentRangeType)) {
+                startDate = startDatePicker.getValue();
+                endDate = endDatePicker.getValue();
+            }
 
-            LOGGER.info("Generando reporte para: " + selectedPeriod);
+            // Actualizar selectedPeriod para compatibilidad con exportación
+            selectedPeriod = YearMonth.from(startDate);
+
+            LOGGER.info("Generando reporte para rango: " + startDate + " a " + endDate);
 
             // Mostrar indicador de carga
             showLoadingState();
 
+            // Capturar variables finales para el thread
+            final LocalDate finalStartDate = startDate;
+            final LocalDate finalEndDate = endDate;
+
             // Ejecutar consultas en background
             new Thread(() -> {
                 try {
-                    Map<String, Object> stats = reportDAO.getMonthlyStats(selectedPeriod);
-                    Map<String, BigDecimal> paymentTotals = reportDAO.getPaymentMethodTotals(selectedPeriod);
-                    List<Map<String, Object>> productsSummary = reportDAO.getProductSalesSummary(selectedPeriod);
+                    Map<String, Object> stats = reportDAO.getStatsByDateRange(finalStartDate, finalEndDate);
+                    Map<String, BigDecimal> paymentTotals = reportDAO.getPaymentMethodTotalsByRange(finalStartDate, finalEndDate);
+                    List<Map<String, Object>> productsSummary = reportDAO.getProductSalesSummaryByRange(finalStartDate, finalEndDate);
+                    Map<String, BigDecimal> dailySales = reportDAO.getDailySalesByRange(finalStartDate, finalEndDate);
 
                     // Actualizar UI en JavaFX thread
                     Platform.runLater(() -> {
@@ -220,7 +299,7 @@ public class ReportsController {
                         updateStatistics(stats);
                         updatePaymentMethods(paymentTotals);
                         updateProductsTable(productsSummary);
-                        updateChart(reportDAO.getDailySales(selectedPeriod));
+                        updateChartByRange(dailySales);
                         showReportSections();
                         enableExportButtons();
                     });
@@ -238,13 +317,24 @@ public class ReportsController {
     }
 
     /**
-     * Valida que se hayan seleccionado mes y año
+     * Valida que se hayan seleccionado las fechas correctamente
      */
     private boolean validateFilters() {
-        if (monthCombo.getValue() == null || yearCombo.getValue() == null) {
-            showWarning("Por favor selecciona un mes y un año");
+        if (rangeTypeCombo.getValue() == null) {
+            showWarning("Por favor selecciona un tipo de rango");
             return false;
         }
+
+        if (startDatePicker.getValue() == null || endDatePicker.getValue() == null) {
+            showWarning("Por favor selecciona las fechas del rango");
+            return false;
+        }
+
+        if (startDatePicker.getValue().isAfter(endDatePicker.getValue())) {
+            showWarning("La fecha inicial no puede ser posterior a la fecha final");
+            return false;
+        }
+
         return true;
     }
 
@@ -381,6 +471,77 @@ public class ReportsController {
         barChart.setStyle("-fx-background-color: transparent;");
         
         chartContainer.getChildren().add(barChart);
+    }
+
+    /**
+     * Actualiza el gráfico de ventas por rango de fechas
+     */
+    private void updateChartByRange(Map<String, BigDecimal> dailySales) {
+        chartContainer.getChildren().clear();
+
+        if (dailySales == null || dailySales.isEmpty()) {
+            VBox emptyChart = new VBox(20);
+            emptyChart.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyChart.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-padding: 60;");
+
+            Label icon = new Label("Sin Datos");
+            icon.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;");
+
+            Label message = new Label("No hay ventas registradas en este rango");
+            message.setStyle("-fx-font-size: 16px; -fx-text-fill: #64748b;");
+
+            emptyChart.getChildren().addAll(icon, message);
+            chartContainer.getChildren().add(emptyChart);
+
+            LOGGER.info("No hay datos de ventas para el gráfico");
+            return;
+        }
+
+        LOGGER.info("Generando gráfico con " + dailySales.size() + " días de datos");
+
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+
+        xAxis.setLabel("Fecha");
+        yAxis.setLabel("Monto (ARS)");
+
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+
+        // Título dinámico según el rango
+        String rangeTitle = currentRangeType != null ? currentRangeType : "Personalizado";
+        barChart.setTitle("Ventas - " + rangeTitle + " (" + startDate + " a " + endDate + ")");
+        barChart.setLegendVisible(false);
+        barChart.setAnimated(true);
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Ventas");
+
+        for (Map.Entry<String, BigDecimal> entry : dailySales.entrySet()) {
+            String fecha = entry.getKey();
+            double amount = entry.getValue().doubleValue();
+            // Formatear la fecha para mostrar solo día/mes
+            String displayDate = formatDateForChart(fecha);
+            series.getData().add(new XYChart.Data<>(displayDate, amount));
+            LOGGER.info("Fecha " + fecha + ": $" + amount);
+        }
+
+        barChart.getData().add(series);
+        barChart.setPrefHeight(350);
+        barChart.setStyle("-fx-background-color: transparent;");
+
+        chartContainer.getChildren().add(barChart);
+    }
+
+    /**
+     * Formatea la fecha para mostrar en el gráfico
+     */
+    private String formatDateForChart(String dateStr) {
+        try {
+            LocalDate date = LocalDate.parse(dateStr);
+            return date.getDayOfMonth() + "/" + date.getMonthValue();
+        } catch (Exception e) {
+            return dateStr;
+        }
     }
 
     /**
@@ -725,7 +886,7 @@ public class ReportsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            Stage stage = (Stage) monthCombo.getScene().getWindow();
+            Stage stage = (Stage) rangeTypeCombo.getScene().getWindow();
 
             // Guardar estado actual de la ventana
             boolean wasMaximized = stage.isMaximized();
