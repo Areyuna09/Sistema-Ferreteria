@@ -34,18 +34,18 @@
 
             <!-- Estadisticas -->
             <HBox spacing="24" alignment="CENTER_LEFT">
-                <VBox styleClass="stat-card card-blue" HBox.hgrow="ALWAYS">
-                    <Label text="💰" styleClass="stat-icon"/>
-                    <Label fx:id="totalSalesLabel" text="$0.00" styleClass="card-value"/>
-                    <Label text="Total Ventas" styleClass="card-label"/>
-                    <Label text="Suma de todas las ventas" styleClass="card-description"/>
+                <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 24; -fx-border-color: #e2e8f0; -fx-border-radius: 16; -fx-border-width: 1; -fx-alignment: top-center; -fx-spacing: 8;" HBox.hgrow="ALWAYS">
+                    <Label text="💰" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #3b82f6;"/>
+                    <Label fx:id="totalSalesLabel" text="$0.00" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #111827;"/>
+                    <Label text="Total Ventas" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569;"/>
+                    <Label text="Suma de todas las ventas" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;"/>
                 </VBox>
 
-                <VBox styleClass="stat-card card-green" HBox.hgrow="ALWAYS">
-                    <Label text="📊" styleClass="stat-icon"/>
-                    <Label fx:id="salesCountLabel" text="0" styleClass="card-value"/>
-                    <Label text="Cantidad de Ventas" styleClass="card-label"/>
-                    <Label text="Ventas registradas" styleClass="card-description"/>
+                <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 24; -fx-border-color: #e2e8f0; -fx-border-radius: 16; -fx-border-width: 1; -fx-alignment: top-center; -fx-spacing: 8;" HBox.hgrow="ALWAYS">
+                    <Label text="📊" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #22c55e;"/>
+                    <Label fx:id="salesCountLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #111827;"/>
+                    <Label text="Cantidad de Ventas" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569;"/>
+                    <Label text="Ventas registradas" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;"/>
                 </VBox>
             </HBox>
 

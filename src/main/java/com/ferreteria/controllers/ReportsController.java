@@ -737,6 +737,26 @@ public class ReportsController {
         }
     }
 
+    @FXML
+    public void handleProducts() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Products.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) rangeTypeCombo.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Productos");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al navegar a Productos", e);
+            showError("Error al navegar a Productos: " + e.getMessage());
+        }
+    }
+
     // ==================== UTILIDADES UI ====================
 
     private void showError(String message) {
