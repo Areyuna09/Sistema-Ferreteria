@@ -36,13 +36,20 @@ public class DatabaseConfig {
     }
 
     public Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-            // Activar foreign keys en SQLite
-            Statement stmt = connection.createStatement();
-            stmt.execute("PRAGMA foreign_keys = ON");
-        }
-        return connection;
+        // Siempre crear una nueva conexión para evitar "database is locked"
+        System.out.println("=== CREANDO NUEVA CONEXIÓN A: " + dbPath + " ===");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+        
+        // Configurar SQLite para permitir concurrencia
+        Statement stmt = conn.createStatement();
+        stmt.execute("PRAGMA foreign_keys = ON");
+        stmt.execute("PRAGMA journal_mode = WAL");  // Permitir lecturas durante escrituras
+        stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
+        stmt.execute("PRAGMA cache_size = 10000");    // Más caché para mejor rendimiento
+        stmt.close();
+        
+        System.out.println("=== CONEXIÓN CREADA EXITOSAMENTE CON WAL MODE ===");
+        return conn;
     }
 
     public String getDbPath() {

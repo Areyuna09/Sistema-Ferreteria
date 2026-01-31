@@ -270,3 +270,83 @@
 [2026-01-31 18:38:13] [INFO   ] Sistema de logging inicializado
 [2026-01-31 18:38:13] [INFO   ] [admin] [AUTH] Login exitoso: admin
 [2026-01-31 18:43:37] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:13:11] [INFO   ] Sistema de logging inicializado
+[2026-01-31 19:13:11] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 19:13:13] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:21:34] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-31 19:21:34] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 19:21:34] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 19:35:50] [INFO   ] Sistema de logging inicializado
+[2026-01-31 19:35:50] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 19:35:51] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:38:55] [INFO   ] Sistema de logging inicializado
+[2026-01-31 19:38:55] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 19:38:57] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:45:26] [INFO   ] Sistema de logging inicializado
+[2026-01-31 19:45:26] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 19:45:28] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:48:07] [INFO   ] Sistema de logging inicializado
+[2026-01-31 19:48:07] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 19:48:08] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:52:45] [INFO   ] Sistema de logging inicializado
+[2026-01-31 19:52:45] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 19:52:47] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:53:26] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 19:53:27] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 19:54:37] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 19:54:40] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 19:54:40] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:02:30] [INFO   ] Sistema de logging inicializado
+[2026-01-31 20:02:30] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 20:02:33] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:02:55] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:02:55] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:03:03] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:03:07] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:03:07] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:03:34] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:03:38] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:03:38] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:04:04] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:04:44] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:04:44] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:06:19] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:08:23] [INFO   ] Sistema de logging inicializado
+[2026-01-31 20:08:23] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 20:08:25] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:08:26] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:08:26] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:08:35] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:12:46] [INFO   ] Sistema de logging inicializado
+[2026-01-31 20:12:46] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 20:12:47] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:12:49] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:12:49] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:12:56] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:12:56] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:12:56] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:13:17] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:13:17] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:14:01] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:16:12] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-31 20:16:13] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:19:47] [INFO   ] Sistema de logging inicializado
+[2026-01-31 20:19:47] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 20:19:56] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:20:14] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:20:14] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:20:29] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:23:33] [INFO   ] Sistema de logging inicializado
+[2026-01-31 20:23:33] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 20:23:35] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:23:39] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:23:39] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:23:57] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:26:17] [INFO   ] Sistema de logging inicializado
+[2026-01-31 20:26:17] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 20:26:19] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 20:26:25] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:26:25] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:26:53] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 20:26:53] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 20:27:11] [INFO   ] [admin] [NAV] Navegando a Productos

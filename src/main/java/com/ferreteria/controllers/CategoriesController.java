@@ -354,25 +354,37 @@ public class CategoriesController {
                 showError("Error al eliminar: " + e.getMessage());
             }
         }
+        loadCategories();
     }
     
     @FXML
     private void handleSearchCategory() {
         String searchTerm = categorySearchField.getText().trim();
+        System.out.println("=== BUSCANDO CATEGORÍA CON TÉRMINO: '" + searchTerm + "' ===");
+        
         List<Category> results;
         
         if (searchTerm.isEmpty()) {
             results = categoryDAO.findAll();
+            System.out.println("=== TÉRMINO VACÍO, CARGANDO TODAS LAS CATEGORÍAS: " + results.size() + " ===");
         } else {
             results = categoryDAO.search(searchTerm);
+            System.out.println("=== BÚSQUEDA COMPLETADA: " + results.size() + " RESULTADOS ===");
+            
+            // Mostrar los nombres de las categorías encontradas
+            for (Category cat : results) {
+                System.out.println("=== - " + cat.getNombre() + " (ID: " + cat.getId() + ") ===");
+            }
         }
         
         categoriesList.setAll(results);
         categoryCountLabel.setText(results.size() + " categoría(s)");
+        System.out.println("=== TABLA ACTUALIZADA CON " + results.size() + " CATEGORÍAS ===");
     }
     
     @FXML
     private void handleClearCategorySearch() {
+        System.out.println("=== LIMPIANDO BÚSQUEDA DE CATEGORÍAS ===");
         categorySearchField.clear();
         loadCategories();
     }

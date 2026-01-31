@@ -229,6 +229,10 @@ public class ProductsController {
                 products.add(product);
             }
             
+            rs.close();
+            stmt.close();
+            conn.close();
+            
             productsTable.setUserData(products);
             productsTable.getItems().setAll(products);
             System.out.println("Productos iniciales cargados: " + products.size());
@@ -249,24 +253,33 @@ public class ProductsController {
         try {
             // Limpiar items existentes
             categoryFilter.getItems().clear();
+            System.out.println("=== ITEMS LIMPIADOS DEL COMBOBOX ===");
             
             // Agregar opción "Todas las categorías"
             categoryFilter.getItems().add("Todas las categorías");
+            System.out.println("=== AGREGADA OPCIÓN 'Todas las categorías' ===");
             
             // Usar CategoryDAO como lo hace CategoriesController
             CategoryDAO categoryDAO = new CategoryDAO();
             List<Category> categories = categoryDAO.findAll();
+            System.out.println("=== CATEGORÍAS OBTENIDAS DE BD: " + categories.size() + " ===");
             
             for (Category category : categories) {
                 if (category != null && category.getNombre() != null && !category.getNombre().trim().isEmpty()) {
                     categoryFilter.getItems().add(category.getNombre());
+                    System.out.println("=== AGREGANDO CATEGORÍA: '" + category.getNombre() + "' (ID: " + category.getId() + ") ===");
                 }
             }
             
             // Seleccionar "Todas las categorías" por defecto
             categoryFilter.getSelectionModel().selectFirst();
             
-            System.out.println("Categorías cargadas: " + categoryFilter.getItems().size());
+            System.out.println("=== CATEGORÍAS CARGADAS: " + categoryFilter.getItems().size() + " ===");
+            System.out.println("=== LISTA COMPLETA DE CATEGORÍAS EN COMBOBOX (EN ORDEN): ===");
+            for (int i = 0; i < categoryFilter.getItems().size(); i++) {
+                String item = categoryFilter.getItems().get(i);
+                System.out.println("=== " + i + ". '" + item + "' ===");
+            }
             
         } catch (Exception e) {
             System.err.println("ERROR cargando categorías: " + e.getMessage());
@@ -289,7 +302,10 @@ public class ProductsController {
         // Ejecutar en un hilo separado para no bloquear la UI
         new Thread(() -> {
             try {
-                System.out.println("Iniciando carga de productos...");
+                System.out.println("Iniciando carga de productos y categorías...");
+                
+                // Recargar categorías primero
+                loadCategories();
                 
                 var conn = DatabaseConfig.getInstance().getConnection();
                 Statement stmt = conn.createStatement();
@@ -326,6 +342,10 @@ public class ProductsController {
                     products.add(product);
                 }
                 
+                rs.close();
+                stmt.close();
+                conn.close();
+                
                 System.out.println("Se encontraron " + products.size() + " productos");
                 
                 // Actualizar la UI en el hilo de JavaFX
@@ -359,7 +379,7 @@ public class ProductsController {
                         System.out.println("Tabla actualizada con " + productsTable.getItems().size() + " productos y movida al inicio");
                         
                         // Mostrar alerta para confirmar visualmente
-                        showAlert("Recarga Completada", "Se recargaron " + products.size() + " productos correctamente");
+                        showAlert("Recarga Completada", "Se recargaron " + products.size() + " productos y " + (categoryFilter.getItems().size() - 1) + " categorías correctamente");
                         
                     } catch (Exception e) {
                         System.err.println("Error actualizando UI: " + e.getMessage());
@@ -522,6 +542,9 @@ public class ProductsController {
                 
                 sql = "UPDATE product_variants SET active = 0 WHERE product_id = " + product.getId();
                 int rowsAffected2 = stmt.executeUpdate(sql);
+                
+                stmt.close();
+                conn.close();
                 
                 if (rowsAffected1 > 0 || rowsAffected2 > 0) {
                     showAlert("Éxito", "Producto eliminado correctamente");

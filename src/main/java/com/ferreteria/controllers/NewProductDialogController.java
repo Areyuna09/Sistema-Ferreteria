@@ -50,29 +50,46 @@ public class NewProductDialogController {
     }
 
     private void loadCategories() {
-        System.out.println("Cargando categorías...");
+        System.out.println("=== CARGANDO CATEGORÍAS EN DIÁLOGO DE PRODUCTO ===");
         categoryComboBox.getItems().clear();
+        System.out.println("=== ITEMS LIMPIADOS DEL COMBOBOX ===");
         
         try {
             var conn = DatabaseConfig.getInstance().getConnection();
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT name FROM categories WHERE active = 1 ORDER BY name");
+            ResultSet rs = stmt.executeQuery("SELECT name FROM categories WHERE active = 1 ORDER BY name COLLATE NOCASE ASC");
             
             List<String> categories = new ArrayList<>();
             while (rs.next()) {
-                categories.add(rs.getString("name"));
+                String categoryName = rs.getString("name");
+                categories.add(categoryName);
+                System.out.println("=== CATEGORÍA ENCONTRADA: '" + categoryName + "' ===");
             }
             
-            System.out.println("Se encontraron " + categories.size() + " categorías en la base de datos");
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            System.out.println("=== SE ENCONTRARON " + categories.size() + " CATEGORÍAS EN LA BD ===");
+            
+            // Limpiar y agregar en orden
+            categoryComboBox.getItems().clear();
             categoryComboBox.getItems().addAll(categories);
             
             // Si no hay categorías, agregar algunas por defecto
             if (categories.isEmpty()) {
-                System.out.println("No hay categorías en la BD, agregando categorías por defecto");
+                System.out.println("=== NO HAY CATEGORÍAS EN LA BD, AGREGANDO CATEGORÍAS POR DEFECTO ===");
                 categoryComboBox.getItems().addAll(
                     "Herramientas", "Electricidad", "Fontanería", 
                     "Jardinería", "Pintura", "Construcción", "Otros"
                 );
+            }
+            
+            System.out.println("=== CATEGORÍAS CARGADAS EN COMBOBOX: " + categoryComboBox.getItems().size() + " ===");
+            System.out.println("=== LISTA COMPLETA (EN ORDEN): ===");
+            for (int i = 0; i < categoryComboBox.getItems().size(); i++) {
+                String cat = categoryComboBox.getItems().get(i);
+                System.out.println("=== " + i + ". '" + cat + "' ===");
             }
             
         } catch (Exception e) {
@@ -85,6 +102,8 @@ public class NewProductDialogController {
                 "Jardinería", "Pintura", "Construcción", "Otros"
             );
         }
+        
+        System.out.println("=== FIN CARGA DE CATEGORÍAS EN DIÁLOGO ===");
     }
 
     private void setupNumericFields() {
@@ -138,6 +157,12 @@ public class NewProductDialogController {
 
     public boolean isSaveClicked() {
         return saveClicked;
+    }
+
+    @FXML
+    private void handleRefreshCategories() {
+        System.out.println("=== REFRESH CATEGORÍAS EN DIÁLOGO DE PRODUCTO ===");
+        loadCategories();
     }
 
     @FXML
@@ -236,124 +261,153 @@ public class NewProductDialogController {
     private void createProduct() throws Exception {
         var conn = DatabaseConfig.getInstance().getConnection();
         
-        // Primero, obtener o crear la categoría
-        int categoryId = getOrCreateCategory(categoryComboBox.getValue());
-        
-        // Insertar producto
-        String productSql = """
-            INSERT INTO products (code, name, description, category_id, location, active, created_at)
-            VALUES (?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
-            """;
-        
-        try (PreparedStatement pstmt = conn.prepareStatement(productSql, Statement.RETURN_GENERATED_KEYS)) {
-            String code = codeField.getText().trim();
-            if (code.isEmpty()) {
-                pstmt.setNull(1, java.sql.Types.VARCHAR);
-            } else {
-                pstmt.setString(1, code);
-            }
-            pstmt.setString(2, nameField.getText().trim());
-            pstmt.setString(3, descriptionArea.getText().trim());
-            pstmt.setInt(4, categoryId);
-            pstmt.setString(5, locationField.getText().trim());
+        try {
+            // Primero, obtener o crear la categoría
+            int categoryId = getOrCreateCategory(categoryComboBox.getValue(), conn);
             
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new Exception("No se pudo crear el producto");
-            }
+            // Insertar producto
+            String productSql = """
+                INSERT INTO products (code, name, description, category_id, location, active, created_at)
+                VALUES (?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
+                """;
             
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int productId = generatedKeys.getInt(1);
+            try (PreparedStatement pstmt = conn.prepareStatement(productSql, Statement.RETURN_GENERATED_KEYS)) {
+                String code = codeField.getText().trim();
+                if (code.isEmpty()) {
+                    pstmt.setNull(1, java.sql.Types.VARCHAR);
+                } else {
+                    pstmt.setString(1, code);
+                }
+                pstmt.setString(2, nameField.getText().trim());
+                pstmt.setString(3, descriptionArea.getText().trim());
+                pstmt.setInt(4, categoryId);
+                pstmt.setString(5, locationField.getText().trim());
+                
+                int affectedRows = pstmt.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new Exception("No se pudo crear el producto");
+                }
+                
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int productId = generatedKeys.getInt(1);
 
-                    // Insertar variante del producto
-                    String variantSql = """
-                        INSERT INTO product_variants (product_id, variant_name, sale_price, cost_price, stock, min_stock, active, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
-                        """;
+                        // Insertar variante del producto
+                        String variantSql = """
+                            INSERT INTO product_variants (product_id, variant_name, sale_price, cost_price, stock, min_stock, active, created_at)
+                            VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now', 'localtime'))
+                            """;
 
-                    try (PreparedStatement variantStmt = conn.prepareStatement(variantSql)) {
-                        variantStmt.setInt(1, productId);
-                        variantStmt.setString(2, "Estándar");
-                        variantStmt.setBigDecimal(3, new BigDecimal(priceField.getText()));
-                        variantStmt.setBigDecimal(4, costField.getText().trim().isEmpty() ?
-                            BigDecimal.ZERO : new BigDecimal(costField.getText()));
-                        variantStmt.setInt(5, Integer.parseInt(stockField.getText()));
-                        variantStmt.setInt(6, minStockField.getText().trim().isEmpty() ?
-                            5 : Integer.parseInt(minStockField.getText()));
+                        try (PreparedStatement variantStmt = conn.prepareStatement(variantSql)) {
+                            variantStmt.setInt(1, productId);
+                            variantStmt.setString(2, "Estándar");
+                            variantStmt.setBigDecimal(3, new BigDecimal(priceField.getText()));
+                            variantStmt.setBigDecimal(4, costField.getText().trim().isEmpty() ?
+                                BigDecimal.ZERO : new BigDecimal(costField.getText()));
+                            variantStmt.setInt(5, Integer.parseInt(stockField.getText()));
+                            variantStmt.setInt(6, minStockField.getText().trim().isEmpty() ?
+                                5 : Integer.parseInt(minStockField.getText()));
 
-                        variantStmt.executeUpdate();
+                            variantStmt.executeUpdate();
+                        }
                     }
                 }
             }
+            
+            showAlert("Éxito", "Producto creado correctamente");
+        } finally {
+            conn.close();
         }
-        
-        showAlert("Éxito", "Producto creado correctamente");
     }
 
     private void updateProduct() throws Exception {
+        System.out.println("=== INICIANDO UPDATE PRODUCT ===");
         var conn = DatabaseConfig.getInstance().getConnection();
+        System.out.println("=== CONEXIÓN OBTENIDA PARA UPDATE ===");
         
-        // Actualizar producto
-        String productSql = """
-            UPDATE products SET 
-                code = ?, name = ?, description = ?, 
-                category_id = ?, location = ?
-            WHERE id = ?
-            """;
-        
-        int categoryId = getOrCreateCategory(categoryComboBox.getValue());
-        String code = codeField.getText().trim();
-
-        try (PreparedStatement pstmt = conn.prepareStatement(productSql)) {
-            if (code.isEmpty()) {
-                pstmt.setNull(1, java.sql.Types.VARCHAR);
-            } else {
-                pstmt.setString(1, code);
-            }
-            pstmt.setString(2, nameField.getText().trim());
-            pstmt.setString(3, descriptionArea.getText().trim());
-            pstmt.setInt(4, categoryId);
-            pstmt.setString(5, locationField.getText().trim());
-            pstmt.setInt(6, editingProduct.getId());
-
-            pstmt.executeUpdate();
-        }
-        
-        // Actualizar variante del producto
-        String variantSql = """
-            UPDATE product_variants SET 
-                sale_price = ?, cost_price = ?, 
-                stock = ?, min_stock = ?
-            WHERE product_id = ?
-            """;
-        
-        try (PreparedStatement pstmt = conn.prepareStatement(variantSql)) {
-            pstmt.setBigDecimal(1, new BigDecimal(priceField.getText()));
-            pstmt.setBigDecimal(2, costField.getText().trim().isEmpty() ? 
-                BigDecimal.ZERO : new BigDecimal(costField.getText()));
-            pstmt.setInt(3, Integer.parseInt(stockField.getText()));
-            pstmt.setInt(4, minStockField.getText().trim().isEmpty() ? 
-                5 : Integer.parseInt(minStockField.getText()));
-            pstmt.setInt(5, editingProduct.getId());
+        try {
+            // Actualizar producto
+            String productSql = """
+                UPDATE products SET 
+                    code = ?, name = ?, description = ?, 
+                    category_id = ?, location = ?
+                WHERE id = ?
+                """;
             
-            pstmt.executeUpdate();
+            int categoryId = getOrCreateCategory(categoryComboBox.getValue(), conn);
+            String code = codeField.getText().trim();
+            System.out.println("=== ACTUALIZANDO PRODUCTO ID: " + editingProduct.getId() + " CON CÓDIGO: " + code + " ===");
+
+            try (PreparedStatement pstmt = conn.prepareStatement(productSql)) {
+                if (code.isEmpty()) {
+                    pstmt.setNull(1, java.sql.Types.VARCHAR);
+                } else {
+                    pstmt.setString(1, code);
+                }
+                pstmt.setString(2, nameField.getText().trim());
+                pstmt.setString(3, descriptionArea.getText().trim());
+                pstmt.setInt(4, categoryId);
+                pstmt.setString(5, locationField.getText().trim());
+                pstmt.setInt(6, editingProduct.getId());
+
+                System.out.println("=== EJECUTANDO UPDATE SQL ===");
+                System.out.println("=== SQL: " + productSql);
+                System.out.println("=== Parámetros: code=" + code + ", id=" + editingProduct.getId());
+                
+                try {
+                    int rows = pstmt.executeUpdate();
+                    System.out.println("=== UPDATE AFECTÓ " + rows + " FILAS ===");
+                    
+                    if (rows == 0) {
+                        System.out.println("=== ADVERTENCIA: Ninguna fila fue actualizada ===");
+                    }
+                } catch (Exception e) {
+                    System.out.println("=== ERROR EN UPDATE: " + e.getMessage());
+                    throw e;
+                }
+            }
+            
+            // Actualizar variante del producto
+            String variantSql = """
+                UPDATE product_variants SET 
+                    sale_price = ?, cost_price = ?, 
+                    stock = ?, min_stock = ?
+                WHERE product_id = ?
+                """;
+            
+            try (PreparedStatement pstmt = conn.prepareStatement(variantSql)) {
+                pstmt.setBigDecimal(1, new BigDecimal(priceField.getText()));
+                pstmt.setBigDecimal(2, costField.getText().trim().isEmpty() ? 
+                    BigDecimal.ZERO : new BigDecimal(costField.getText()));
+                pstmt.setInt(3, Integer.parseInt(stockField.getText()));
+                pstmt.setInt(4, minStockField.getText().trim().isEmpty() ? 
+                    5 : Integer.parseInt(minStockField.getText()));
+                pstmt.setInt(5, editingProduct.getId());
+                
+                System.out.println("=== EJECUTANDO UPDATE VARIANT SQL ===");
+                int rows = pstmt.executeUpdate();
+                System.out.println("=== UPDATE VARIANT AFECTÓ " + rows + " FILAS ===");
+            }
+            
+            showAlert("Éxito", "Producto actualizado correctamente");
+            System.out.println("=== PRODUCTO ACTUALIZADO CON ÉXITO ===");
+        } finally {
+            System.out.println("=== CERRANDO CONEXIÓN DE UPDATE ===");
+            conn.close();
+            System.out.println("=== CONEXIÓN CERRADA ===");
         }
-        
-        showAlert("Éxito", "Producto actualizado correctamente");
     }
 
-    private int getOrCreateCategory(String categoryName) throws Exception {
+    private int getOrCreateCategory(String categoryName, Connection conn) throws Exception {
         if (categoryName == null || categoryName.trim().isEmpty()) {
             return 1; // Categoría por defecto
         }
         
-        var conn = DatabaseConfig.getInstance().getConnection();
-        
         // Buscar categoría existente
         String selectSql = "SELECT id FROM categories WHERE name = ? AND active = 1";
+        
         try (PreparedStatement pstmt = conn.prepareStatement(selectSql)) {
-            pstmt.setString(1, categoryName.trim());
+            pstmt.setString(1, categoryName);
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
@@ -363,8 +417,9 @@ public class NewProductDialogController {
         
         // Crear nueva categoría si no existe
         String insertSql = "INSERT INTO categories (name, active, created_at) VALUES (?, 1, datetime('now', 'localtime'))";
+        
         try (PreparedStatement pstmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, categoryName.trim());
+            pstmt.setString(1, categoryName);
             pstmt.executeUpdate();
             
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {

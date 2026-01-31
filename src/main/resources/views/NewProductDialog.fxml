@@ -31,7 +31,10 @@
                
                <!-- Fila 2: Categoría y Ubicación -->
                <Label text="Categoría:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-               <ComboBox fx:id="categoryComboBox" prefWidth="200.0" promptText="Seleccionar categoría" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+               <HBox spacing="5" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                   <ComboBox fx:id="categoryComboBox" prefWidth="170.0" promptText="Seleccionar categoría" />
+                   <Button text="..." onAction="#handleRefreshCategories" styleClass="primary-button" prefWidth="35" />
+               </HBox>
                
                <Label text="Ubicación:" GridPane.rowIndex="1" GridPane.columnIndex="2" />
                <TextField fx:id="locationField" promptText="Ej: Pasillo A, Estantería 3" GridPane.rowIndex="1" GridPane.columnIndex="3" />

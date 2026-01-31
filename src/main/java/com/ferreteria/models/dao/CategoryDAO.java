@@ -61,7 +61,7 @@ public class CategoryDAO {
      * @return Lista de categorías
      */
     public List<Category> findAll() {
-        String sql = "SELECT * FROM categories WHERE parent_id IS NULL AND active = 1 ORDER BY name";
+        String sql = "SELECT * FROM categories WHERE parent_id IS NULL AND active = 1 ORDER BY name COLLATE NOCASE ASC";
         return executeQuery(sql);
     }
 
