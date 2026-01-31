@@ -246,3 +246,14 @@
 [2026-01-31 01:15:45] [INFO   ] [admin] [NAV] Navegando a Categorías
 [2026-01-31 01:15:53] [INFO   ] [admin] [NAV] Navegando a Productos
 [2026-01-31 01:15:54] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 01:34:27] [INFO   ] Sistema de logging inicializado
+[2026-01-31 01:34:27] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 01:34:28] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 02:22:16] [INFO   ] Sistema de logging inicializado
+[2026-01-31 02:22:16] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 02:22:18] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 02:22:21] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-31 02:22:21] [INFO   ] [admin] [CATEGORIAS] CategoriesController inicializado
+[2026-01-31 02:22:22] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-31 02:22:24] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-31 02:22:27] [INFO   ] [admin] [NAV] Navegando a Usuarios
