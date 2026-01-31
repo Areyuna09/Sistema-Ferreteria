@@ -31,22 +31,22 @@
                 <!-- Estadísticas -->
                 <HBox spacing="16" alignment="CENTER">
                     <VBox styleClass="stat-card card-green" HBox.hgrow="ALWAYS">
-                        <Label text="$" styleClass="card-icon"/>
+                        <Label text="DINERO" styleClass="card-icon"/>
                         <Label fx:id="ventasHoyLabel" text="$0.00" styleClass="card-value"/>
                         <Label text="Ventas de Hoy" styleClass="card-label"/>
                     </VBox>
                     <VBox styleClass="stat-card card-blue" HBox.hgrow="ALWAYS">
-                        <Label text="$" styleClass="card-icon"/>
+                        <Label text="VENTAS" styleClass="card-icon"/>
                         <Label fx:id="ventasMesLabel" text="$0.00" styleClass="card-value"/>
                         <Label text="Ventas del Mes" styleClass="card-label"/>
                     </VBox>
                     <VBox styleClass="stat-card card-purple" HBox.hgrow="ALWAYS">
-                        <Label text="#" styleClass="card-icon"/>
+                        <Label text="CANT" styleClass="card-icon"/>
                         <Label fx:id="cantidadHoyLabel" text="0" styleClass="card-value"/>
                         <Label text="Ventas Hoy" styleClass="card-label"/>
                     </VBox>
                     <VBox styleClass="stat-card card-orange" HBox.hgrow="ALWAYS">
-                        <Label text="%" styleClass="card-icon"/>
+                        <Label text="PROM" styleClass="card-icon"/>
                         <Label fx:id="promedioLabel" text="$0.00" styleClass="card-value"/>
                         <Label text="Promedio" styleClass="card-label"/>
                     </VBox>
