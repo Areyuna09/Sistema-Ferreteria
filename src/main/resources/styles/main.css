@@ -1133,3 +1133,66 @@
     -fx-border-color: #e5e7eb;
     -fx-border-width: 1 0 0 0;
 }
+
+/* ============================================
+   ESTILOS ADICIONALES PARA FILTROS Y COMPONENTES
+   ============================================ */
+
+.filter-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 16 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 2);
+}
+
+.filter-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-padding: 0 0 4 2;
+}
+
+.chart-container {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 2);
+}
+
+.empty-state {
+    -fx-alignment: center;
+    -fx-spacing: 16;
+    -fx-padding: 60 40;
+}
+
+.empty-icon {
+    -fx-font-size: 48px;
+    -fx-text-fill: #cbd5e1;
+    -fx-font-weight: bold;
+}
+
+.empty-text {
+    -fx-font-size: 18px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 500;
+}
+
+.empty-subtext {
+    -fx-font-size: 14px;
+    -fx-text-fill: #94a3b8;
+}
+
+.pagination-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #374151;
+}
+
+/* ============================================
+   FIN DEL ARCHIVO CSS
+   ============================================ */

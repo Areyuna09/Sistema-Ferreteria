@@ -17,6 +17,7 @@ public class NavbarController {
 
     @FXML private Button btnDashboard;
     @FXML private Button btnProductos;
+    @FXML private Button btnCategorias;
     @FXML private Button btnVentas;
     @FXML private Button btnReportes;
     @FXML private Button btnUsuarios;
@@ -48,6 +49,7 @@ public class NavbarController {
         // Resetear todos
         btnDashboard.getStyleClass().remove("nav-button-active");
         btnProductos.getStyleClass().remove("nav-button-active");
+        btnCategorias.getStyleClass().remove("nav-button-active");
         btnVentas.getStyleClass().remove("nav-button-active");
         btnReportes.getStyleClass().remove("nav-button-active");
         btnUsuarios.getStyleClass().remove("nav-button-active");
@@ -57,6 +59,7 @@ public class NavbarController {
         switch (viewName.toLowerCase()) {
             case "dashboard" -> btnDashboard.getStyleClass().add("nav-button-active");
             case "productos", "products" -> btnProductos.getStyleClass().add("nav-button-active");
+            case "categorias", "categories" -> btnCategorias.getStyleClass().add("nav-button-active");
             case "ventas", "sales" -> btnVentas.getStyleClass().add("nav-button-active");
             case "reportes", "reports" -> btnReportes.getStyleClass().add("nav-button-active");
             case "usuarios", "users" -> btnUsuarios.getStyleClass().add("nav-button-active");
@@ -77,6 +80,14 @@ public class NavbarController {
         if (!"productos".equals(currentView)) {
             AppLogger.info("NAV", "Navegando a Productos");
             Main.navigateTo("/views/Products.fxml", "Sistema Ferreteria - Productos");
+        }
+    }
+
+    @FXML
+    public void handleCategories() {
+        if (!"categorias".equals(currentView)) {
+            AppLogger.info("NAV", "Navegando a Categorías");
+            Main.navigateTo("/views/Categories.fxml", "Sistema Ferreteria - Categorías");
         }
     }
 

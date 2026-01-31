@@ -23,6 +23,7 @@
     <HBox alignment="CENTER" spacing="6">
         <Button fx:id="btnDashboard" text="Dashboard" onAction="#handleDashboard" styleClass="nav-button"/>
         <Button fx:id="btnProductos" text="Productos" onAction="#handleProducts" styleClass="nav-button"/>
+        <Button fx:id="btnCategorias" text="Categorías" onAction="#handleCategories" styleClass="nav-button"/>
         <Button fx:id="btnVentas" text="Ventas" onAction="#handleSales" styleClass="nav-button"/>
         <Button fx:id="btnReportes" text="Reportes" onAction="#handleReports" styleClass="nav-button"/>
         <Button fx:id="btnSettings" text="Configuración" onAction="#handleSettings" styleClass="nav-button"/>
