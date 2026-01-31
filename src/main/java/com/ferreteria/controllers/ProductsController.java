@@ -32,6 +32,7 @@ public class ProductsController {
 
     @FXML private TableView<Product> productsTable;
     @FXML private TextField searchField;
+    @FXML private ComboBox<String> categoryFilter;
     @FXML private TableColumn<Product, String> codeColumn;
     @FXML private TableColumn<Product, String> nameColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
@@ -329,6 +330,22 @@ public class ProductsController {
         }).start();
         
         System.out.println("=== FIN HANDLE REFRESH ===");
+    }
+
+    @FXML
+    public void handleFilterByCategory() {
+        System.out.println("ProductsController.handleFilterByCategory() LLAMADO");
+        // Implementación básica del filtro
+        loadProducts();
+    }
+
+    @FXML
+    public void handleClearFilter() {
+        System.out.println("ProductsController.handleClearFilter() LLAMADO");
+        if (categoryFilter != null) {
+            categoryFilter.getSelectionModel().clearSelection();
+        }
+        loadProducts();
     }
 
     @FXML
