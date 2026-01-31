@@ -6,218 +6,30 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.ferreteria.controllers.CategoriesController"
-            styleClass="categories-root">
+            styleClass="dashboard-root">
 
     <!-- Navbar Superior -->
     <top>
-        <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="12">
-            <padding>
-                <Insets top="0" right="32" bottom="0" left="32"/>
-            </padding>
-
-            <!-- Logo y Marca -->
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="🔧" styleClass="navbar-icon"/>
-                <Label text="Ferreteria" styleClass="navbar-brand"/>
-            </HBox>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <!-- Menu de Navegacion -->
-            <HBox alignment="CENTER" spacing="6">
-                <Button text="Dashboard" onAction="#handleDashboard" styleClass="nav-button"/>
-                <Button text="Productos" onAction="#handleProducts" styleClass="nav-button"/>
-                <Button text="Categorias" styleClass="nav-button nav-button-active"/>
-                <Button text="Ventas" onAction="#handleSales" styleClass="nav-button"/>
-                <Button text="Reportes" onAction="#handleReports" styleClass="nav-button"/>
-                <Button text="Usuarios" onAction="#handleUsers" styleClass="nav-button"/>
-            </HBox>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <!-- Usuario y Logout -->
-            <HBox alignment="CENTER_RIGHT" spacing="20">
-                <VBox alignment="CENTER_RIGHT">
-                    <Label fx:id="welcomeLabel" text="Administrador" styleClass="nav-user-name"/>
-                    <Label fx:id="roleLabel" text="Admin" styleClass="nav-user-role"/>
-                </VBox>
-                <Button text="Cerrar Sesion" onAction="#handleLogout" styleClass="logout-btn"/>
-            </HBox>
-        </HBox>
+        <fx:include fx:id="navbar" source="components/Navbar.fxml"/>
     </top>
 
     <!-- Contenido Principal -->
     <center>
-        <VBox styleClass="main-content" spacing="24">
+        <VBox styleClass="main-content" alignment="CENTER" spacing="20">
             <padding>
-                <Insets top="32" right="40" bottom="32" left="40"/>
+                <Insets top="60" right="40" bottom="40" left="40"/>
             </padding>
 
-            <!-- Header de Pagina -->
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <VBox HBox.hgrow="ALWAYS" spacing="6">
-                    <Label text="Gestion de Categorias" styleClass="page-title"/>
-                    <Label text="Administra las categorias y subcategorias de productos" styleClass="page-subtitle"/>
-                </VBox>
+            <Label fx:id="welcomeLabel" text="Módulo de Categorías" styleClass="page-title"/>
+            
+            <Label text="Esta sección está en desarrollo" styleClass="page-subtitle"/>
+            
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="Ir a Dashboard" styleClass="action-button" onAction="#handleDashboard"/>
+                <Button text="Ir a Productos" styleClass="action-button" onAction="#handleProducts"/>
+                <Button text="Ir a Ventas" styleClass="action-button" onAction="#handleSales"/>
+                <Button text="Ir a Reportes" styleClass="action-button" onAction="#handleReports"/>
             </HBox>
-
-            <!-- TabPane con Categorias y Subcategorias -->
-            <TabPane fx:id="tabPane" styleClass="categories-tabpane" VBox.vgrow="ALWAYS">
-
-                <!-- TAB: CATEGORIAS -->
-                <Tab text="Categorias" closable="false">
-                    <VBox spacing="20" styleClass="tab-content">
-                        <padding>
-                            <Insets top="24" right="0" bottom="0" left="0"/>
-                        </padding>
-
-                        <!-- Panel de Formulario y Acciones -->
-                        <HBox spacing="20" alignment="CENTER_LEFT">
-                            <!-- Formulario -->
-                            <VBox spacing="12" styleClass="form-panel" HBox.hgrow="ALWAYS">
-                                <Label text="Nueva Categoria" styleClass="form-title" fx:id="categoryFormTitle"/>
-
-                                <HBox spacing="16" alignment="CENTER_LEFT">
-                                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                        <Label text="NOMBRE" styleClass="field-label"/>
-                                        <TextField fx:id="categoryNameField"
-                                                   promptText="Nombre de la categoria"
-                                                   styleClass="form-field"/>
-                                    </VBox>
-
-                                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                        <Label text="DESCRIPCION" styleClass="field-label"/>
-                                        <TextField fx:id="categoryDescField"
-                                                   promptText="Descripcion (opcional)"
-                                                   styleClass="form-field"/>
-                                    </VBox>
-
-                                    <VBox spacing="6" alignment="BOTTOM_LEFT">
-                                        <Label text=" "/>
-                                        <HBox spacing="8">
-                                            <Button text="Guardar" onAction="#handleSaveCategory"
-                                                    styleClass="btn-primary" fx:id="saveCategoryBtn"/>
-                                            <Button text="Cancelar" onAction="#handleCancelCategory"
-                                                    styleClass="btn-secondary" fx:id="cancelCategoryBtn"
-                                                    visible="false" managed="false"/>
-                                        </HBox>
-                                    </VBox>
-                                </HBox>
-                            </VBox>
-                        </HBox>
-
-                        <!-- Barra de Busqueda -->
-                        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="search-bar">
-                            <TextField fx:id="categorySearchField"
-                                       promptText="Buscar categorias..."
-                                       styleClass="search-field"
-                                       prefWidth="300"/>
-                            <Button text="Buscar" onAction="#handleSearchCategory" styleClass="btn-secondary"/>
-                            <Button text="Limpiar" onAction="#handleClearCategorySearch" styleClass="btn-text"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Label fx:id="categoryCountLabel" text="0 categorias" styleClass="count-label"/>
-                        </HBox>
-
-                        <!-- Tabla de Categorias -->
-                        <TableView fx:id="categoriesTable" styleClass="data-table" VBox.vgrow="ALWAYS">
-                            <columns>
-                                <TableColumn text="ID" fx:id="catIdColumn" prefWidth="60"/>
-                                <TableColumn text="Nombre" fx:id="catNameColumn" prefWidth="200"/>
-                                <TableColumn text="Descripcion" fx:id="catDescColumn" prefWidth="300"/>
-                                <TableColumn text="Subcategorias" fx:id="catSubcatCountColumn" prefWidth="120"/>
-                                <TableColumn text="Productos" fx:id="catProductCountColumn" prefWidth="100"/>
-                                <TableColumn text="Acciones" fx:id="catActionsColumn" prefWidth="150"/>
-                            </columns>
-                            <placeholder>
-                                <Label text="No hay categorias registradas" styleClass="table-placeholder"/>
-                            </placeholder>
-                        </TableView>
-                    </VBox>
-                </Tab>
-
-                <!-- TAB: SUBCATEGORIAS -->
-                <Tab text="Subcategorias" closable="false">
-                    <VBox spacing="20" styleClass="tab-content">
-                        <padding>
-                            <Insets top="24" right="0" bottom="0" left="0"/>
-                        </padding>
-
-                        <!-- Panel de Formulario -->
-                        <VBox spacing="12" styleClass="form-panel">
-                            <Label text="Nueva Subcategoria" styleClass="form-title" fx:id="subcategoryFormTitle"/>
-
-                            <HBox spacing="16" alignment="CENTER_LEFT">
-                                <VBox spacing="6">
-                                    <Label text="CATEGORIA PADRE" styleClass="field-label"/>
-                                    <ComboBox fx:id="parentCategoryCombo"
-                                              promptText="Seleccionar categoria"
-                                              styleClass="form-combo"
-                                              prefWidth="200"/>
-                                </VBox>
-
-                                <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                    <Label text="NOMBRE" styleClass="field-label"/>
-                                    <TextField fx:id="subcategoryNameField"
-                                               promptText="Nombre de la subcategoria"
-                                               styleClass="form-field"/>
-                                </VBox>
-
-                                <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                    <Label text="DESCRIPCION" styleClass="field-label"/>
-                                    <TextField fx:id="subcategoryDescField"
-                                               promptText="Descripcion (opcional)"
-                                               styleClass="form-field"/>
-                                </VBox>
-
-                                <VBox spacing="6" alignment="BOTTOM_LEFT">
-                                    <Label text=" "/>
-                                    <HBox spacing="8">
-                                        <Button text="Guardar" onAction="#handleSaveSubcategory"
-                                                styleClass="btn-primary" fx:id="saveSubcategoryBtn"/>
-                                        <Button text="Cancelar" onAction="#handleCancelSubcategory"
-                                                styleClass="btn-secondary" fx:id="cancelSubcategoryBtn"
-                                                visible="false" managed="false"/>
-                                    </HBox>
-                                </VBox>
-                            </HBox>
-                        </VBox>
-
-                        <!-- Filtro por Categoria y Busqueda -->
-                        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="search-bar">
-                            <Label text="Filtrar por:" styleClass="filter-label-text"/>
-                            <ComboBox fx:id="filterCategoryCombo"
-                                      promptText="Todas las categorias"
-                                      styleClass="filter-combo"
-                                      prefWidth="200"/>
-                            <Separator orientation="VERTICAL"/>
-                            <TextField fx:id="subcategorySearchField"
-                                       promptText="Buscar subcategorias..."
-                                       styleClass="search-field"
-                                       prefWidth="250"/>
-                            <Button text="Buscar" onAction="#handleSearchSubcategory" styleClass="btn-secondary"/>
-                            <Button text="Limpiar" onAction="#handleClearSubcategorySearch" styleClass="btn-text"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Label fx:id="subcategoryCountLabel" text="0 subcategorias" styleClass="count-label"/>
-                        </HBox>
-
-                        <!-- Tabla de Subcategorias -->
-                        <TableView fx:id="subcategoriesTable" styleClass="data-table" VBox.vgrow="ALWAYS">
-                            <columns>
-                                <TableColumn text="ID" fx:id="subIdColumn" prefWidth="60"/>
-                                <TableColumn text="Categoria" fx:id="subCategoryColumn" prefWidth="150"/>
-                                <TableColumn text="Nombre" fx:id="subNameColumn" prefWidth="200"/>
-                                <TableColumn text="Descripcion" fx:id="subDescColumn" prefWidth="280"/>
-                                <TableColumn text="Productos" fx:id="subProductCountColumn" prefWidth="100"/>
-                                <TableColumn text="Acciones" fx:id="subActionsColumn" prefWidth="150"/>
-                            </columns>
-                            <placeholder>
-                                <Label text="No hay subcategorias registradas" styleClass="table-placeholder"/>
-                            </placeholder>
-                        </TableView>
-                    </VBox>
-                </Tab>
-
-            </TabPane>
 
         </VBox>
     </center>
