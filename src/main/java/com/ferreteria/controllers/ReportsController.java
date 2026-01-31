@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.beans.property.SimpleStringProperty;
@@ -45,15 +46,15 @@ public class ReportsController {
     @FXML private Label maxSaleLabel;
     
     // FXML - Métodos de Pago
-    @FXML private HBox paymentMethodsSection;
+    @FXML private VBox paymentMethodsSection;
     @FXML private HBox paymentMethodsContainer;
     
     // FXML - Gráfico
-    @FXML private HBox chartSection;
+    @FXML private VBox chartSection;
     @FXML private StackPane chartContainer;
     
     // FXML - Tabla de Productos
-    @FXML private HBox productsSection;
+    @FXML private VBox productsSection;
     @FXML private TableView<String> productsTable;
     @FXML private TableColumn<String, String> productColumn;
     @FXML private TableColumn<String, String> variantColumn;
@@ -71,7 +72,7 @@ public class ReportsController {
     @FXML private TableColumn<String, Void> searchActionsColumn;
     
     // FXML - Estado vacío
-    @FXML private HBox emptyStateContainer;
+    @FXML private VBox emptyStateContainer;
     
     @FXML
     public void initialize() {
