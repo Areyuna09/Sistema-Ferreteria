@@ -126,9 +126,11 @@ public class ReportsController {
      */
     private void setupUserInfo() {
         var currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null) {
+        if (currentUser != null && welcomeLabel != null) {
             welcomeLabel.setText(currentUser.getFullName());
-            roleLabel.setText(currentUser.getRole().getValue());
+            if (roleLabel != null) {
+                roleLabel.setText(currentUser.getRole().getValue());
+            }
         }
     }
 

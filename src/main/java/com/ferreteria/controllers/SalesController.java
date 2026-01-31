@@ -25,6 +25,12 @@ public class SalesController {
     }
 
     @FXML
+    public void handleNuevaVenta() {
+        // Por ahora, mostrar mensaje de desarrollo
+        System.out.println("Nueva Venta - En desarrollo");
+    }
+
+    @FXML
     public void handleDashboard() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Dashboard.fxml"));
@@ -59,6 +65,101 @@ public class SalesController {
             
         } catch (Exception e) {
             System.err.println("Error al navegar a Productos: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void handleCategories() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Categories.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Categorías");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            System.err.println("Error al navegar a Categorías: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void handleReports() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Reports.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Reportes");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            System.err.println("Error al navegar a Reportes: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void handleSettings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Settings.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Configuración");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            System.err.println("Error al navegar a Configuración: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void handleUsers() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Users.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Usuarios");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            System.err.println("Error al navegar a Usuarios: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void handleLogout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Login.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Login");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            System.err.println("Error al navegar a Login: " + e.getMessage());
         }
     }
 }

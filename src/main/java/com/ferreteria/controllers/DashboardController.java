@@ -93,8 +93,8 @@ public class DashboardController {
 
     @FXML
     public void handleCategories() {
-        // Categorías está integrado en productos
-        navbarController.handleProducts();
+        // Navegar a Categorías
+        navbarController.handleCategories();
     }
 
     @FXML
