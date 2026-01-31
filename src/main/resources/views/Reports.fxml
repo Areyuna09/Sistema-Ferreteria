@@ -52,32 +52,32 @@
 
                 <!-- Botones de Exportación -->
                 <HBox alignment="CENTER_LEFT" spacing="12">
-                    <Button fx:id="exportPdfBtn" mnemonicParsing="false" onAction="#handleExportPDF" styleClass="action-button" text="📄 Exportar PDF" disable="true"/>
-                    <Button fx:id="exportExcelBtn" mnemonicParsing="false" onAction="#handleExportExcel" styleClass="action-button" text="📊 Exportar Excel" disable="true"/>
+                    <Button fx:id="exportPdfBtn" mnemonicParsing="false" onAction="#handleExportPDF" styleClass="action-button" text="Exportar PDF" disable="true"/>
+                    <Button fx:id="exportExcelBtn" mnemonicParsing="false" onAction="#handleExportExcel" styleClass="action-button" text="Exportar Excel" disable="true"/>
                 </HBox>
 
                 <!-- Estadísticas Generadas -->
                 <HBox spacing="16" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
                     <VBox styleClass="stat-card card-blue">
-                        <Label text="💰" styleClass="card-icon"/>
+                        <Label text="$" styleClass="card-icon"/>
                         <Label fx:id="totalSalesLabel" text="$0.00" styleClass="card-value"/>
                         <Label text="Total Recaudado" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-green">
-                        <Label text="🧾" styleClass="card-icon"/>
+                        <Label text="#" styleClass="card-icon"/>
                         <Label fx:id="totalTransactionsLabel" text="0" styleClass="card-value"/>
                         <Label text="Ventas Realizadas" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-purple">
-                        <Label text="📊" styleClass="card-icon"/>
+                        <Label text="$" styleClass="card-icon"/>
                         <Label fx:id="avgSaleLabel" text="$0.00" styleClass="card-value"/>
                         <Label text="Promedio por Venta" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-orange">
-                        <Label text="📈" styleClass="card-icon"/>
+                        <Label text="%" styleClass="card-icon"/>
                         <Label fx:id="maxSaleLabel" text="$0.00" styleClass="card-value"/>
                         <Label text="Venta Máxima" styleClass="card-label"/>
                     </VBox>
@@ -132,7 +132,7 @@
 
                 <!-- Estado Vacío -->
                 <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="16" styleClass="empty-state">
-                    <Label text="📊" styleClass="empty-icon"/>
+                    <Label text="?" styleClass="empty-icon"/>
                     <Label text="No hay datos para mostrar" styleClass="empty-text"/>
                     <Label text="Genera un reporte para ver las estadísticas" styleClass="empty-subtext"/>
                 </VBox>
