@@ -60,7 +60,7 @@
                 <HBox spacing="16" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
                     <VBox styleClass="stat-card card-blue">
                         <Label text="TOTAL" styleClass="card-icon"/>
-                        <Label fx:id="totalSalesLabel" text="$0.00" styleClass="card-value"/>
+                        <Label fx:id="totalSalesLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Total Recaudado" styleClass="card-label"/>
                     </VBox>
 
@@ -72,13 +72,13 @@
 
                     <VBox styleClass="stat-card card-purple">
                         <Label text="PROMEDIO" styleClass="card-icon"/>
-                        <Label fx:id="avgSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label fx:id="avgSaleLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Promedio por Venta" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-orange">
                         <Label text="MAXIMO" styleClass="card-icon"/>
-                        <Label fx:id="maxSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label fx:id="maxSaleLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Venta Máxima" styleClass="card-label"/>
                     </VBox>
                 </HBox>
