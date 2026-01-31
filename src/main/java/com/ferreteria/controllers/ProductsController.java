@@ -1,7 +1,9 @@
 package com.ferreteria.controllers;
 
 import com.ferreteria.models.Product;
+import com.ferreteria.models.Category;
 import com.ferreteria.models.dao.DatabaseConfig;
+import com.ferreteria.models.dao.CategoryDAO;
 import com.ferreteria.utils.SessionManager;
 
 import javafx.fxml.FXML;
@@ -53,6 +55,7 @@ public class ProductsController {
         setupDateLabel();
         setupTableColumns();
         setupSearchField();
+        loadCategories(); // Cargar categorías en el ComboBox
         loadProducts();
         System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
     }
@@ -234,6 +237,43 @@ public class ProductsController {
             System.err.println("Error cargando productos iniciales: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void loadCategories() {
+        System.out.println("=== CARGANDO CATEGORÍAS ===");
+        if (categoryFilter == null) {
+            System.err.println("ERROR: categoryFilter es null");
+            return;
+        }
+
+        try {
+            // Limpiar items existentes
+            categoryFilter.getItems().clear();
+            
+            // Agregar opción "Todas las categorías"
+            categoryFilter.getItems().add("Todas las categorías");
+            
+            // Usar CategoryDAO como lo hace CategoriesController
+            CategoryDAO categoryDAO = new CategoryDAO();
+            List<Category> categories = categoryDAO.findAll();
+            
+            for (Category category : categories) {
+                if (category != null && category.getNombre() != null && !category.getNombre().trim().isEmpty()) {
+                    categoryFilter.getItems().add(category.getNombre());
+                }
+            }
+            
+            // Seleccionar "Todas las categorías" por defecto
+            categoryFilter.getSelectionModel().selectFirst();
+            
+            System.out.println("Categorías cargadas: " + categoryFilter.getItems().size());
+            
+        } catch (Exception e) {
+            System.err.println("ERROR cargando categorías: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        System.out.println("=== FIN CARGA DE CATEGORÍAS ===");
     }
 
     @FXML
