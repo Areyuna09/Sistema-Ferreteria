@@ -15,20 +15,107 @@
 
     <!-- Contenido Principal -->
     <center>
-        <VBox styleClass="main-content" alignment="CENTER" spacing="20">
+        <VBox styleClass="main-content" spacing="24">
             <padding>
-                <Insets top="60" right="40" bottom="40" left="40"/>
+                <Insets top="28" right="36" bottom="28" left="36"/>
             </padding>
 
-            <Label fx:id="welcomeLabel" text="Módulo de Ventas" styleClass="page-title"/>
-            
-            <Label text="Esta sección está en desarrollo" styleClass="page-subtitle"/>
-            
-            <HBox spacing="15" alignment="CENTER">
-                <Button text="Ir a Dashboard" styleClass="action-button" onAction="#handleDashboard"/>
-                <Button text="Ir a Productos" styleClass="action-button" onAction="#handleProducts"/>
-                <Button text="Ir a Categorías" styleClass="action-button" onAction="#handleCategories"/>
-                <Button text="Ir a Reportes" styleClass="action-button" onAction="#handleReports"/>
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <VBox HBox.hgrow="ALWAYS" spacing="4">
+                    <Label text="Gestión de Ventas" styleClass="page-title"/>
+                    <Label text="Historial de ventas y punto de venta" styleClass="page-subtitle"/>
+                </VBox>
+                <Button text="+ Nueva Venta" onAction="#handleNuevaVenta" styleClass="action-button primary"
+                        prefHeight="44" minWidth="150"/>
+            </HBox>
+
+            <!-- Stats Cards -->
+            <HBox spacing="20" alignment="CENTER">
+                <VBox styleClass="stat-card card-green" HBox.hgrow="ALWAYS">
+                    <Label text="💵" styleClass="card-icon"/>
+                    <Label fx:id="ventasHoyLabel" text="$0.00" styleClass="card-value"/>
+                    <Label text="Ventas de Hoy" styleClass="card-label"/>
+                </VBox>
+                <VBox styleClass="stat-card card-blue" HBox.hgrow="ALWAYS">
+                    <Label text="📊" styleClass="card-icon"/>
+                    <Label fx:id="ventasMesLabel" text="$0.00" styleClass="card-value"/>
+                    <Label text="Ventas del Mes" styleClass="card-label"/>
+                </VBox>
+                <VBox styleClass="stat-card card-purple" HBox.hgrow="ALWAYS">
+                    <Label text="🧾" styleClass="card-icon"/>
+                    <Label fx:id="cantidadHoyLabel" text="0" styleClass="card-value"/>
+                    <Label text="Transacciones Hoy" styleClass="card-label"/>
+                </VBox>
+                <VBox styleClass="stat-card card-orange" HBox.hgrow="ALWAYS">
+                    <Label text="📈" styleClass="card-icon"/>
+                    <Label fx:id="promedioLabel" text="$0.00" styleClass="card-value"/>
+                    <Label text="Ticket Promedio" styleClass="card-label"/>
+                </VBox>
+            </HBox>
+
+            <!-- Filtros -->
+            <VBox spacing="16" styleClass="filter-panel">
+                <Label text="Filtros de Búsqueda" styleClass="section-title"/>
+                
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <VBox spacing="6">
+                        <Label text="FECHA DESDE" styleClass="filter-label"/>
+                        <DatePicker fx:id="fechaDesde" promptText="Desde" prefWidth="140" styleClass="form-combo"/>
+                    </VBox>
+                    
+                    <VBox spacing="6">
+                        <Label text="FECHA HASTA" styleClass="filter-label"/>
+                        <DatePicker fx:id="fechaHasta" promptText="Hasta" prefWidth="140" styleClass="form-combo"/>
+                    </VBox>
+                    
+                    <VBox spacing="6">
+                        <Label text="ESTADO" styleClass="filter-label"/>
+                        <ComboBox fx:id="statusFilter" promptText="Estado" prefWidth="140" styleClass="form-combo"/>
+                    </VBox>
+                    
+                    <Region HBox.hgrow="ALWAYS"/>
+                    
+                    <VBox spacing="6">
+                        <Label text="BÚSQUEDA" styleClass="filter-label"/>
+                        <TextField fx:id="searchField" promptText="Buscar por producto..." prefWidth="200" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="6" alignment="BOTTOM_LEFT">
+                        <Label text=" "/>
+                        <HBox spacing="8">
+                            <Button text="Buscar" onAction="#handleFiltrar" styleClass="action-button"/>
+                            <Button text="Limpiar" onAction="#handleLimpiarFiltros" styleClass="action-button secondary"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Tabla de Ventas -->
+            <TableView fx:id="ventasTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colId" text="#" prefWidth="70"/>
+                    <TableColumn fx:id="colFecha" text="Fecha" prefWidth="150"/>
+                    <TableColumn fx:id="colProductos" text="Productos" prefWidth="200"/>
+                    <TableColumn fx:id="colVendedor" text="Vendedor" prefWidth="130"/>
+                    <TableColumn fx:id="colTotal" text="Total" prefWidth="110"/>
+                    <TableColumn fx:id="colEstado" text="Estado" prefWidth="100"/>
+                    <TableColumn fx:id="colAcciones" text="Acciones" prefWidth="150"/>
+                </columns>
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="12" style="-fx-padding: 40;">
+                        <Label text="📋" styleClass="empty-icon"/>
+                        <Label text="No hay ventas para mostrar" styleClass="empty-text"/>
+                        <Label text="Usa los filtros arriba o crea una nueva venta" styleClass="empty-subtext"/>
+                    </VBox>
+                </placeholder>
+            </TableView>
+
+            <!-- Paginación -->
+            <HBox alignment="CENTER" spacing="16">
+                <Button fx:id="btnAnterior" text="Anterior" onAction="#handlePaginaAnterior" styleClass="action-button"/>
+                <Label fx:id="paginaLabel" text="Página 1 de 1" styleClass="pagination-label"/>
+                <Button fx:id="btnSiguiente" text="Siguiente" onAction="#handlePaginaSiguiente" styleClass="action-button"/>
             </HBox>
 
         </VBox>

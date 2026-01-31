@@ -1302,5 +1302,100 @@
 }
 
 /* ============================================
+   ESTILOS ADICIONALES PARA VENTAS
+   ============================================ */
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-padding: 20;
+    -fx-alignment: center;
+    -fx-spacing: 8;
+}
+
+.stat-card.card-green {
+    -fx-border-color: #10b981;
+    -fx-border-width: 2;
+}
+
+.stat-card.card-blue {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 2;
+}
+
+.stat-card.card-purple {
+    -fx-border-color: #8b5cf6;
+    -fx-border-width: 2;
+}
+
+.stat-card.card-orange {
+    -fx-border-color: #f59e0b;
+    -fx-border-width: 2;
+}
+
+.card-icon {
+    -fx-font-size: 24px;
+    -fx-text-fill: #64748b;
+}
+
+.card-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1e293b;
+}
+
+.card-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #64748b;
+}
+
+.action-button.primary {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: white;
+}
+
+.action-button.primary:hover {
+    -fx-background-color: #0284c7;
+}
+
+.pagination-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #374151;
+}
+
+/* ============================================
+   ESTILOS ADICIONALES PARA REPORTES
+   ============================================ */
+
+.chart-container {
+    -fx-background-color: white;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-padding: 20;
+}
+
+.empty-icon {
+    -fx-font-size: 48px;
+    -fx-text-fill: #cbd5e1;
+}
+
+.empty-text {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #64748b;
+}
+
+.empty-subtext {
+    -fx-font-size: 14px;
+    -fx-text-fill: #94a3b8;
+}
+
+/* ============================================
    FIN DEL ARCHIVO CSS
    ============================================ */

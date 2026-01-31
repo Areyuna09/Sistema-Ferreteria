@@ -21,17 +21,16 @@
                     <Insets top="32" right="40" bottom="100" left="40"/>
                 </padding>
 
-                <!-- Header -->
                 <HBox alignment="CENTER_LEFT" spacing="20">
                     <VBox spacing="6">
                         <Label text="Reportes de Ventas" styleClass="page-title"/>
-                        <Label text="Análisis completo de ventas por rango de fechas, productos y métodos de pago" styleClass="page-subtitle"/>
+                        <Label text="Análisis de ventas por rango de fechas, productos y métodos de pago" styleClass="page-subtitle"/>
                     </VBox>
                 </HBox>
 
-                <!-- Filtros Principales de Reportes -->
+                <!-- Filtros de Reportes -->
                 <VBox spacing="16" styleClass="filter-panel">
-                    <Label text="Generador de Reportes" styleClass="section-title"/>
+                    <Label text="Filtros de Reporte" styleClass="section-title"/>
                     
                     <HBox spacing="20" alignment="CENTER_LEFT">
                         <VBox spacing="6">
@@ -53,7 +52,7 @@
 
                         <VBox alignment="BOTTOM_LEFT" spacing="6">
                             <Label text=" "/>
-                            <Button text="Generar Reporte" onAction="#handleGenerateReport" styleClass="action-button primary" prefWidth="180"/>
+                            <Button text="Generar Reporte" onAction="#handleGenerateReport" styleClass="action-button" prefWidth="180"/>
                         </VBox>
 
                         <Separator orientation="VERTICAL"/>
@@ -68,23 +67,23 @@
                     </HBox>
                 </VBox>
 
-                <!-- Búsqueda Avanzada de Ventas -->
+                <!-- Búsqueda de Ventas (de Alan) -->
                 <VBox spacing="16" styleClass="filter-panel">
-                    <Label text="Búsqueda Avanzada de Ventas" styleClass="section-title"/>
+                    <Label text="Búsqueda de Ventas" styleClass="section-title"/>
                     
                     <HBox spacing="12" alignment="CENTER_LEFT">
                         <VBox spacing="4">
-                            <Label text="ID DE VENTA" styleClass="filter-label"/>
+                            <Label text="ID de Venta" styleClass="filter-label"/>
                             <TextField fx:id="searchSaleIdField" promptText="Ej: 123" prefWidth="120" styleClass="form-field"/>
                         </VBox>
                         
                         <VBox spacing="4">
-                            <Label text="FECHA ESPECÍFICA" styleClass="filter-label"/>
+                            <Label text="Fecha" styleClass="filter-label"/>
                             <DatePicker fx:id="searchDatePicker" promptText="Seleccionar fecha" prefWidth="160" styleClass="form-combo"/>
                         </VBox>
                         
                         <VBox spacing="4">
-                            <Label text="MONTO APROXIMADO" styleClass="filter-label"/>
+                            <Label text="Monto Aproximado" styleClass="filter-label"/>
                             <TextField fx:id="searchAmountField" promptText="Ej: 5000.00" prefWidth="140" styleClass="form-field"/>
                         </VBox>
                         
@@ -115,9 +114,8 @@
                             </columns>
                             <placeholder>
                                 <VBox alignment="CENTER" spacing="12" style="-fx-padding: 40;">
-                                    <Label text="🔍" styleClass="empty-icon"/>
-                                    <Label text="No hay resultados" styleClass="empty-text"/>
-                                    <Label text="Usa los filtros arriba para buscar ventas" styleClass="empty-subtext"/>
+                                    <Label text="No hay resultados" styleClass="table-placeholder"/>
+                                    <Label text="Use los filtros arriba para buscar ventas" styleClass="table-placeholder"/>
                                 </VBox>
                             </placeholder>
                         </TableView>
@@ -125,7 +123,7 @@
                     
                     <VBox spacing="8" styleClass="warning-box">
                         <HBox spacing="8" alignment="CENTER_LEFT">
-                            <Label text="⚠️ INFORMACIÓN IMPORTANTE:" styleClass="warning-title"/>
+                            <Label text="INFORMACIÓN IMPORTANTE:" styleClass="warning-title"/>
                         </HBox>
                         <VBox spacing="4" style="-fx-padding: 0 0 0 10;">
                             <Label text="ANULAR: Marca la venta como anulada y revierte el stock de los productos" styleClass="warning-text"/>
@@ -138,26 +136,26 @@
                 <!-- Estadísticas Generadas -->
                 <HBox spacing="20" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
                     <VBox styleClass="stat-card card-blue">
-                        <Label text="💰" styleClass="card-icon"/>
-                        <Label fx:id="totalSalesLabel" text="$0.00" styleClass="card-value"/>
+                        <Label text="Total" styleClass="card-icon"/>
+                        <Label fx:id="totalSalesLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Total Recaudado" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-green">
-                        <Label text="🧾" styleClass="card-icon"/>
+                        <Label text="Ventas" styleClass="card-icon"/>
                         <Label fx:id="totalTransactionsLabel" text="0" styleClass="card-value"/>
                         <Label text="Ventas Realizadas" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-purple">
-                        <Label text="📊" styleClass="card-icon"/>
-                        <Label fx:id="avgSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label text="Promedio" styleClass="card-icon"/>
+                        <Label fx:id="avgSaleLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Promedio por Venta" styleClass="card-label"/>
                     </VBox>
 
                     <VBox styleClass="stat-card card-orange">
-                        <Label text="📈" styleClass="card-icon"/>
-                        <Label fx:id="maxSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label text="Max" styleClass="card-icon"/>
+                        <Label fx:id="maxSaleLabel" text="0.00" styleClass="card-value"/>
                         <Label text="Venta Máxima" styleClass="card-label"/>
                     </VBox>
                 </HBox>
