@@ -15,64 +15,19 @@
 
     <!-- Contenido Principal -->
     <center>
-        <VBox styleClass="main-content" spacing="24">
+        <VBox styleClass="main-content" alignment="CENTER" spacing="20">
             <padding>
-                <Insets top="32" right="40" bottom="32" left="40"/>
+                <Insets top="60" right="40" bottom="40" left="40"/>
             </padding>
 
-            <!-- Header de Pagina -->
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <VBox HBox.hgrow="ALWAYS" spacing="6">
-                    <Label text="Gestion de Ventas" styleClass="page-title"/>
-                    <Label text="Administra las ventas realizadas en el sistema" styleClass="page-subtitle"/>
-                </VBox>
-                <HBox spacing="12">
-                    <Button text="Nueva Venta" onAction="#handleNewSale" styleClass="btn-primary"/>
-                    <Button text="Actualizar" onAction="#handleRefresh" styleClass="btn-secondary"/>
-                </HBox>
+            <Label fx:id="welcomeLabel" text="Módulo de Ventas" styleClass="page-title"/>
+            
+            <Label text="Esta sección está en desarrollo" styleClass="page-subtitle"/>
+            
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="Volver al Dashboard" styleClass="action-button" onAction="#handleDashboard"/>
+                <Button text="Ir a Productos" styleClass="action-button" onAction="#handleProducts"/>
             </HBox>
-
-            <!-- Estadisticas -->
-            <HBox spacing="24" alignment="CENTER_LEFT">
-                <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 24; -fx-border-color: #e2e8f0; -fx-border-radius: 16; -fx-border-width: 1; -fx-alignment: top-center; -fx-spacing: 8;" HBox.hgrow="ALWAYS">
-                    <Label text="💰" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #3b82f6;"/>
-                    <Label fx:id="totalSalesLabel" text="$0.00" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #111827;"/>
-                    <Label text="Total Ventas" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569;"/>
-                    <Label text="Suma de todas las ventas" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;"/>
-                </VBox>
-
-                <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 24; -fx-border-color: #e2e8f0; -fx-border-radius: 16; -fx-border-width: 1; -fx-alignment: top-center; -fx-spacing: 8;" HBox.hgrow="ALWAYS">
-                    <Label text="📊" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #22c55e;"/>
-                    <Label fx:id="salesCountLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: #111827;"/>
-                    <Label text="Cantidad de Ventas" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569;"/>
-                    <Label text="Ventas registradas" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;"/>
-                </VBox>
-            </HBox>
-
-            <!-- Barra de Busqueda -->
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="search-bar">
-                <TextField fx:id="searchField"
-                           promptText="Buscar ventas por ID, cliente o método de pago..."
-                           styleClass="search-field"
-                           prefWidth="400"/>
-                <Region HBox.hgrow="ALWAYS"/>
-            </HBox>
-
-            <!-- Tabla de Ventas -->
-            <TableView fx:id="salesTable" styleClass="data-table" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn text="ID" fx:id="idColumn" prefWidth="60"/>
-                    <TableColumn text="Fecha" fx:id="dateColumn" prefWidth="150"/>
-                    <TableColumn text="Cliente" fx:id="customerColumn" prefWidth="200"/>
-                    <TableColumn text="Total" fx:id="totalColumn" prefWidth="120"/>
-                    <TableColumn text="Método Pago" fx:id="paymentColumn" prefWidth="120"/>
-                    <TableColumn text="Estado" fx:id="statusColumn" prefWidth="100"/>
-                    <TableColumn text="Acciones" fx:id="actionsColumn" prefWidth="120"/>
-                </columns>
-                <placeholder>
-                    <Label text="No hay ventas registradas" styleClass="table-placeholder"/>
-                </placeholder>
-            </TableView>
 
         </VBox>
     </center>

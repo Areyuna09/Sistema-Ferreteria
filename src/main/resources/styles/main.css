@@ -331,13 +331,15 @@
 
 .nav-button {
     -fx-background-color: transparent;
-    -fx-text-fill: rgba(255, 255, 255, 0.95);
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
-    -fx-padding: 8px 16px;
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 10 16;
+    -fx-background-radius: 8;
     -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 8;
     -fx-effect: none;
 }
 

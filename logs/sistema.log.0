@@ -196,3 +196,14 @@
 [2026-01-30 23:44:39] [INFO   ] [admin] [NAV] Navegando a Dashboard
 [2026-01-30 23:44:39] [INFO   ] [admin] [NAV] Navegando a Productos
 [2026-01-30 23:44:42] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:58:40] [INFO   ] Sistema de logging inicializado
+[2026-01-30 23:58:40] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:58:42] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:58:42] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:58:43] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-31 00:00:52] [INFO   ] Sistema de logging inicializado
+[2026-01-31 00:00:52] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-31 00:00:54] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 00:00:56] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-31 00:00:57] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-31 00:00:58] [INFO   ] [admin] [NAV] Navegando a Reportes

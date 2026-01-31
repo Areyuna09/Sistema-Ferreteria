@@ -33,7 +33,6 @@
                     <HBox alignment="CENTER_LEFT" spacing="16">
                         <TextField fx:id="searchField" prefWidth="400" promptText="Buscar por codigo, nombre, categoria o ubicacion..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
                         <Button mnemonicParsing="false" onAction="#handleNewProduct" styleClass="action-button, success" text="+ Nuevo Producto" />
-                        <Button mnemonicParsing="false" onAction="#handleCategories" styleClass="action-button, accent" text="📁 Categorías" />
                         <Button mnemonicParsing="false" onAction="#handleRefresh" styleClass="action-button, primary" text="🔄 Recargar" />
                     </HBox>
                     

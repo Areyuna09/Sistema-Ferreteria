@@ -96,27 +96,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Exec Plugin para ejecutar utilidades -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>run-data-loader</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>com.ferreteria.utils.SQLDataLoader</mainClass>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>com.ferreteria.Main</mainClass>
-                </configuration>
-            </plugin>
-
             <!-- JAR con dependencias -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
