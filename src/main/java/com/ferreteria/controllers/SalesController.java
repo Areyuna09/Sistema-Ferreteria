@@ -25,12 +25,6 @@ public class SalesController {
     }
 
     @FXML
-    public void handleNuevaVenta() {
-        // Por ahora, mostrar mensaje de desarrollo
-        System.out.println("Nueva Venta - En desarrollo");
-    }
-
-    @FXML
     public void handleDashboard() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Dashboard.fxml"));
