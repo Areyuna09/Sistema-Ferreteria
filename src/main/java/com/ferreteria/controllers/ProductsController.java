@@ -384,8 +384,23 @@ public class ProductsController {
     @FXML
     public void handleFilterByCategory() {
         System.out.println("ProductsController.handleFilterByCategory() LLAMADO");
-        // Implementación básica del filtro
-        loadProducts();
+        
+        if (categoryFilter == null) {
+            System.err.println("ERROR: categoryFilter es null");
+            loadProducts();
+            return;
+        }
+        
+        String selectedCategory = categoryFilter.getSelectionModel().getSelectedItem();
+        System.out.println("Categoría seleccionada: " + selectedCategory);
+        
+        if (selectedCategory == null || selectedCategory.equals("Todas las categorías")) {
+            // Si no hay selección o es "Todas", cargar todos los productos
+            loadProducts();
+        } else {
+            // Filtrar por la categoría seleccionada
+            loadProductsByCategory(selectedCategory);
+        }
     }
 
     @FXML
@@ -570,6 +585,75 @@ public class ProductsController {
             e.printStackTrace();
             showAlert("Error", "No se pudo abrir el formulario de nuevo producto: " + e.getMessage());
         }
+    }
+
+    private void loadProductsByCategory(String categoryName) {
+        System.out.println("=== CARGANDO PRODUCTOS POR CATEGORÍA: " + categoryName + " ===");
+        
+        new Thread(() -> {
+            try {
+                var conn = DatabaseConfig.getInstance().getConnection();
+                
+                if (conn != null) {
+                    String query = """
+                        SELECT p.id, p.code, p.name, p.description, p.category_id, c.name as category,
+                               COALESCE(pv.sale_price, 0) as price, COALESCE(pv.cost_price, 0) as cost, 
+                               COALESCE(pv.stock, 0) as stock, COALESCE(pv.min_stock, 5) as min_stock,
+                               p.location, p.active, p.created_at 
+                        FROM products p
+                        LEFT JOIN categories c ON p.category_id = c.id
+                        LEFT JOIN product_variants pv ON p.id = pv.product_id AND pv.active = 1
+                        WHERE p.active = 1 AND c.name = ?
+                        ORDER BY p.name
+                        """;
+                    
+                    var stmt = conn.prepareStatement(query);
+                    stmt.setString(1, categoryName);
+                    
+                    var rs = stmt.executeQuery();
+                    List<Product> products = new ArrayList<>();
+                    
+                    while (rs.next()) {
+                        Product product = new Product.Builder()
+                            .id(rs.getInt("id"))
+                            .code(rs.getString("code"))
+                            .name(rs.getString("name"))
+                            .description(rs.getString("description"))
+                            .category(rs.getString("category"))
+                            .price(rs.getBigDecimal("price"))
+                            .cost(rs.getBigDecimal("cost"))
+                            .stock(rs.getInt("stock"))
+                            .minStock(rs.getInt("min_stock"))
+                            .location(rs.getString("location"))
+                            .active(rs.getBoolean("active"))
+                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                            .build();
+                        
+                        products.add(product);
+                    }
+                    
+                    rs.close();
+                    stmt.close();
+                    conn.close();
+                    
+                    // Actualizar la tabla en el hilo de JavaFX
+                    javafx.application.Platform.runLater(() -> {
+                        productsTable.getItems().clear();
+                        productsTable.getItems().addAll(products);
+                        System.out.println("Productos filtrados: " + products.size());
+                    });
+                    
+                } else {
+                    System.err.println("ERROR: No se pudo conectar a la base de datos");
+                }
+                
+            } catch (Exception e) {
+                System.err.println("ERROR cargando productos por categoría: " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            System.out.println("=== FIN CARGA DE PRODUCTOS POR CATEGORÍA ===");
+        }).start();
     }
 
     // Navegación manejada por NavbarController
