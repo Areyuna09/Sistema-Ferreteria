@@ -1,69 +1,187 @@
-[2026-01-27 16:53:29] [INFO   ] Sistema de logging inicializado
-[2026-01-27 16:53:29] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 16:53:32] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 16:53:41] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 16:53:41] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:02:29] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:02:29] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:02:33] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:02:34] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:02:34] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:02:34] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:07:10] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:07:10] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:07:18] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:07:20] [INFO   ] [admin] [NAV] Navegando a Ventas
-[2026-01-27 17:07:24] [INFO   ] [admin] [NAV] Navegando a Reportes
-[2026-01-27 17:07:28] [INFO   ] [admin] [NAV] Navegando a Usuarios
-[2026-01-27 17:07:31] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:07:33] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 17:07:39] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 17:07:45] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 17:12:23] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:12:23] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:12:25] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:19:57] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:19:57] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:19:59] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:20:00] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:20:00] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:20:00] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:20:00] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:26:16] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:26:16] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:34:58] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:34:58] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:35:11] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:35:12] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 17:40:35] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:40:35] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:40:45] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:40:46] [INFO   ] [admin] [NAV] Navegando a Ventas
-[2026-01-27 17:40:52] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 17:48:28] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:48:28] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:50:54] [INFO   ] Sistema de logging inicializado
-[2026-01-27 17:50:54] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 17:51:08] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:51:13] [INFO   ] [admin] [NAV] Navegando a Ventas
-[2026-01-27 17:51:16] [INFO   ] [admin] [NAV] Navegando a Reportes
-[2026-01-27 17:51:18] [INFO   ] [admin] [NAV] Navegando a Usuarios
-[2026-01-27 17:51:20] [INFO   ] [admin] [NAV] Navegando a Reportes
-[2026-01-27 17:51:22] [INFO   ] [admin] [NAV] Navegando a Ventas
-[2026-01-27 17:51:24] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 17:51:25] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 17:51:38] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 18:01:09] [INFO   ] Sistema de logging inicializado
-[2026-01-27 18:01:09] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 18:01:21] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 18:01:25] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 18:01:29] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 18:01:34] [INFO   ] [admin] [NAV] Navegando a Dashboard
-[2026-01-27 18:01:45] [INFO   ] [admin] [AUTH] Logout: admin
-[2026-01-27 18:17:43] [INFO   ] Sistema de logging inicializado
-[2026-01-27 18:17:43] [INFO   ] [admin] [AUTH] Login exitoso: admin
-[2026-01-27 18:17:51] [INFO   ] [admin] [NAV] Navegando a Productos
-[2026-01-27 18:17:59] [INFO   ] [admin] [NAV] Navegando a Ventas
-[2026-01-27 18:18:02] [INFO   ] [admin] [NAV] Navegando a Reportes
-[2026-01-27 18:18:08] [INFO   ] [admin] [NAV] Navegando a Usuarios
-[2026-01-27 18:18:14] [INFO   ] [admin] [AUTH] Logout: admin
+[2026-01-27 22:02:06] [INFO   ] Sistema de logging inicializado
+[2026-01-27 22:02:06] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:02:06] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-27 22:08:32] [INFO   ] Sistema de logging inicializado
+[2026-01-27 22:08:32] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:08:32] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-27 22:08:43] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-27 22:08:43] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-27 22:08:44] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:13:05] [INFO   ] Sistema de logging inicializado
+[2026-01-27 22:13:05] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:13:05] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-27 22:20:12] [INFO   ] Sistema de logging inicializado
+[2026-01-27 22:20:12] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:20:12] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-27 22:20:20] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:20:30] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:20:32] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:20:35] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:24:43] [INFO   ] Sistema de logging inicializado
+[2026-01-27 22:24:43] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:24:43] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-27 22:24:48] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:24:51] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:24:55] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:24:57] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:24:58] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:00] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:02] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:04] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:07] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:10] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:12] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-27 22:25:15] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-27 22:25:16] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-27 22:25:18] [INFO   ] [admin] [NAV] Navegando a Usuarios
+[2026-01-27 22:25:19] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-27 22:25:19] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-27 22:31:43] [INFO   ] Sistema de logging inicializado
+[2026-01-27 22:31:43] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:31:43] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-27 22:31:56] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-27 22:31:56] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:45:15] [INFO   ] Sistema de logging inicializado
+[2026-01-28 21:45:15] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:45:15] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:45:23] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:45:23] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:22] [INFO   ] Sistema de logging inicializado
+[2026-01-28 21:49:22] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:22] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:27] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:27] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:42] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:49:43] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:49:43] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:52:34] [INFO   ] Sistema de logging inicializado
+[2026-01-28 21:52:34] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:52:34] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:52:36] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:52:36] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:52:43] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:52:43] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:53:12] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:53:12] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:53:12] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:53:12] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:53:14] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:53:14] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:55:20] [INFO   ] Sistema de logging inicializado
+[2026-01-28 21:55:20] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:55:20] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 21:55:59] [INFO   ] Sistema de logging inicializado
+[2026-01-28 21:55:59] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 21:55:59] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:01:08] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:01:08] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:01:08] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:01:12] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:01:12] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:01:32] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:01:32] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:02:32] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:02:32] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:02:32] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:02:35] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:02:35] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:04:33] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:04:33] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:04:33] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:04:35] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:04:35] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:04:35] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:04:35] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:04:37] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:04:37] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:05:03] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:05:03] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:05:03] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:07:48] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:07:48] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:07:48] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:07:51] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:07:51] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:13:04] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:13:04] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:13:04] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:17:35] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:17:35] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:17:35] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:22:27] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:22:27] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:22:27] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:26:15] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:26:15] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:26:15] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 22:30:34] [INFO   ] Sistema de logging inicializado
+[2026-01-28 22:30:34] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 22:30:34] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 23:27:40] [INFO   ] Sistema de logging inicializado
+[2026-01-28 23:27:40] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 23:27:40] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 23:33:27] [INFO   ] Sistema de logging inicializado
+[2026-01-28 23:33:27] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 23:33:27] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 23:33:44] [INFO   ] [admin] [AUTH] Logout: admin
+[2026-01-28 23:34:19] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 23:34:19] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 23:34:24] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-28 23:34:25] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-28 23:34:28] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-28 23:34:32] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-28 23:34:35] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-28 23:34:38] [INFO   ] [admin] [NAV] Navegando a Usuarios
+[2026-01-28 23:34:41] [INFO   ] [admin] [AUTH] Logout: admin
+[2026-01-28 23:36:28] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 23:36:28] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 23:36:30] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-28 23:36:31] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-28 23:36:34] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-28 23:36:40] [INFO   ] [admin] [AUTH] Logout: admin
+[2026-01-28 23:36:52] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-28 23:36:52] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-28 23:36:54] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-28 23:36:56] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-28 23:36:57] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-28 23:36:59] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-28 23:37:00] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-28 23:37:02] [INFO   ] [admin] [NAV] Navegando a Usuarios
+[2026-01-28 23:37:07] [INFO   ] [admin] [AUTH] Logout: admin
+[2026-01-30 23:12:48] [INFO   ] Sistema de logging inicializado
+[2026-01-30 23:12:48] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:12:48] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-30 23:12:53] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-30 23:12:54] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:13:01] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-30 23:13:04] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:13:05] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-30 23:13:07] [INFO   ] [admin] [NAV] Navegando a Usuarios
+[2026-01-30 23:13:10] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-30 23:20:38] [INFO   ] Sistema de logging inicializado
+[2026-01-30 23:20:38] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:20:38] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-30 23:20:40] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:20:52] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-30 23:20:54] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-30 23:20:57] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-30 23:20:58] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:20:59] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-30 23:21:02] [INFO   ] [admin] [NAV] Navegando a Usuarios
+[2026-01-30 23:21:04] [INFO   ] [admin] [NAV] Navegando a Reportes
+[2026-01-30 23:21:05] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:21:06] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-30 23:21:16] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:28:57] [INFO   ] Sistema de logging inicializado
+[2026-01-30 23:28:57] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:28:57] [INFO   ] [admin] [AUTH] Navegando al Dashboard después del login
+[2026-01-30 23:28:59] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:29:05] [INFO   ] [admin] [NAV] Navegando a Categorías
+[2026-01-30 23:29:08] [INFO   ] [admin] [NAV] Navegando a Ventas
