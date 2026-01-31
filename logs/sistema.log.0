@@ -189,3 +189,10 @@
 [2026-01-30 23:37:21] [INFO   ] [admin] [AUTH] Login exitoso: admin
 [2026-01-30 23:37:24] [INFO   ] [admin] [AUTH] Login exitoso: admin
 [2026-01-30 23:37:27] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:44:21] [INFO   ] Sistema de logging inicializado
+[2026-01-30 23:44:21] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:44:24] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:44:26] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:44:39] [INFO   ] [admin] [NAV] Navegando a Dashboard
+[2026-01-30 23:44:39] [INFO   ] [admin] [NAV] Navegando a Productos
+[2026-01-30 23:44:42] [INFO   ] [admin] [NAV] Navegando a Ventas
