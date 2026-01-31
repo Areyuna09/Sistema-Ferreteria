@@ -185,3 +185,7 @@
 [2026-01-30 23:28:59] [INFO   ] [admin] [NAV] Navegando a Productos
 [2026-01-30 23:29:05] [INFO   ] [admin] [NAV] Navegando a Categorías
 [2026-01-30 23:29:08] [INFO   ] [admin] [NAV] Navegando a Ventas
+[2026-01-30 23:37:21] [INFO   ] Sistema de logging inicializado
+[2026-01-30 23:37:21] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:37:24] [INFO   ] [admin] [AUTH] Login exitoso: admin
+[2026-01-30 23:37:27] [INFO   ] [admin] [AUTH] Login exitoso: admin

@@ -717,6 +717,26 @@ public class ReportsController {
         }
     }
 
+    @FXML
+    public void handleDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Dashboard.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) rangeTypeCombo.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            stage.setTitle("Sistema Ferreteria - Dashboard");
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al navegar al Dashboard", e);
+            showError("Error al navegar al Dashboard: " + e.getMessage());
+        }
+    }
+
     // ==================== UTILIDADES UI ====================
 
     private void showError(String message) {

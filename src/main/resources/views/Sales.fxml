@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ferreteria.controllers.SalesController"
+            styleClass="dashboard-root">
+
+    <!-- Navbar Superior -->
+    <top>
+        <fx:include fx:id="navbar" source="components/Navbar.fxml"/>
+    </top>
+
+    <!-- Contenido Principal -->
+    <center>
+        <VBox styleClass="main-content" alignment="CENTER" spacing="20">
+            <padding>
+                <Insets top="60" right="40" bottom="40" left="40"/>
+            </padding>
+
+            <Label fx:id="welcomeLabel" text="Módulo de Ventas" styleClass="page-title"/>
+            
+            <Label text="Esta sección está en desarrollo" styleClass="page-subtitle"/>
+            
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="Volver al Dashboard" styleClass="action-button" onAction="#handleDashboard"/>
+                <Button text="Ir a Productos" styleClass="action-button" onAction="#handleProducts"/>
+            </HBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>
