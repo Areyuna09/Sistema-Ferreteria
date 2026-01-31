@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ferreteria.controllers.ReportsController"
+            styleClass="dashboard-root">
+
+    <!-- Navbar Superior -->
+    <top>
+        <fx:include fx:id="navbar" source="components/Navbar.fxml"/>
+    </top>
+
+    <!-- Contenido Principal -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox styleClass="main-content" spacing="28" minHeight="600">
+                <padding>
+                    <Insets top="32" right="40" bottom="100" left="40"/>
+                </padding>
+
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <VBox spacing="6">
+                        <Label text="Reportes de Ventas" styleClass="page-title"/>
+                        <Label text="Análisis completo de ventas por rango de fechas, productos y métodos de pago" styleClass="page-subtitle"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Filtros Principales de Reportes -->
+                <VBox spacing="16" styleClass="filter-panel">
+                    <Label text="Generador de Reportes" styleClass="section-title"/>
+                    
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+                        <VBox spacing="6">
+                            <Label text="TIPO DE RANGO" styleClass="filter-label"/>
+                            <ComboBox fx:id="rangeTypeCombo" styleClass="form-combo" promptText="Seleccionar rango" prefWidth="160"/>
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label text="FECHA DESDE" styleClass="filter-label"/>
+                            <DatePicker fx:id="startDatePicker" styleClass="form-combo" promptText="Desde" prefWidth="150"/>
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label text="FECHA HASTA" styleClass="filter-label"/>
+                            <DatePicker fx:id="endDatePicker" styleClass="form-combo" promptText="Hasta" prefWidth="150"/>
+                        </VBox>
+
+                        <Region HBox.hgrow="SOMETIMES"/>
+
+                        <VBox alignment="BOTTOM_LEFT" spacing="6">
+                            <Label text=" "/>
+                            <Button text="Generar Reporte" onAction="#handleGenerateReport" styleClass="action-button primary" prefWidth="180"/>
+                        </VBox>
+
+                        <Separator orientation="VERTICAL"/>
+
+                        <VBox alignment="BOTTOM_LEFT" spacing="6">
+                            <Label text=" "/>
+                            <HBox spacing="8">
+                                <Button text="Exportar PDF" onAction="#handleExportPDF" styleClass="action-button" disable="true" fx:id="exportPdfBtn"/>
+                                <Button text="Exportar Excel" onAction="#handleExportExcel" styleClass="action-button" disable="true" fx:id="exportExcelBtn"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Búsqueda Avanzada de Ventas -->
+                <VBox spacing="16" styleClass="filter-panel">
+                    <Label text="Búsqueda Avanzada de Ventas" styleClass="section-title"/>
+                    
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <VBox spacing="4">
+                            <Label text="ID DE VENTA" styleClass="filter-label"/>
+                            <TextField fx:id="searchSaleIdField" promptText="Ej: 123" prefWidth="120" styleClass="form-field"/>
+                        </VBox>
+                        
+                        <VBox spacing="4">
+                            <Label text="FECHA ESPECÍFICA" styleClass="filter-label"/>
+                            <DatePicker fx:id="searchDatePicker" promptText="Seleccionar fecha" prefWidth="160" styleClass="form-combo"/>
+                        </VBox>
+                        
+                        <VBox spacing="4">
+                            <Label text="MONTO APROXIMADO" styleClass="filter-label"/>
+                            <TextField fx:id="searchAmountField" promptText="Ej: 5000.00" prefWidth="140" styleClass="form-field"/>
+                        </VBox>
+                        
+                        <Region HBox.hgrow="SOMETIMES"/>
+                        
+                        <VBox spacing="4" alignment="BOTTOM_LEFT">
+                            <Label text=" "/>
+                            <HBox spacing="8">
+                                <Button text="Buscar" onAction="#handleSearchSales" styleClass="action-button" prefWidth="120"/>
+                                <Button text="Limpiar" onAction="#handleClearSearchFilters" styleClass="action-button secondary" prefWidth="100"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                    
+                    <Separator/>
+                    
+                    <VBox spacing="8">
+                        <Label text="Resultados de Búsqueda" styleClass="section-subtitle"/>
+                        
+                        <TableView fx:id="salesSearchTable" styleClass="table-view" prefHeight="300">
+                            <columns>
+                                <TableColumn text="ID" fx:id="searchIdColumn" prefWidth="80"/>
+                                <TableColumn text="Fecha y Hora" fx:id="searchDateColumn" prefWidth="180"/>
+                                <TableColumn text="Total" fx:id="searchTotalColumn" prefWidth="120"/>
+                                <TableColumn text="Estado" fx:id="searchStatusColumn" prefWidth="120"/>
+                                <TableColumn text="Vendedor" fx:id="searchSellerColumn" prefWidth="180"/>
+                                <TableColumn text="Acciones" fx:id="searchActionsColumn" prefWidth="200"/>
+                            </columns>
+                            <placeholder>
+                                <VBox alignment="CENTER" spacing="12" style="-fx-padding: 40;">
+                                    <Label text="🔍" styleClass="empty-icon"/>
+                                    <Label text="No hay resultados" styleClass="empty-text"/>
+                                    <Label text="Usa los filtros arriba para buscar ventas" styleClass="empty-subtext"/>
+                                </VBox>
+                            </placeholder>
+                        </TableView>
+                    </VBox>
+                    
+                    <VBox spacing="8" styleClass="warning-box">
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="⚠️ INFORMACIÓN IMPORTANTE:" styleClass="warning-title"/>
+                        </HBox>
+                        <VBox spacing="4" style="-fx-padding: 0 0 0 10;">
+                            <Label text="ANULAR: Marca la venta como anulada y revierte el stock de los productos" styleClass="warning-text"/>
+                            <Label text="ELIMINAR: Borra PERMANENTEMENTE la venta del historial (irreversible)" styleClass="warning-text"/>
+                            <Label text="Se recomienda ANULAR antes de eliminar para mantener trazabilidad" styleClass="warning-text"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Estadísticas Generadas -->
+                <HBox spacing="20" alignment="CENTER" fx:id="statsContainer" managed="false" visible="false">
+                    <VBox styleClass="stat-card card-blue">
+                        <Label text="💰" styleClass="card-icon"/>
+                        <Label fx:id="totalSalesLabel" text="$0.00" styleClass="card-value"/>
+                        <Label text="Total Recaudado" styleClass="card-label"/>
+                    </VBox>
+
+                    <VBox styleClass="stat-card card-green">
+                        <Label text="🧾" styleClass="card-icon"/>
+                        <Label fx:id="totalTransactionsLabel" text="0" styleClass="card-value"/>
+                        <Label text="Ventas Realizadas" styleClass="card-label"/>
+                    </VBox>
+
+                    <VBox styleClass="stat-card card-purple">
+                        <Label text="📊" styleClass="card-icon"/>
+                        <Label fx:id="avgSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label text="Promedio por Venta" styleClass="card-label"/>
+                    </VBox>
+
+                    <VBox styleClass="stat-card card-orange">
+                        <Label text="📈" styleClass="card-icon"/>
+                        <Label fx:id="maxSaleLabel" text="$0.00" styleClass="card-value"/>
+                        <Label text="Venta Máxima" styleClass="card-label"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Métodos de Pago -->
+                <VBox spacing="12" fx:id="paymentMethodsSection" managed="false" visible="false">
+                    <Label text="Totales por Método de Pago" styleClass="section-title"/>
+                    <HBox spacing="16" fx:id="paymentMethodsContainer" minHeight="120"/>
+                </VBox>
+
+                <!-- Gráfico de Ventas -->
+                <VBox spacing="12" fx:id="chartSection" managed="false" visible="false">
+                    <Label text="Ventas por Día del Mes" styleClass="section-title"/>
+                    <StackPane fx:id="chartContainer" styleClass="chart-container" prefHeight="350"/>
+                </VBox>
+
+                <!-- Productos Más Vendidos -->
+                <VBox spacing="12" fx:id="productsSection" managed="false" visible="false">
+                    <padding>
+                        <Insets bottom="40"/>
+                    </padding>
+                    <Label text="Productos Más Vendidos" styleClass="section-title"/>
+                    <TableView fx:id="productsTable" styleClass="table-view" prefHeight="400">
+                        <columns>
+                            <TableColumn text="Producto" fx:id="productColumn" prefWidth="250"/>
+                            <TableColumn text="Variante" fx:id="variantColumn" prefWidth="200"/>
+                            <TableColumn text="Cantidad" fx:id="quantityColumn" prefWidth="120"/>
+                            <TableColumn text="Precio Unit" fx:id="priceColumn" prefWidth="130"/>
+                            <TableColumn text="Total Vendido" fx:id="totalColumn" prefWidth="150"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <!-- Estado Vacío -->
+                <VBox alignment="CENTER" spacing="16" styleClass="empty-state" fx:id="emptyStateContainer" managed="true" visible="true">
+                    <Label text="📊" styleClass="empty-icon"/>
+                    <Label text="Selecciona un rango de fechas para generar el reporte" styleClass="empty-text"/>
+                    <Label text="Los reportes muestran ventas, productos más vendidos y métodos de pago" styleClass="empty-subtext"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
