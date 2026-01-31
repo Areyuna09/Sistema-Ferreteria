@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ferreteria.controllers.ProductsController" styleClass="dashboard-root">
+<BorderPane xmlns:fx="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ferreteria.controllers.ProductsController" styleClass="dashboard-root">
 
     <!-- Navbar Superior -->
     <top>
@@ -14,14 +14,14 @@
     <!-- Contenido Principal -->
     <center>
         <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
-            <VBox styleClass="main-content" spacing="28">
+            <VBox styleClass="main-content" spacing="20" minHeight="600">
                 <padding>
-                    <Insets top="32" right="40" bottom="32" left="40"/>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
                 </padding>
 
                 <!-- Header de Pagina -->
-                <HBox alignment="CENTER_LEFT" spacing="20">
-                    <VBox HBox.hgrow="ALWAYS" spacing="6">
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <VBox HBox.hgrow="ALWAYS" spacing="4">
                         <Label text="Gestión de Productos" styleClass="page-title"/>
                         <Label text="Administra el inventario de productos de tu ferretería" styleClass="page-subtitle"/>
                     </VBox>
@@ -29,32 +29,32 @@
                 </HBox>
 
                 <!-- Barra de búsqueda y botones -->
-                <VBox spacing="16">
-                    <HBox alignment="CENTER_LEFT" spacing="16">
-                        <TextField fx:id="searchField" prefWidth="400" promptText="Buscar por codigo, nombre, categoria o ubicacion..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
-                        <Button mnemonicParsing="false" onAction="#handleNewProduct" styleClass="action-button, success" text="+ Nuevo Producto" />
-                        <Button mnemonicParsing="false" onAction="#handleRefresh" styleClass="action-button, primary" text="🔄 Recargar" />
+                <VBox spacing="12">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <TextField fx:id="searchField" prefWidth="300" promptText="Buscar por código, nombre, categoría..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+                        <Button mnemonicParsing="false" onAction="#handleNewProduct" styleClass="action-button primary" text="+ Nuevo Producto" />
+                        <Button mnemonicParsing="false" onAction="#handleRefresh" styleClass="action-button secondary" text="🔄 Recargar" />
                     </HBox>
                     
                     <!-- Filtro de categorías -->
-                    <HBox alignment="CENTER_LEFT" spacing="12">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="Filtrar por categoría:" styleClass="filter-label"/>
-                        <ComboBox fx:id="categoryFilter" prefWidth="200" promptText="Todas las categorías" styleClass="filter-combo"/>
-                        <Button mnemonicParsing="false" onAction="#handleFilterByCategory" styleClass="action-button, accent" text="Filtrar"/>
-                        <Button mnemonicParsing="false" onAction="#handleClearFilter" styleClass="action-button" text="Limpiar Filtro"/>
+                        <ComboBox fx:id="categoryFilter" prefWidth="180" promptText="Todas las categorías" styleClass="form-combo"/>
+                        <Button mnemonicParsing="false" onAction="#handleFilterByCategory" styleClass="action-button" text="Filtrar"/>
+                        <Button mnemonicParsing="false" onAction="#handleClearFilter" styleClass="action-button secondary" text="Limpiar"/>
                     </HBox>
                 </VBox>
 
                 <!-- Tabla de productos -->
-                <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="full-width-table">
+                <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="table-view">
                     <columns>
-                       <TableColumn fx:id="codeColumn" prefWidth="120.0" text="Código" />
-                       <TableColumn fx:id="nameColumn" prefWidth="280.0" text="Nombre" />
-                       <TableColumn fx:id="categoryColumn" prefWidth="150.0" text="Categoría" />
-                       <TableColumn fx:id="locationColumn" prefWidth="120.0" text="Ubicación" />
-                       <TableColumn fx:id="priceColumn" prefWidth="120.0" text="Precio" />
-                       <TableColumn fx:id="stockColumn" prefWidth="80.0" text="Stock" />
-                       <TableColumn fx:id="actionsColumn" prefWidth="200.0" text="Acciones" />
+                       <TableColumn fx:id="codeColumn" prefWidth="100" text="Código" />
+                       <TableColumn fx:id="nameColumn" prefWidth="250" text="Nombre" />
+                       <TableColumn fx:id="categoryColumn" prefWidth="130" text="Categoría" />
+                       <TableColumn fx:id="locationColumn" prefWidth="100" text="Ubicación" />
+                       <TableColumn fx:id="priceColumn" prefWidth="100" text="Precio" />
+                       <TableColumn fx:id="stockColumn" prefWidth="70" text="Stock" />
+                       <TableColumn fx:id="actionsColumn" prefWidth="180" text="Acciones" />
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

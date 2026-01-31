@@ -725,8 +725,52 @@
     -fx-font-weight: bold;
 }
 
+.dialog-pane .main-content {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 16;
+    -fx-padding: 24px;
+    -fx-spacing: 20px;
+    -fx-min-height: 600px;
+}
+
 /* ============================================
-   CATEGORÍAS - GESTIÓN
+   ESTILOS PARA SCROLL
+   ============================================ */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: as-needed;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 8;
+    -fx-pref-width: 12;
+}
+
+.scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 6;
+    -fx-pref-width: 8;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #94a3b8;
+}
+
+/* ============================================
+   ESTILOS PARA TABLAS
    ============================================ */
 
 .categories-root {
