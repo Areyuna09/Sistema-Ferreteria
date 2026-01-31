@@ -96,7 +96,7 @@ public class ProductsController {
             }
         });
 
-        // Columna de acciones con botones Editar y Eliminar
+        // Columna de acciones con botones Ver, Editar y Eliminar
         actionsColumn.setCellFactory(createActionsCellFactory());
     }
     
@@ -141,14 +141,22 @@ public class ProductsController {
             @Override
             public TableCell<Product, Void> call(final TableColumn<Product, Void> param) {
                 return new TableCell<>() {
+                    private final Button viewButton = new Button("Ver");
                     private final Button editButton = new Button("Editar");
                     private final Button deleteButton = new Button("Eliminar");
-                    private final HBox buttonsContainer = new HBox(5, editButton, deleteButton);
+                    private final HBox buttonsContainer = new HBox(3, viewButton, editButton, deleteButton);
 
                     {
                         // Estilo de los botones
-                        editButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 5 10;");
-                        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-padding: 5 10;");
+                        viewButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 3 8; -fx-font-size: 11px;");
+                        editButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 3 8; -fx-font-size: 11px;");
+                        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-padding: 3 8; -fx-font-size: 11px;");
+
+                        // Acción del botón Ver
+                        viewButton.setOnAction(event -> {
+                            Product product = getTableView().getItems().get(getIndex());
+                            handleViewProduct(product);
+                        });
 
                         // Acción del botón Editar
                         editButton.setOnAction(event -> {
@@ -346,6 +354,47 @@ public class ProductsController {
             categoryFilter.getSelectionModel().clearSelection();
         }
         loadProducts();
+    }
+
+    @FXML
+    public void handleViewProduct(Product product) {
+        if (product == null) {
+            showAlert("Información", "Por favor seleccione un producto para ver");
+            return;
+        }
+        
+        try {
+            // Cargar el diálogo de detalles
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ProductDetailsDialog.fxml"));
+            Parent root = loader.load();
+            
+            // Crear el escenario del diálogo
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Detalles del Producto - " + product.getName());
+            Scene scene = new Scene(root);
+            
+            // Cargar los estilos CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+            
+            dialogStage.setScene(scene);
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(productsTable.getScene().getWindow());
+            dialogStage.setResizable(false);
+            dialogStage.centerOnScreen();
+            
+            // Obtener el controlador y configurarlo
+            ProductDetailsDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setProduct(product);
+            
+            // Mostrar el diálogo
+            dialogStage.showAndWait();
+            
+        } catch (Exception e) {
+            System.err.println("Error abriendo diálogo de detalles: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Error", "No se pudo abrir el diálogo de detalles: " + e.getMessage());
+        }
     }
 
     @FXML
