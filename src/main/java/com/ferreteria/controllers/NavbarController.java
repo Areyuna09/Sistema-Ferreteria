@@ -84,6 +84,16 @@ public class NavbarController {
     }
 
     @FXML
+    public void handleViewInventory() {
+        if (!"productos".equals(currentView)) {
+            // Establecer parámetro para abrir pestaña de inventario
+            System.setProperty("open.tab", "inventory");
+            AppLogger.info("NAV", "Navegando a Ver Inventario");
+            Main.navigateTo("/views/Products.fxml", "Sistema Ferreteria - Ver Inventario");
+        }
+    }
+
+    @FXML
     public void handleCategories() {
         if (!"categorias".equals(currentView)) {
             AppLogger.info("NAV", "Navegando a Categorías");
@@ -133,5 +143,24 @@ public class NavbarController {
         }
         SessionManager.getInstance().logout();
         Main.navigateTo("/views/Login.fxml", "Ferreteria - Sistema de Gestion");
+    }
+    
+    /**
+     * Obtiene el contenido principal actual para acceso a los controllers.
+     */
+    public javafx.scene.layout.Pane getMainContent() {
+        try {
+            // Obtener la escena principal
+            javafx.scene.Scene scene = btnDashboard.getScene();
+            if (scene != null && scene.getRoot() instanceof javafx.scene.layout.BorderPane) {
+                javafx.scene.layout.BorderPane root = (javafx.scene.layout.BorderPane) scene.getRoot();
+                if (root.getCenter() instanceof javafx.scene.layout.Pane) {
+                    return (javafx.scene.layout.Pane) root.getCenter();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error obteniendo main content: " + e.getMessage());
+        }
+        return null;
     }
 }

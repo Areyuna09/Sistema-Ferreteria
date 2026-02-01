@@ -11,7 +11,7 @@
         <fx:include fx:id="navbar" source="components/Navbar.fxml"/>
     </top>
 
-    <!-- Contenido Principal -->
+    <!-- Contenido Principal con TabPane -->
     <center>
         <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
             <VBox styleClass="main-content" spacing="20" minHeight="600">
@@ -22,44 +22,110 @@
                 <!-- Header de Pagina -->
                 <HBox alignment="CENTER_LEFT" spacing="16">
                     <VBox HBox.hgrow="ALWAYS" spacing="4">
-                        <Label text="Gestión de Productos" styleClass="page-title"/>
-                        <Label text="Administra el inventario de productos de tu ferretería" styleClass="page-subtitle"/>
+                        <Label text="Gestión de Inventario" styleClass="page-title"/>
+                        <Label text="Visualiza y administra todos los productos de tu ferretería" styleClass="page-subtitle"/>
                     </VBox>
                     <Label fx:id="dateLabel" styleClass="date-label"/>
                 </HBox>
 
-                <!-- Barra de búsqueda y botones -->
-                <VBox spacing="12">
-                    <HBox alignment="CENTER_LEFT" spacing="12">
-                        <TextField fx:id="searchField" prefWidth="300" promptText="Buscar por código, nombre, categoría..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
-                        <Button mnemonicParsing="false" onAction="#handleNewProduct" styleClass="action-button primary" text="+ Nuevo Producto" />
-                        <Button mnemonicParsing="false" onAction="#handleRefresh" styleClass="action-button secondary" text="🔄 Recargar" />
-                    </HBox>
+                <!-- TabPane con dos pestañas -->
+                <TabPane fx:id="productsTabPane" VBox.vgrow="ALWAYS" styleClass="tab-pane">
                     
-                    <!-- Filtro de categorías -->
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label text="Filtrar por categoría:" styleClass="filter-label"/>
-                        <ComboBox fx:id="categoryFilter" prefWidth="180" promptText="Todas las categorías" styleClass="form-combo"/>
-                        <Button mnemonicParsing="false" onAction="#handleFilterByCategory" styleClass="action-button" text="Filtrar"/>
-                        <Button mnemonicParsing="false" onAction="#handleClearFilter" styleClass="action-button secondary" text="Limpiar"/>
-                    </HBox>
-                </VBox>
+                    <!-- PESTAÑA 1: VER INVENTARIO -->
+                    <Tab text="📦 Ver Inventario" closable="false">
+                        <content>
+                            <VBox spacing="16">
+                                <padding>
+                                    <Insets top="16" right="16" bottom="16" left="16"/>
+                                </padding>
+                                
+                                <!-- Barra de búsqueda y filtros para inventario -->
+                                <VBox spacing="12">
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <TextField fx:id="inventorySearchField" prefWidth="300" promptText="Buscar por código, nombre, categoría..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+                                        <Button mnemonicParsing="false" onAction="#handleInventoryRefresh" styleClass="action-button secondary" text="🔄 Recargar" />
+                                    </HBox>
+                                    
+                                    <!-- Filtro de categorías para inventario -->
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <Label text="Filtrar por categoría:" styleClass="filter-label"/>
+                                        <ComboBox fx:id="inventoryCategoryFilter" prefWidth="180" promptText="Todas las categorías" styleClass="form-combo"/>
+                                        <Button mnemonicParsing="false" onAction="#handleInventoryFilterByCategory" styleClass="action-button" text="Filtrar"/>
+                                        <Button mnemonicParsing="false" onAction="#handleInventoryClearFilter" styleClass="action-button secondary" text="Limpiar"/>
+                                    </HBox>
+                                </VBox>
 
-                <!-- Tabla de productos -->
-                <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="table-view">
-                    <columns>
-                       <TableColumn fx:id="codeColumn" prefWidth="100" text="Código" />
-                       <TableColumn fx:id="nameColumn" prefWidth="250" text="Nombre" />
-                       <TableColumn fx:id="categoryColumn" prefWidth="130" text="Categoría" />
-                       <TableColumn fx:id="locationColumn" prefWidth="100" text="Ubicación" />
-                       <TableColumn fx:id="priceColumn" prefWidth="100" text="Precio" />
-                       <TableColumn fx:id="stockColumn" prefWidth="70" text="Stock" />
-                       <TableColumn fx:id="actionsColumn" prefWidth="180" text="Acciones" />
-                    </columns>
-                    <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                    </columnResizePolicy>
-                </TableView>
+                                <!-- Tabla de inventario (SOLO LECTURA) -->
+                                <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                                    <columns>
+                                       <TableColumn fx:id="inventoryCodeColumn" prefWidth="100" text="Código" />
+                                       <TableColumn fx:id="inventoryNameColumn" prefWidth="250" text="Nombre" />
+                                       <TableColumn fx:id="inventoryCategoryColumn" prefWidth="130" text="Categoría" />
+                                       <TableColumn fx:id="inventoryLocationColumn" prefWidth="100" text="Ubicación" />
+                                       <TableColumn fx:id="inventoryPriceColumn" prefWidth="100" text="Precio" />
+                                       <TableColumn fx:id="inventoryStockColumn" prefWidth="70" text="Stock" />
+                                       <TableColumn fx:id="inventoryStatusColumn" prefWidth="100" text="Estado" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    </columnResizePolicy>
+                                </TableView>
+                                
+                                <!-- Estadísticas de inventario -->
+                                <HBox spacing="20" styleClass="stats-container">
+                                    <Label fx:id="inventoryCountLabel" text="0 productos" styleClass="stat-label"/>
+                                    <Label fx:id="lowStockLabel" text="0 con stock bajo" styleClass="warning-label"/>
+                                    <Label fx:id="totalValueLabel" text="Valor total: $0" styleClass="value-label"/>
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                    <!-- PESTAÑA 2: GESTIÓN DE PRODUCTOS -->
+                    <Tab text="⚙️ Gestión de Productos" closable="false">
+                        <content>
+                            <VBox spacing="16">
+                                <padding>
+                                    <Insets top="16" right="16" bottom="16" left="16"/>
+                                </padding>
+                                
+                                <!-- Barra de búsqueda y botones para gestión -->
+                                <VBox spacing="12">
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <TextField fx:id="managementSearchField" prefWidth="300" promptText="Buscar por código, nombre, categoría..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+                                        <Button mnemonicParsing="false" onAction="#handleNewProduct" styleClass="action-button primary" text="+ Nuevo Producto" />
+                                        <Button mnemonicParsing="false" onAction="#handleManagementRefresh" styleClass="action-button secondary" text="🔄 Recargar" />
+                                    </HBox>
+                                    
+                                    <!-- Filtro de categorías para gestión -->
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <Label text="Filtrar por categoría:" styleClass="filter-label"/>
+                                        <ComboBox fx:id="managementCategoryFilter" prefWidth="180" promptText="Todas las categorías" styleClass="form-combo"/>
+                                        <Button mnemonicParsing="false" onAction="#handleManagementFilterByCategory" styleClass="action-button" text="Filtrar"/>
+                                        <Button mnemonicParsing="false" onAction="#handleManagementClearFilter" styleClass="action-button secondary" text="Limpiar"/>
+                                    </HBox>
+                                </VBox>
+
+                                <!-- Tabla de gestión (CON CRUD) -->
+                                <TableView fx:id="managementTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                                    <columns>
+                                       <TableColumn fx:id="managementCodeColumn" prefWidth="100" text="Código" />
+                                       <TableColumn fx:id="managementNameColumn" prefWidth="250" text="Nombre" />
+                                       <TableColumn fx:id="managementCategoryColumn" prefWidth="130" text="Categoría" />
+                                       <TableColumn fx:id="managementLocationColumn" prefWidth="100" text="Ubicación" />
+                                       <TableColumn fx:id="managementPriceColumn" prefWidth="100" text="Precio" />
+                                       <TableColumn fx:id="managementStockColumn" prefWidth="70" text="Stock" />
+                                       <TableColumn fx:id="managementActionsColumn" prefWidth="180" text="Acciones" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    </columnResizePolicy>
+                                </TableView>
+                            </VBox>
+                        </content>
+                    </Tab>
+                    
+                </TabPane>
 
             </VBox>
         </ScrollPane>

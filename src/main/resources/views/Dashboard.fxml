@@ -70,8 +70,8 @@
                     <Label text="Acciones Rapidas" styleClass="section-title"/>
                     <HBox spacing="16">
                         <Button text="💰 Nueva Venta" styleClass="action-button success" onAction="#handleSales"/>
-                        <Button text="📦 Nuevo Producto" styleClass="action-button accent" onAction="#handleProducts"/>
-                        <Button text="📋 Ver Inventario" styleClass="action-button" onAction="#handleProducts"/>
+                        <Button text="📦 Nuevo Producto" styleClass="action-button accent" onAction="#handleNewProduct"/>
+                        <Button text="📋 Ver Inventario" styleClass="action-button" onAction="#handleViewInventory"/>
                         <Button text="📊 Generar Reporte" styleClass="action-button" onAction="#handleReports"/>
                     </HBox>
                 </VBox>

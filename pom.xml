@@ -36,6 +36,13 @@
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        
+        <!-- Forzar versión JavaFX para evitar conflictos -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
         <!-- SQLite -->
         <dependency>

@@ -77,12 +77,15 @@ public class DashboardController {
     // Acciones rápidas
     @FXML
     public void handleNewProduct() {
+        // Establecer parámetro para abrir pestaña de gestión
+        System.setProperty("open.tab", "management");
         navbarController.handleProducts();
     }
 
     @FXML
-    public void handleProducts() {
-        navbarController.handleProducts();
+    public void handleViewInventory() {
+        // Usar el nuevo método específico para ver inventario
+        navbarController.handleViewInventory();
     }
 
     @FXML

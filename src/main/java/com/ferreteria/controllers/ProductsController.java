@@ -29,35 +29,139 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controlador de la vista de Productos.
+ * Controlador de la vista de Productos con pestañas.
  */
 public class ProductsController {
 
-    @FXML private TableView<Product> productsTable;
-    @FXML private TextField searchField;
-    @FXML private ComboBox<String> categoryFilter;
-    @FXML private TableColumn<Product, String> codeColumn;
-    @FXML private TableColumn<Product, String> nameColumn;
-    @FXML private TableColumn<Product, String> categoryColumn;
-    @FXML private TableColumn<Product, String> locationColumn;
-    @FXML private TableColumn<Product, BigDecimal> priceColumn;
-    @FXML private TableColumn<Product, Integer> stockColumn;
-    @FXML private TableColumn<Product, Void> actionsColumn;
+    // Pestañas
+    @FXML private TabPane productsTabPane;
+    
+    // Pestaña 1: Inventario (Solo lectura)
+    @FXML private TableView<Product> inventoryTable;
+    @FXML private TextField inventorySearchField;
+    @FXML private ComboBox<String> inventoryCategoryFilter;
+    @FXML private TableColumn<Product, String> inventoryCodeColumn;
+    @FXML private TableColumn<Product, String> inventoryNameColumn;
+    @FXML private TableColumn<Product, String> inventoryCategoryColumn;
+    @FXML private TableColumn<Product, String> inventoryLocationColumn;
+    @FXML private TableColumn<Product, BigDecimal> inventoryPriceColumn;
+    @FXML private TableColumn<Product, Integer> inventoryStockColumn;
+    @FXML private TableColumn<Product, String> inventoryStatusColumn;
+    @FXML private Label inventoryCountLabel;
+    @FXML private Label lowStockLabel;
+    @FXML private Label totalValueLabel;
+    
+    // Pestaña 2: Gestión (CRUD completo)
+    @FXML private TableView<Product> managementTable;
+    @FXML private TextField managementSearchField;
+    @FXML private ComboBox<String> managementCategoryFilter;
+    @FXML private TableColumn<Product, String> managementCodeColumn;
+    @FXML private TableColumn<Product, String> managementNameColumn;
+    @FXML private TableColumn<Product, String> managementCategoryColumn;
+    @FXML private TableColumn<Product, String> managementLocationColumn;
+    @FXML private TableColumn<Product, BigDecimal> managementPriceColumn;
+    @FXML private TableColumn<Product, Integer> managementStockColumn;
+    @FXML private TableColumn<Product, Void> managementActionsColumn;
+    
+    // Generales
     @FXML private Label dateLabel;
     @FXML private NavbarController navbarController;
 
     @FXML
     public void initialize() {
-        System.out.println("=== INICIALIZANDO PRODUCTSCONTROLLER ===");
+        System.out.println("=== INICIALIZANDO PRODUCTSCONTROLLER CON PESTAÑAS ===");
         if (navbarController != null) {
             navbarController.setActiveView("productos");
         }
         setupDateLabel();
-        setupTableColumns();
-        setupSearchField();
-        loadCategories(); // Cargar categorías en el ComboBox
-        loadProducts();
-        System.out.println("=== PRODUCTSCONTROLLER INICIALIZADO ===");
+        
+        // Configurar ambas pestañas
+        setupInventoryTab();
+        setupManagementTab();
+        
+        // Cargar datos iniciales
+        loadCategories();
+        loadInventoryData();
+        loadManagementData();
+        
+        // Verificar si hay un parámetro para abrir pestaña específica
+        String tabToOpen = System.getProperty("open.tab");
+        if (tabToOpen != null) {
+            System.out.println("=== ABRIENDO PESTAÑA ESPECÍFICA: " + tabToOpen + " ===");
+            javafx.application.Platform.runLater(() -> {
+                openTab(tabToOpen);
+                // Limpiar la propiedad para que no afecte futuras cargas
+                System.clearProperty("open.tab");
+            });
+        }
+        
+        System.out.println("=== PRODUCTSCONTROLLER CON PESTAÑAS INICIALIZADO ===");
+    }
+
+    private void setupInventoryTab() {
+        System.out.println("=== CONFIGURANDO PESTAÑA DE INVENTARIO ===");
+        
+        // Configurar columnas de inventario
+        inventoryCodeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
+        inventoryNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        inventoryCategoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        inventoryLocationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
+        inventoryPriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        inventoryStockColumn.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        
+        // Columna de estado (stock bajo/normal)
+        inventoryStatusColumn.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    Product product = getTableRow().getItem();
+                    if (product != null) {
+                        int stock = product.getStock();
+                        int minStock = product.getMinStock();
+                        
+                        if (stock <= minStock) {
+                            setText("⚠️ Stock Bajo");
+                            setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
+                        } else if (stock <= minStock * 2) {
+                            setText("⚡ Stock Medio");
+                            setStyle("-fx-text-fill: #f39c12; -fx-font-weight: bold;");
+                        } else {
+                            setText("✅ Stock Normal");
+                            setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Configurar búsqueda de inventario
+        setupInventorySearch();
+        
+        System.out.println("=== PESTAÑA DE INVENTARIO CONFIGURADA ===");
+    }
+
+    private void setupManagementTab() {
+        System.out.println("=== CONFIGURANDO PESTAÑA DE GESTIÓN ===");
+        
+        // Configurar columnas de gestión
+        managementCodeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
+        managementNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        managementCategoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        managementLocationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
+        managementPriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        managementStockColumn.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        
+        // Configurar botones de acciones (CRUD)
+        managementActionsColumn.setCellFactory(createActionCellFactory());
+        
+        // Configurar búsqueda de gestión
+        setupManagementSearch();
+        
+        System.out.println("=== PESTAÑA DE GESTIÓN CONFIGURADA ===");
     }
 
     private void setupDateLabel() {
@@ -79,68 +183,203 @@ public class ProductsController {
         }
     }
 
-    private void setupTableColumns() {
-        codeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        stockColumn.setCellValueFactory(new PropertyValueFactory<>("stock"));
-
-        // Formatear precio
-        priceColumn.setCellFactory(column -> new TableCell<Product, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) {
-                    setText(null);
-                } else {
-                    setText("$" + price.toString());
+    private void loadCategories() {
+        System.out.println("=== CARGANDO CATEGORÍAS PARA AMBAS PESTAÑAS ===");
+        
+        try {
+            // Categorías para inventario
+            if (inventoryCategoryFilter != null) {
+                inventoryCategoryFilter.getItems().clear();
+                inventoryCategoryFilter.getItems().add("Todas las categorías");
+            }
+            
+            // Categorías para gestión
+            if (managementCategoryFilter != null) {
+                managementCategoryFilter.getItems().clear();
+                managementCategoryFilter.getItems().add("Todas las categorías");
+            }
+            
+            // Obtener categorías de la BD
+            CategoryDAO categoryDAO = new CategoryDAO();
+            List<Category> categories = categoryDAO.findAll();
+            System.out.println("=== CATEGORÍAS OBTENIDAS DE BD: " + categories.size() + " ===");
+            
+            for (Category category : categories) {
+                if (category != null && category.getNombre() != null && !category.getNombre().trim().isEmpty()) {
+                    String categoryName = category.getNombre();
+                    
+                    // Agregar a ambos ComboBox
+                    if (inventoryCategoryFilter != null) {
+                        inventoryCategoryFilter.getItems().add(categoryName);
+                    }
+                    if (managementCategoryFilter != null) {
+                        managementCategoryFilter.getItems().add(categoryName);
+                    }
+                    
+                    System.out.println("=== AGREGANDO CATEGORÍA: '" + categoryName + "' (ID: " + category.getId() + ") ===");
                 }
             }
-        });
-
-        // Columna de acciones con botones Ver, Editar y Eliminar
-        actionsColumn.setCellFactory(createActionsCellFactory());
+            
+            // Seleccionar "Todas las categorías" por defecto en ambos
+            if (inventoryCategoryFilter != null) {
+                inventoryCategoryFilter.getSelectionModel().selectFirst();
+            }
+            if (managementCategoryFilter != null) {
+                managementCategoryFilter.getSelectionModel().selectFirst();
+            }
+            
+            System.out.println("=== CATEGORÍAS CARGADAS EN AMBAS PESTAÑAS ===");
+            
+        } catch (Exception e) {
+            System.err.println("ERROR cargando categorías: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
-    private void setupSearchField() {
-        // Configurar el listener para búsqueda en tiempo real
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filterProducts(newValue);
+    // ==================== MÉTODOS PARA PESTAÑA DE INVENTARIO ====================
+    
+    private void loadInventoryData() {
+        System.out.println("=== CARGANDO DATOS DE INVENTARIO ===");
+        List<Product> products = getAllProducts();
+        inventoryTable.getItems().setAll(products);
+        updateInventoryStats(products);
+        System.out.println("=== DATOS DE INVENTARIO CARGADOS: " + products.size() + " productos ===");
+    }
+    
+    private void updateInventoryStats(List<Product> products) {
+        int totalCount = products.size();
+        int lowStockCount = 0;
+        BigDecimal totalValue = BigDecimal.ZERO;
+        
+        for (Product product : products) {
+            if (product.getStock() <= product.getMinStock()) {
+                lowStockCount++;
+            }
+            totalValue = totalValue.add(product.getPrice().multiply(new BigDecimal(product.getStock())));
+        }
+        
+        inventoryCountLabel.setText(totalCount + " productos");
+        lowStockLabel.setText(lowStockCount + " con stock bajo");
+        totalValueLabel.setText("Valor total: $" + totalValue.toString());
+    }
+    
+    private void setupInventorySearch() {
+        inventorySearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            filterInventory();
         });
     }
     
-    private void filterProducts(String searchText) {
-        List<Product> allProducts = (List<Product>) productsTable.getUserData();
-        if (allProducts == null) {
-            allProducts = new ArrayList<>();
-            productsTable.setUserData(allProducts);
-        }
+    private void filterInventory() {
+        String searchTerm = inventorySearchField.getText().toLowerCase().trim();
+        String selectedCategory = inventoryCategoryFilter.getValue();
         
-        if (searchText == null || searchText.trim().isEmpty()) {
-            productsTable.getItems().setAll(allProducts);
-            return;
-        }
-        
-        String lowerSearchText = searchText.toLowerCase().trim();
+        List<Product> allProducts = getAllProducts();
         List<Product> filteredProducts = new ArrayList<>();
         
         for (Product product : allProducts) {
-            boolean codeMatch = product.getCode() != null && product.getCode().toLowerCase().contains(lowerSearchText);
-            boolean nameMatch = product.getName() != null && product.getName().toLowerCase().contains(lowerSearchText);
-            boolean categoryMatch = product.getCategory() != null && product.getCategory().toLowerCase().contains(lowerSearchText);
-            boolean locationMatch = product.getLocation() != null && product.getLocation().toLowerCase().contains(lowerSearchText);
-
-            if (codeMatch || nameMatch || categoryMatch || locationMatch) {
+            boolean matchesSearch = searchTerm.isEmpty() || 
+                product.getCode().toLowerCase().contains(searchTerm) ||
+                product.getName().toLowerCase().contains(searchTerm) ||
+                product.getCategory().toLowerCase().contains(searchTerm);
+                
+            boolean matchesCategory = selectedCategory == null || 
+                selectedCategory.equals("Todas las categorías") ||
+                product.getCategory().equals(selectedCategory);
+                
+            if (matchesSearch && matchesCategory) {
                 filteredProducts.add(product);
             }
         }
         
-        productsTable.getItems().setAll(filteredProducts);
+        inventoryTable.getItems().setAll(filteredProducts);
+        updateInventoryStats(filteredProducts);
     }
-
-    private Callback<TableColumn<Product, Void>, TableCell<Product, Void>> createActionsCellFactory() {
+    
+    @FXML
+    private void handleInventoryRefresh() {
+        System.out.println("=== REFRESH DE INVENTARIO ===");
+        loadCategories(); // Recargar categorías
+        loadInventoryData();
+    }
+    
+    @FXML
+    private void handleInventoryFilterByCategory() {
+        System.out.println("=== FILTRANDO INVENTARIO POR CATEGORÍA ===");
+        filterInventory();
+    }
+    
+    @FXML
+    private void handleInventoryClearFilter() {
+        System.out.println("=== LIMPIANDO FILTROS DE INVENTARIO ===");
+        inventorySearchField.clear();
+        inventoryCategoryFilter.getSelectionModel().selectFirst();
+        filterInventory();
+    }
+    
+    // ==================== MÉTODOS PARA PESTAÑA DE GESTIÓN ====================
+    
+    private void loadManagementData() {
+        System.out.println("=== CARGANDO DATOS DE GESTIÓN ===");
+        List<Product> products = getAllProducts();
+        managementTable.getItems().setAll(products);
+        System.out.println("=== DATOS DE GESTIÓN CARGADOS: " + products.size() + " productos ===");
+    }
+    
+    private void setupManagementSearch() {
+        managementSearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            filterManagement();
+        });
+    }
+    
+    private void filterManagement() {
+        String searchTerm = managementSearchField.getText().toLowerCase().trim();
+        String selectedCategory = managementCategoryFilter.getValue();
+        
+        List<Product> allProducts = getAllProducts();
+        List<Product> filteredProducts = new ArrayList<>();
+        
+        for (Product product : allProducts) {
+            boolean matchesSearch = searchTerm.isEmpty() || 
+                product.getCode().toLowerCase().contains(searchTerm) ||
+                product.getName().toLowerCase().contains(searchTerm) ||
+                product.getCategory().toLowerCase().contains(searchTerm);
+                
+            boolean matchesCategory = selectedCategory == null || 
+                selectedCategory.equals("Todas las categorías") ||
+                product.getCategory().equals(selectedCategory);
+                
+            if (matchesSearch && matchesCategory) {
+                filteredProducts.add(product);
+            }
+        }
+        
+        managementTable.getItems().setAll(filteredProducts);
+    }
+    
+    @FXML
+    private void handleManagementRefresh() {
+        System.out.println("=== REFRESH DE GESTIÓN ===");
+        loadCategories(); // Recargar categorías
+        loadManagementData();
+    }
+    
+    @FXML
+    private void handleManagementFilterByCategory() {
+        System.out.println("=== FILTRANDO GESTIÓN POR CATEGORÍA ===");
+        filterManagement();
+    }
+    
+    @FXML
+    private void handleManagementClearFilter() {
+        System.out.println("=== LIMPIANDO FILTROS DE GESTIÓN ===");
+        managementSearchField.clear();
+        managementCategoryFilter.getSelectionModel().selectFirst();
+        filterManagement();
+    }
+    
+    // ==================== MÉTODOS CRUD ====================
+    
+    private Callback<TableColumn<Product, Void>, TableCell<Product, Void>> createActionCellFactory() {
         return new Callback<>() {
             @Override
             public TableCell<Product, Void> call(final TableColumn<Product, Void> param) {
@@ -190,280 +429,67 @@ public class ProductsController {
     }
 
     @FXML
-    public void loadProducts() {
-        System.out.println("Cargando productos iniciales...");
-        List<Product> products = new ArrayList<>();
-        
+    public void handleNewProduct() {
+        System.out.println("Abriendo diálogo de nuevo producto...");
         try {
-            var conn = DatabaseConfig.getInstance().getConnection();
-            Statement stmt = conn.createStatement();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/NewProductDialog.fxml"));
+            Parent root = loader.load();
             
-            ResultSet rs = stmt.executeQuery("""
-                SELECT p.id, p.code, p.name, p.description, p.category_id, c.name as category,
-                       COALESCE(pv.sale_price, 0) as price, COALESCE(pv.cost_price, 0) as cost, 
-                       COALESCE(pv.stock, 0) as stock, COALESCE(pv.min_stock, 5) as min_stock,
-                       p.location, p.active, p.created_at 
-                FROM products p
-                LEFT JOIN categories c ON p.category_id = c.id
-                LEFT JOIN product_variants pv ON p.id = pv.product_id AND pv.active = 1
-                WHERE p.active = 1
-                ORDER BY p.name
-                """);
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Nuevo Producto");
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
             
-            while (rs.next()) {
-                Product product = new Product.Builder()
-                    .id(rs.getInt("id"))
-                    .code(rs.getString("code"))
-                    .name(rs.getString("name"))
-                    .description(rs.getString("description"))
-                    .category(rs.getString("category"))
-                    .price(rs.getBigDecimal("price"))
-                    .cost(rs.getBigDecimal("cost"))
-                    .stock(rs.getInt("stock"))
-                    .minStock(rs.getInt("min_stock"))
-                    .location(rs.getString("location"))
-                    .active(rs.getBoolean("active"))
-                    .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                    .build();
-                
-                products.add(product);
-            }
+            dialogStage.setScene(scene);
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(managementTable.getScene().getWindow());
+            dialogStage.setResizable(false);
+            dialogStage.centerOnScreen();
             
-            rs.close();
-            stmt.close();
-            conn.close();
+            NewProductDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
             
-            productsTable.setUserData(products);
-            productsTable.getItems().setAll(products);
-            System.out.println("Productos iniciales cargados: " + products.size());
+            dialogStage.showAndWait();
             
-        } catch (Exception e) {
-            System.err.println("Error cargando productos iniciales: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void loadCategories() {
-        System.out.println("=== CARGANDO CATEGORÍAS ===");
-        if (categoryFilter == null) {
-            System.err.println("ERROR: categoryFilter es null");
-            return;
-        }
-
-        try {
-            // Limpiar items existentes
-            categoryFilter.getItems().clear();
-            System.out.println("=== ITEMS LIMPIADOS DEL COMBOBOX ===");
-            
-            // Agregar opción "Todas las categorías"
-            categoryFilter.getItems().add("Todas las categorías");
-            System.out.println("=== AGREGADA OPCIÓN 'Todas las categorías' ===");
-            
-            // Usar CategoryDAO como lo hace CategoriesController
-            CategoryDAO categoryDAO = new CategoryDAO();
-            List<Category> categories = categoryDAO.findAll();
-            System.out.println("=== CATEGORÍAS OBTENIDAS DE BD: " + categories.size() + " ===");
-            
-            for (Category category : categories) {
-                if (category != null && category.getNombre() != null && !category.getNombre().trim().isEmpty()) {
-                    categoryFilter.getItems().add(category.getNombre());
-                    System.out.println("=== AGREGANDO CATEGORÍA: '" + category.getNombre() + "' (ID: " + category.getId() + ") ===");
-                }
-            }
-            
-            // Seleccionar "Todas las categorías" por defecto
-            categoryFilter.getSelectionModel().selectFirst();
-            
-            System.out.println("=== CATEGORÍAS CARGADAS: " + categoryFilter.getItems().size() + " ===");
-            System.out.println("=== LISTA COMPLETA DE CATEGORÍAS EN COMBOBOX (EN ORDEN): ===");
-            for (int i = 0; i < categoryFilter.getItems().size(); i++) {
-                String item = categoryFilter.getItems().get(i);
-                System.out.println("=== " + i + ". '" + item + "' ===");
+            // Si se guardó el producto, recargar ambas pestañas
+            if (controller.isSaveClicked()) {
+                System.out.println("=== PRODUCTO GUARDADO - RECARGANDO AMBAS PESTAÑAS ===");
+                loadInventoryData();
+                loadManagementData();
             }
             
         } catch (Exception e) {
-            System.err.println("ERROR cargando categorías: " + e.getMessage());
+            System.err.println("Error abriendo diálogo de nuevo producto: " + e.getMessage());
             e.printStackTrace();
-        }
-        
-        System.out.println("=== FIN CARGA DE CATEGORÍAS ===");
-    }
-
-    @FXML
-    public void handleRefresh() {
-        System.out.println("=== BOTÓN REFRESH PRESIONADO ===");
-        
-        // Mostrar mensaje inmediato en la tabla
-        productsTable.setPlaceholder(new javafx.scene.control.Label("🔄 Refrescando..."));
-        
-        // Forzar un refresh inmediato de la UI
-        productsTable.refresh();
-        
-        // Ejecutar en un hilo separado para no bloquear la UI
-        new Thread(() -> {
-            try {
-                System.out.println("Iniciando carga de productos y categorías...");
-                
-                // Recargar categorías primero
-                loadCategories();
-                
-                var conn = DatabaseConfig.getInstance().getConnection();
-                Statement stmt = conn.createStatement();
-                
-                ResultSet rs = stmt.executeQuery("""
-                    SELECT p.id, p.code, p.name, p.description, p.category_id, c.name as category,
-                           COALESCE(pv.sale_price, 0) as price, COALESCE(pv.cost_price, 0) as cost, 
-                           COALESCE(pv.stock, 0) as stock, COALESCE(pv.min_stock, 5) as min_stock,
-                           p.location, p.active, p.created_at 
-                    FROM products p
-                    LEFT JOIN categories c ON p.category_id = c.id
-                    LEFT JOIN product_variants pv ON p.id = pv.product_id AND pv.active = 1
-                    WHERE p.active = 1
-                    ORDER BY p.name
-                    """);
-                
-                List<Product> products = new ArrayList<>();
-                while (rs.next()) {
-                    Product product = new Product.Builder()
-                        .id(rs.getInt("id"))
-                        .code(rs.getString("code"))
-                        .name(rs.getString("name"))
-                        .description(rs.getString("description"))
-                        .category(rs.getString("category"))
-                        .price(rs.getBigDecimal("price"))
-                        .cost(rs.getBigDecimal("cost"))
-                        .stock(rs.getInt("stock"))
-                        .minStock(rs.getInt("min_stock"))
-                        .location(rs.getString("location"))
-                        .active(rs.getBoolean("active"))
-                        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                        .build();
-                    
-                    products.add(product);
-                }
-                
-                rs.close();
-                stmt.close();
-                conn.close();
-                
-                System.out.println("Se encontraron " + products.size() + " productos");
-                
-                // Actualizar la UI en el hilo de JavaFX
-                javafx.application.Platform.runLater(() -> {
-                    try {
-                        System.out.println("Actualizando UI en hilo JavaFX...");
-                        
-                        // Limpiar completamente la tabla
-                        productsTable.getItems().clear();
-                        
-                        // Agregar los nuevos productos
-                        productsTable.getItems().setAll(products);
-                        
-                        // Actualizar userData para el filtrado
-                        productsTable.setUserData(products);
-                        
-                        // Quitar el placeholder
-                        productsTable.setPlaceholder(null);
-                        
-                        // Forzar refresh de la tabla
-                        productsTable.refresh();
-                        
-                        // MOVER LA TABLA AL INICIO
-                        productsTable.scrollTo(0);
-                        
-                        // También hacer scroll del contenedor si es un ScrollPane
-                        if (productsTable.getParent() instanceof javafx.scene.control.ScrollPane) {
-                            ((javafx.scene.control.ScrollPane) productsTable.getParent()).setVvalue(0);
-                        }
-                        
-                        System.out.println("Tabla actualizada con " + productsTable.getItems().size() + " productos y movida al inicio");
-                        
-                        // Mostrar alerta para confirmar visualmente
-                        showAlert("Recarga Completada", "Se recargaron " + products.size() + " productos y " + (categoryFilter.getItems().size() - 1) + " categorías correctamente");
-                        
-                    } catch (Exception e) {
-                        System.err.println("Error actualizando UI: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                });
-                
-            } catch (Exception e) {
-                System.err.println("Error en handleRefresh: " + e.getMessage());
-                e.printStackTrace();
-                
-                javafx.application.Platform.runLater(() -> {
-                    productsTable.setPlaceholder(new javafx.scene.control.Label("❌ Error al recargar"));
-                    showAlert("Error", "No se pudieron recargar los productos: " + e.getMessage());
-                });
-            }
-        }).start();
-        
-        System.out.println("=== FIN HANDLE REFRESH ===");
-    }
-
-    @FXML
-    public void handleFilterByCategory() {
-        System.out.println("ProductsController.handleFilterByCategory() LLAMADO");
-        
-        if (categoryFilter == null) {
-            System.err.println("ERROR: categoryFilter es null");
-            loadProducts();
-            return;
-        }
-        
-        String selectedCategory = categoryFilter.getSelectionModel().getSelectedItem();
-        System.out.println("Categoría seleccionada: " + selectedCategory);
-        
-        if (selectedCategory == null || selectedCategory.equals("Todas las categorías")) {
-            // Si no hay selección o es "Todas", cargar todos los productos
-            loadProducts();
-        } else {
-            // Filtrar por la categoría seleccionada
-            loadProductsByCategory(selectedCategory);
+            showAlert("Error", "No se pudo abrir el formulario de nuevo producto: " + e.getMessage());
         }
     }
 
-    @FXML
-    public void handleClearFilter() {
-        System.out.println("ProductsController.handleClearFilter() LLAMADO");
-        if (categoryFilter != null) {
-            categoryFilter.getSelectionModel().clearSelection();
-        }
-        loadProducts();
-    }
-
-    @FXML
-    public void handleViewProduct(Product product) {
+    private void handleViewProduct(Product product) {
         if (product == null) {
             showAlert("Información", "Por favor seleccione un producto para ver");
             return;
         }
         
         try {
-            // Cargar el diálogo de detalles
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ProductDetailsDialog.fxml"));
             Parent root = loader.load();
             
-            // Crear el escenario del diálogo
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Detalles del Producto - " + product.getName());
             Scene scene = new Scene(root);
-            
-            // Cargar los estilos CSS
             scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
             
             dialogStage.setScene(scene);
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(productsTable.getScene().getWindow());
+            dialogStage.initOwner(managementTable.getScene().getWindow());
             dialogStage.setResizable(false);
             dialogStage.centerOnScreen();
             
-            // Obtener el controlador y configurarlo
             ProductDetailsDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
             controller.setProduct(product);
             
-            // Mostrar el diálogo
             dialogStage.showAndWait();
             
         } catch (Exception e) {
@@ -473,43 +499,38 @@ public class ProductsController {
         }
     }
 
-    @FXML
-    public void handleEditProduct(Product product) {
+    private void handleEditProduct(Product product) {
         if (product == null) {
             showAlert("Información", "Por favor seleccione un producto para editar");
             return;
         }
         
         try {
-            // Cargar el diálogo
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/NewProductDialog.fxml"));
             Parent root = loader.load();
             
-            // Crear el escenario del diálogo
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Editar Producto");
             Scene scene = new Scene(root);
-            
-            // Cargar los estilos CSS
             scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
             
             dialogStage.setScene(scene);
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(productsTable.getScene().getWindow());
+            dialogStage.initOwner(managementTable.getScene().getWindow());
             dialogStage.setResizable(false);
             dialogStage.centerOnScreen();
             
-            // Obtener el controlador y configurarlo para edición
             NewProductDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setProduct(product); // Pasar el producto a editar
+            controller.setProduct(product);
             
-            // Mostrar el diálogo y esperar a que se cierre
             dialogStage.showAndWait();
             
-            // Si se guardó el producto, recargar la tabla
+            // Si se guardó el producto, recargar ambas pestañas
             if (controller.isSaveClicked()) {
-                loadProducts();
+                System.out.println("=== PRODUCTO GUARDADO - RECARGANDO AMBAS PESTAÑAS ===");
+                loadInventoryData();
+                loadManagementData();
             }
             
         } catch (Exception e) {
@@ -519,8 +540,7 @@ public class ProductsController {
         }
     }
 
-    @FXML
-    public void handleDeleteProduct(Product product) {
+    private void handleDeleteProduct(Product product) {
         if (product == null) {
             showAlert("Información", "Por favor seleccione un producto para eliminar");
             return;
@@ -548,7 +568,8 @@ public class ProductsController {
                 
                 if (rowsAffected1 > 0 || rowsAffected2 > 0) {
                     showAlert("Éxito", "Producto eliminado correctamente");
-                    loadProducts(); // Recargar la tabla
+                    loadInventoryData();
+                    loadManagementData();
                 } else {
                     showAlert("Error", "No se pudo eliminar el producto");
                 }
@@ -559,127 +580,68 @@ public class ProductsController {
             }
         }
     }
-
-    @FXML
-    public void handleNewProduct() {
-        System.out.println("Abriendo diálogo de nuevo producto...");
+    
+    // ==================== MÉTODO UTILIDAD ====================
+    
+    private List<Product> getAllProducts() {
+        List<Product> products = new ArrayList<>();
         try {
-            // Cargar el diálogo
-            System.out.println("Cargando FXML: /views/NewProductDialog.fxml");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/NewProductDialog.fxml"));
-            if (loader.getLocation() == null) {
-                System.err.println("ERROR: No se encontró el archivo FXML");
-                showAlert("Error", "No se encontró el archivo del formulario");
-                return;
+            var conn = DatabaseConfig.getInstance().getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("""
+                SELECT p.*, pv.sale_price, pv.cost_price, pv.stock, pv.min_stock,
+                       c.name as category_name
+                FROM products p
+                JOIN product_variants pv ON p.id = pv.product_id
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.active = 1 AND pv.active = 1
+                ORDER BY p.name
+                """);
+            
+            while (rs.next()) {
+                Product product = new Product.Builder()
+                    .id(rs.getInt("id"))
+                    .code(rs.getString("code"))
+                    .name(rs.getString("name"))
+                    .description(rs.getString("description"))
+                    .category(rs.getString("category_name"))
+                    .location(rs.getString("location"))
+                    .price(rs.getBigDecimal("sale_price"))
+                    .cost(rs.getBigDecimal("cost_price"))
+                    .stock(rs.getInt("stock"))
+                    .minStock(rs.getInt("min_stock"))
+                    .active(rs.getBoolean("active"))
+                    .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                    .build();
+                products.add(product);
             }
             
-            Parent root = loader.load();
-            System.out.println("FXML cargado correctamente");
-            
-            // Crear el escenario del diálogo
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Nuevo Producto");
-            Scene scene = new Scene(root);
-            
-            // Cargar los estilos CSS
-            scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-            
-            dialogStage.setScene(scene);
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(productsTable.getScene().getWindow());
-            dialogStage.setResizable(false);
-            dialogStage.centerOnScreen();
-            
-            // Obtener el controlador y configurarlo
-            NewProductDialogController controller = loader.getController();
-            controller.setDialogStage(dialogStage);
-            
-            System.out.println("Mostrando diálogo...");
-            // Mostrar el diálogo y esperar a que se cierre
-            dialogStage.showAndWait();
-            
-            // Si se guardó el producto, recargar la tabla
-            if (controller.isSaveClicked()) {
-                loadProducts();
-            }
+            rs.close();
+            stmt.close();
+            conn.close();
             
         } catch (Exception e) {
-            System.err.println("Error abriendo diálogo de nuevo producto: " + e.getMessage());
+            System.err.println("Error cargando productos: " + e.getMessage());
             e.printStackTrace();
-            showAlert("Error", "No se pudo abrir el formulario de nuevo producto: " + e.getMessage());
+        }
+        return products;
+    }
+    
+    // ==================== MÉTODO PARA ABRIR PESTAÑA ESPECÍFICA ====================
+    
+    /**
+     * Abre una pestaña específica. Usado por el Dashboard.
+     * @param tabName "inventory" para inventario, "management" para gestión
+     */
+    public void openTab(String tabName) {
+        if ("inventory".equals(tabName)) {
+            productsTabPane.getSelectionModel().select(0); // Primera pestaña
+            System.out.println("=== ABIERTA PESTAÑA DE INVENTARIO ===");
+        } else if ("management".equals(tabName)) {
+            productsTabPane.getSelectionModel().select(1); // Segunda pestaña
+            System.out.println("=== ABIERTA PESTAÑA DE GESTIÓN ===");
         }
     }
-
-    private void loadProductsByCategory(String categoryName) {
-        System.out.println("=== CARGANDO PRODUCTOS POR CATEGORÍA: " + categoryName + " ===");
-        
-        new Thread(() -> {
-            try {
-                var conn = DatabaseConfig.getInstance().getConnection();
-                
-                if (conn != null) {
-                    String query = """
-                        SELECT p.id, p.code, p.name, p.description, p.category_id, c.name as category,
-                               COALESCE(pv.sale_price, 0) as price, COALESCE(pv.cost_price, 0) as cost, 
-                               COALESCE(pv.stock, 0) as stock, COALESCE(pv.min_stock, 5) as min_stock,
-                               p.location, p.active, p.created_at 
-                        FROM products p
-                        LEFT JOIN categories c ON p.category_id = c.id
-                        LEFT JOIN product_variants pv ON p.id = pv.product_id AND pv.active = 1
-                        WHERE p.active = 1 AND c.name = ?
-                        ORDER BY p.name
-                        """;
-                    
-                    var stmt = conn.prepareStatement(query);
-                    stmt.setString(1, categoryName);
-                    
-                    var rs = stmt.executeQuery();
-                    List<Product> products = new ArrayList<>();
-                    
-                    while (rs.next()) {
-                        Product product = new Product.Builder()
-                            .id(rs.getInt("id"))
-                            .code(rs.getString("code"))
-                            .name(rs.getString("name"))
-                            .description(rs.getString("description"))
-                            .category(rs.getString("category"))
-                            .price(rs.getBigDecimal("price"))
-                            .cost(rs.getBigDecimal("cost"))
-                            .stock(rs.getInt("stock"))
-                            .minStock(rs.getInt("min_stock"))
-                            .location(rs.getString("location"))
-                            .active(rs.getBoolean("active"))
-                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                            .build();
-                        
-                        products.add(product);
-                    }
-                    
-                    rs.close();
-                    stmt.close();
-                    conn.close();
-                    
-                    // Actualizar la tabla en el hilo de JavaFX
-                    javafx.application.Platform.runLater(() -> {
-                        productsTable.getItems().clear();
-                        productsTable.getItems().addAll(products);
-                        System.out.println("Productos filtrados: " + products.size());
-                    });
-                    
-                } else {
-                    System.err.println("ERROR: No se pudo conectar a la base de datos");
-                }
-                
-            } catch (Exception e) {
-                System.err.println("ERROR cargando productos por categoría: " + e.getMessage());
-                e.printStackTrace();
-            }
-            
-            System.out.println("=== FIN CARGA DE PRODUCTOS POR CATEGORÍA ===");
-        }).start();
-    }
-
-    // Navegación manejada por NavbarController
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
