@@ -146,10 +146,10 @@ public class PDFExporter {
 
         yPosition -= 25;
 
-        BigDecimal totalRecaudado = (BigDecimal) stats.get("totalRecaudado");
-        Integer totalVentas = (Integer) stats.get("totalVentas");
-        BigDecimal promedioVenta = (BigDecimal) stats.get("promedioVenta");
-        BigDecimal ventaMaxima = (BigDecimal) stats.get("ventaMaxima");
+        BigDecimal totalRecaudado = safeBigDecimal(stats.get("totalRecaudado"));
+        Integer totalVentas = safeInteger(stats.get("totalVentas"));
+        BigDecimal promedioVenta = safeBigDecimal(stats.get("promedioVenta"));
+        BigDecimal ventaMaxima = safeBigDecimal(stats.get("ventaMaxima"));
 
         contentStream.setFont(PDType1Font.HELVETICA, TEXT_FONT_SIZE);
 
@@ -237,6 +237,30 @@ public class PDFExporter {
         int rowNumber = 1;
         int currentRowIndex = 0;
         boolean isFirstPage = true;
+
+        // Handle empty product list
+        if (productData.isEmpty()) {
+            PDPageContentStream contentStream = new PDPageContentStream(
+                    document, firstPage, PDPageContentStream.AppendMode.APPEND, true);
+            try {
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, HEADER_FONT_SIZE);
+                contentStream.beginText();
+                contentStream.newLineAtOffset(MARGIN, yPosition);
+                contentStream.showText("Productos Vendidos");
+                contentStream.endText();
+
+                yPosition -= 25;
+
+                contentStream.setFont(PDType1Font.HELVETICA, TEXT_FONT_SIZE);
+                contentStream.beginText();
+                contentStream.newLineAtOffset(MARGIN, yPosition);
+                contentStream.showText("Sin productos vendidos en el rango seleccionado.");
+                contentStream.endText();
+            } finally {
+                contentStream.close();
+            }
+            return;
+        }
 
         while (currentRowIndex < productData.size()) {
             PDPage currentPage;
@@ -472,6 +496,18 @@ public class PDFExporter {
         return sum;
     }
 
+    private static BigDecimal safeBigDecimal(Object value) {
+        if (value instanceof BigDecimal) return (BigDecimal) value;
+        if (value instanceof Number) return BigDecimal.valueOf(((Number) value).doubleValue());
+        return BigDecimal.ZERO;
+    }
+
+    private static Integer safeInteger(Object value) {
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
     /**
      * Clase para representar una fila del reporte.
      */
@@ -491,10 +527,10 @@ public class PDFExporter {
             this.total = total;
         }
 
-        public String getProducto() { return producto; }
-        public String getVariante() { return variante; }
-        public Integer getCantidad() { return cantidad; }
-        public BigDecimal getPrecio() { return precio; }
-        public BigDecimal getTotal() { return total; }
+        public String getProducto() { return producto != null ? producto : "N/A"; }
+        public String getVariante() { return variante != null ? variante : "N/A"; }
+        public Integer getCantidad() { return cantidad != null ? cantidad : 0; }
+        public BigDecimal getPrecio() { return precio != null ? precio : BigDecimal.ZERO; }
+        public BigDecimal getTotal() { return total != null ? total : BigDecimal.ZERO; }
     }
 }

@@ -1,0 +1,369 @@
+================================================================================
+    REGISTRO DE CAMBIOS - SISTEMA FERRETERIA
+    Fecha: 2026-02-01
+    Rama: sebaa
+================================================================================
+
+RESUMEN GENERAL
+--------------------------------------------------------------------------------
+Se realizaron mejoras significativas en 3 modulos del sistema:
+  - Modulo de Reportes (ReportsController, ReportDAO, PDFExporter, ExcelExporter)
+  - Modulo de Categorias (CategoriesController, Categories.fxml)
+  - Estilos y UX unificados entre modulos
+
+Total de archivos modificados: 6 archivos de codigo fuente + 1 FXML
+Lineas agregadas: ~1012  |  Lineas eliminadas: ~517
+
+
+================================================================================
+ARCHIVOS MODIFICADOS
+================================================================================
+
+  1. src/main/java/com/ferreteria/controllers/ReportsController.java
+  2. src/main/java/com/ferreteria/models/dao/ReportDAO.java
+  3. src/main/java/com/ferreteria/utils/PDFExporter.java
+  4. src/main/java/com/ferreteria/utils/ExcelExporter.java
+  5. src/main/java/com/ferreteria/controllers/CategoriesController.java
+  6. src/main/resources/views/Categories.fxml
+
+
+================================================================================
+FASE 1: MODULO DE REPORTES - Exportacion PDF y Excel
+================================================================================
+
+ARCHIVO: ReportsController.java
+--------------------------------------------------------------------------------
+PROBLEMA:
+  El controlador era un STUB con datos de ejemplo hardcodeados. No estaba
+  conectado al ReportDAO ni a los exportadores PDFExporter/ExcelExporter.
+  Los botones de exportar no funcionaban.
+
+CAMBIOS APLICADOS:
+
+  [1] Reescritura completa del controlador
+      - Se conecto con ReportDAO para consultas reales a la base de datos SQLite
+      - Se integro con PDFExporter y ExcelExporter para exportacion funcional
+      - Se agrego la clase interna ProductRow para el TableView con getters
+        null-safe y formato de precio/total en pesos argentinos
+
+  [2] Exportacion PDF funcional (handleExportPDF)
+      - Dialogo FileChooser para seleccionar ubicacion de guardado
+      - Conversion de datos a formato PDFExporter.ReportRow
+      - Generacion del archivo PDF con Apache PDFBox
+      - Apertura automatica del archivo al exportar (Desktop.open())
+
+  [3] Exportacion Excel funcional (handleExportExcel)
+      - Dialogo FileChooser para seleccionar ubicacion de guardado
+      - Conversion de datos a formato ExcelExporter.ReportRow
+      - Generacion del archivo Excel (.xlsx) con Apache POI
+      - Apertura automatica del archivo al exportar (Desktop.open())
+
+  [4] Validacion relajada (validateReportData)
+      - Antes: exigia que currentProductsSummary no estuviera vacio
+      - Ahora: permite exportar si hay estadisticas aunque no haya productos
+        vendidos en el rango (caso valido cuando hay ventas sin items)
+
+  [5] Manejo null-safe de datos
+      - Metodos convertToPdfReportRows() y convertToExcelReportRows()
+        manejan valores NULL de la base de datos sin lanzar NullPointerException
+      - Campos: unit_price, variant_name, product_name, quantity, subtotal
+
+  [6] selectedPeriod siempre asignado
+      - Se asigna correctamente desde startDate en handleGenerateReport()
+        para todos los tipos de rango (Hoy, Esta Semana, Este Mes, Este Ano)
+
+  [7] Metodo openFile() agregado
+      - Usa java.awt.Desktop.getDesktop().open(file) para abrir el archivo
+        exportado automaticamente con la aplicacion predeterminada del sistema
+      - Fallback: si Desktop no esta disponible, muestra mensaje informativo
+        con la ruta del archivo generado
+
+  [8] Navegacion mejorada (navigateTo)
+      - Preserva el estado de la ventana (tamano y maximizado) al navegar
+      - Caso especial para Login: reset a 1100x650 y centra en pantalla
+      - Mantiene stage.isMaximized() al cambiar entre vistas
+
+
+ARCHIVO: ReportDAO.java
+--------------------------------------------------------------------------------
+PROBLEMA:
+  Las consultas SQL NO filtraban por status='completed', incluyendo ventas
+  canceladas en los totales y estadisticas del reporte.
+
+CAMBIOS APLICADOS:
+
+  [1] Filtro AND status = 'completed' agregado a TODAS las consultas:
+
+      - getStatsByDateRange()
+        Estadisticas (total recaudado, cantidad ventas, promedio, maximo)
+
+      - getProductSalesSummaryByRange()
+        Resumen de productos vendidos por rango de fecha
+
+      - getPaymentMethodTotalsByRange()
+        Totales por metodo de pago (efectivo, tarjeta, transferencia)
+
+      - getMonthlyStats()
+        Estadisticas del mes actual
+
+      - getProductSalesSummary()
+        Resumen general de productos vendidos
+
+      - getPaymentMethodTotals()
+        Totales generales por metodo de pago
+
+  NOTA: getDailySalesByRange() ya tenia el filtro correctamente.
+
+
+ARCHIVO: PDFExporter.java
+--------------------------------------------------------------------------------
+CAMBIOS APLICADOS:
+
+  [1] Helpers null-safe agregados
+      - safeBigDecimal(Object): convierte de forma segura a BigDecimal
+      - safeInteger(Object): convierte de forma segura a Integer
+      - Reemplazan casts directos que podian lanzar NullPointerException
+
+  [2] Lista de productos vacia
+      - Cuando no hay productos vendidos en el rango, se muestra el mensaje
+        "Sin productos vendidos en el rango seleccionado" en el PDF
+        en lugar de una tabla vacia o error
+
+  [3] ReportRow getters null-safe
+      - getProducto(): retorna "N/A" si es null
+      - getVariante(): retorna "N/A" si es null
+      - getCantidad(): retorna 0 si es null
+      - getPrecio(): retorna BigDecimal.ZERO si es null
+      - getTotal(): retorna BigDecimal.ZERO si es null
+
+
+ARCHIVO: ExcelExporter.java
+--------------------------------------------------------------------------------
+CAMBIOS APLICADOS:
+
+  [1] Helpers null-safe agregados
+      - safeBigDecimal(Object): conversion segura a BigDecimal
+      - safeInteger(Object): conversion segura a Integer
+
+  [2] Lista de productos vacia
+      - Fila fusionada con mensaje "Sin productos vendidos en el rango
+        seleccionado" cuando la lista de productos esta vacia
+
+  [3] ReportRow getters null-safe
+      - Mismos getters protegidos que PDFExporter (N/A, 0, BigDecimal.ZERO)
+
+
+================================================================================
+FASE 2: AUTO-APERTURA Y FILTRADO DE VENTAS
+================================================================================
+
+ARCHIVO: ReportsController.java (continuacion)
+--------------------------------------------------------------------------------
+
+  [1] Auto-apertura de archivos exportados
+      - Import agregado: java.awt.Desktop
+      - Metodo openFile(File file) implementado
+      - Al exportar PDF o Excel, el archivo se abre automaticamente
+        con la aplicacion predeterminada del sistema operativo
+      - Si falla Desktop.open(), se muestra dialogo con la ruta del archivo
+
+  [2] Correccion de filtrado de ventas
+      - Diagnosticado mediante consulta directa a SQLite (QueryDB.java)
+      - Se encontraron 5 ventas: 3 canceladas + 2 completadas
+      - El problema era que ReportDAO incluia ventas canceladas
+      - Solucion: filtro status='completed' en todas las queries (ver Fase 1)
+
+
+================================================================================
+FASE 3: MODULO DE CATEGORIAS - Mejoras UX
+================================================================================
+
+ARCHIVO: CategoriesController.java
+--------------------------------------------------------------------------------
+REFERENCIA: Se comparo con el proyecto de referencia en
+  C:\wamp64\www\Sistema-Ferreteria (sin espacio, sin acento)
+
+CAMBIOS APLICADOS:
+
+  [1] Eliminacion del problema N+1 en tabla de subcategorias
+      ANTES:
+        subCategoryColumn usaba categoryDAO.findById(subcategory.getCategoryId())
+        para obtener el nombre de la categoria padre. Esto ejecutaba una consulta
+        SQL adicional POR CADA FILA de la tabla.
+      AHORA:
+        Usa subcategory.getCategoryName() que ya viene cargado desde el DAO,
+        eliminando las consultas redundantes.
+
+  [2] setupSearchListeners() agregado
+      - categorySearchField.setOnAction() -> handleSearchCategory()
+      - subcategorySearchField.setOnAction() -> handleSearchSubcategory()
+      - Permite buscar presionando Enter en los campos de busqueda
+        (antes solo funcionaba con el boton "Buscar")
+
+  [3] setupCategoryComboBoxes() mejorado
+      - StringConverter compartido para parentCategoryCombo y filterCategoryCombo
+      - Antes: solo parentCategoryCombo tenia converter, filterCategoryCombo
+        mostraba el toString() del objeto Category
+      - Ahora: ambos combos muestran category.getNombre() correctamente
+
+  [4] filterCategoryCombo.setOnAction() listener
+      - Al cambiar la seleccion del combo de filtro en la pestana de
+        subcategorias, se filtran automaticamente las subcategorias
+      - Antes: habia que hacer clic en "Buscar" manualmente
+
+  [5] loadSubcategories() respeta el filtro de categoria
+      - Antes: siempre cargaba subcategoryDAO.findAll() ignorando la seleccion
+      - Ahora: si filterCategoryCombo tiene un valor seleccionado, carga
+        solo las subcategorias de esa categoria con findByCategoryId()
+
+  [6] .active(true) en updates de categorias y subcategorias
+      - Al actualizar una categoria: Category.Builder().active(true)
+      - Al actualizar una subcategoria: Subcategory.Builder().active(true)
+      - Previene que el registro quede con active=false (soft-delete accidental)
+        al actualizar, ya que el Builder podria no tener valor por defecto
+
+  [7] handleDeleteCategory() - eliminacion de doble loadCategories()
+      - Antes: llamaba loadCategories() dentro del if (exito) Y tambien
+        al final del metodo, causando doble recarga innecesaria
+      - Ahora: solo recarga dentro del bloque de exito, junto con
+        loadSubcategories() para actualizar contadores
+
+  [8] Eliminacion de System.out.println de debug
+      - handleSearchCategory(): 5 lineas de debug eliminadas
+      - handleClearCategorySearch(): 1 linea de debug eliminada
+      - Estos prints se usaban durante desarrollo y no debian estar en
+        codigo de produccion
+
+  [9] navigateTo() - preservacion de estado de ventana
+      - Antes: stage.centerOnScreen() perdia el tamano y estado maximizado
+      - Ahora: guarda wasMaximized, currentWidth, currentHeight
+      - Crea Scene con dimensiones actuales
+      - Restaura maximizado si estaba maximizado
+      - Caso especial Login: reset a 1100x650, no resizable, centrado
+
+  [10] loadCategories() mejorado
+       - parentCategoryCombo usa lista independiente (no comparte referencia)
+       - filterCategoryCombo usa lista separada con null como primer item
+         representando "Todas las categorias"
+
+
+ARCHIVO: Categories.fxml
+--------------------------------------------------------------------------------
+CAMBIOS APLICADOS:
+
+  [1] ScrollPane agregado (estructura igual a Products.fxml)
+      ANTES:
+        <center>
+          <VBox styleClass="main-content" ...>
+      AHORA:
+        <center>
+          <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+            <VBox styleClass="main-content" ...>
+      - Permite scroll cuando el contenido excede el tamano de la ventana
+      - Clase CSS "scroll-pane" aplicada (consistente con Products)
+
+  [2] Padding unificado con Products.fxml
+      ANTES: top="28" right="36" bottom="28" left="36"
+      AHORA: top="24" right="24" bottom="24" left="24"
+      - Mismo espaciado que Products.fxml para consistencia visual
+
+
+================================================================================
+FASE 4: ESTILOS DE BOTONES UNIFICADOS
+================================================================================
+
+REFERENCIA: ProductsController.java usa estilos inline para los botones de
+tabla con los siguientes colores:
+  - Ver:      #2196F3 (celeste)  -fx-text-fill: white
+  - Editar:   #4CAF50 (verde)    -fx-text-fill: white
+  - Eliminar: #f44336 (rojo)     -fx-text-fill: white
+  Formato comun: -fx-padding: 3 8; -fx-font-size: 11px;
+
+
+ARCHIVO: CategoriesController.java
+--------------------------------------------------------------------------------
+
+  [1] Botones de tabla de Categorias
+      ANTES:
+        editButton.getStyleClass().addAll("action-button", "small");
+        deleteButton.getStyleClass().addAll("action-button", "danger", "small");
+      AHORA:
+        editButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;
+          -fx-padding: 3 8; -fx-font-size: 11px;");
+        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;
+          -fx-padding: 3 8; -fx-font-size: 11px;");
+
+  [2] Botones de tabla de Subcategorias
+      - Mismo cambio aplicado: Editar (#4CAF50 verde), Eliminar (#f44336 rojo)
+      - Estilos inline identicos a los de Products
+
+
+ARCHIVO: ReportsController.java
+--------------------------------------------------------------------------------
+
+  [1] Boton "Ver" en tabla de busqueda de ventas
+      ANTES:
+        btnVer.getStyleClass().addAll("action-button", "small");
+      AHORA:
+        btnVer.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;
+          -fx-padding: 3 8; -fx-font-size: 11px;");
+      - Color celeste (#2196F3) identico al boton "Ver" de Products
+
+
+================================================================================
+TABLA RESUMEN DE COLORES DE BOTONES (UNIFICADOS)
+================================================================================
+
+  +------------+---------+-----------+-----------------------------------+
+  | Boton      | Color   | Hex       | Usado en                          |
+  +------------+---------+-----------+-----------------------------------+
+  | Ver        | Celeste | #2196F3   | Products, Reportes                |
+  | Editar     | Verde   | #4CAF50   | Products, Categorias, Subcategor. |
+  | Eliminar   | Rojo    | #f44336   | Products, Categorias, Subcategor. |
+  +------------+---------+-----------+-----------------------------------+
+
+  Formato comun de todos los botones de tabla:
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-font-size: 11px;
+
+
+================================================================================
+CLASES CSS COMPARTIDAS ENTRE MODULOS
+================================================================================
+
+  Las siguientes clases CSS de main.css se usan consistentemente en
+  Products, Categories y Reports:
+
+  - dashboard-root     -> Contenedor raiz (BorderPane)
+  - scroll-pane        -> ScrollPane del contenido central
+  - main-content       -> VBox principal
+  - page-title         -> Titulo de la pagina (H1)
+  - page-subtitle      -> Subtitulo descriptivo
+  - action-button      -> Botones de accion (header)
+  - action-button secondary -> Botones secundarios (Limpiar, Cancelar)
+  - search-field       -> Campo de busqueda
+  - form-combo         -> ComboBox de formularios
+  - form-panel         -> Panel de formulario
+  - form-field         -> Campos de texto de formulario
+  - field-label        -> Etiquetas de campos
+  - table-view         -> Tabla principal
+  - tab-pane           -> Contenedor de pestanas
+  - count-label        -> Etiqueta de conteo de resultados
+
+
+================================================================================
+VERIFICACION
+================================================================================
+
+  - Compilacion exitosa: mvn clean compile (sin errores ni warnings)
+  - Todos los cambios verificados en rama: sebaa
+  - Base de datos SQLite verificada con consultas directas:
+      * 5 ventas totales (3 canceladas, 2 completadas)
+      * Formato created_at: "2026-01-23 17:42:02" (compatible con DATE())
+      * Filtro status='completed' probado correctamente
+
+
+================================================================================
+FIN DEL REGISTRO DE CAMBIOS
+================================================================================

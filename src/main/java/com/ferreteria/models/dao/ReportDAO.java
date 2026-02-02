@@ -93,14 +93,15 @@ public class ReportDAO {
                       "INNER JOIN product_variants pv ON si.variant_id = pv.id " +
                       "INNER JOIN products p ON pv.product_id = p.id " +
                       "WHERE strftime('%Y-%m', s.created_at) = ? " +
+                      "AND s.status = 'completed' " +
                       "GROUP BY p.id, pv.id " +
                       "ORDER BY total_vendido DESC";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            
+
             stmt.setString(1, yearMonth.toString());
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
@@ -109,11 +110,11 @@ public class ReportDAO {
                     row.put("cantidad", rs.getInt("cantidad_total"));
                     row.put("precio", rs.getBigDecimal("precio_unitario"));
                     row.put("total", rs.getBigDecimal("total_vendido"));
-                    
+
                     summary.add(row);
                 }
             }
-            
+
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error al obtener resumen de productos", e);
         }
@@ -135,6 +136,7 @@ public class ReportDAO {
                       "FROM sale_payments sp " +
                       "INNER JOIN sales s ON sp.sale_id = s.id " +
                       "WHERE strftime('%Y-%m', s.created_at) = ? " +
+                      "AND s.status = 'completed' " +
                       "GROUP BY sp.payment_method " +
                       "ORDER BY total DESC";
 
@@ -267,13 +269,14 @@ public class ReportDAO {
                       "COALESCE(MAX(total), 0) as venta_maxima, " +
                       "COALESCE(MIN(total), 0) as venta_minima " +
                       "FROM sales " +
-                      "WHERE strftime('%Y-%m', created_at) = ?";
+                      "WHERE strftime('%Y-%m', created_at) = ? " +
+                      "AND status = 'completed'";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            
+
             stmt.setString(1, yearMonth.toString());
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     stats.put("totalVentas", rs.getInt("total_ventas"));
@@ -283,7 +286,7 @@ public class ReportDAO {
                     stats.put("ventaMinima", rs.getBigDecimal("venta_minima"));
                 }
             }
-            
+
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error al obtener estadísticas mensuales", e);
             stats.put("totalVentas", 0);
@@ -314,7 +317,8 @@ public class ReportDAO {
                       "COALESCE(MAX(total), 0) as venta_maxima, " +
                       "COALESCE(MIN(total), 0) as venta_minima " +
                       "FROM sales " +
-                      "WHERE DATE(created_at) BETWEEN ? AND ?";
+                      "WHERE DATE(created_at) BETWEEN ? AND ? " +
+                      "AND status = 'completed'";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -366,6 +370,7 @@ public class ReportDAO {
                       "INNER JOIN product_variants pv ON si.variant_id = pv.id " +
                       "INNER JOIN products p ON pv.product_id = p.id " +
                       "WHERE DATE(s.created_at) BETWEEN ? AND ? " +
+                      "AND s.status = 'completed' " +
                       "GROUP BY p.id, pv.id " +
                       "ORDER BY total_vendido DESC";
 
@@ -412,6 +417,7 @@ public class ReportDAO {
                       "FROM sale_payments sp " +
                       "INNER JOIN sales s ON sp.sale_id = s.id " +
                       "WHERE DATE(s.created_at) BETWEEN ? AND ? " +
+                      "AND s.status = 'completed' " +
                       "GROUP BY sp.payment_method " +
                       "ORDER BY total DESC";
 

@@ -125,10 +125,10 @@ public class ExcelExporter {
         headerCell.setCellStyle(headerStyle);
         sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum - 1, 0, 1));
 
-        BigDecimal totalRecaudado = (BigDecimal) statistics.get("totalRecaudado");
-        Integer totalVentas = (Integer) statistics.get("totalVentas");
-        BigDecimal promedioVenta = (BigDecimal) statistics.get("promedioVenta");
-        BigDecimal ventaMaxima = (BigDecimal) statistics.get("ventaMaxima");
+        BigDecimal totalRecaudado = safeBigDecimal(statistics.get("totalRecaudado"));
+        Integer totalVentas = safeInteger(statistics.get("totalVentas"));
+        BigDecimal promedioVenta = safeBigDecimal(statistics.get("promedioVenta"));
+        BigDecimal ventaMaxima = safeBigDecimal(statistics.get("ventaMaxima"));
 
         // Total Recaudado
         Row row1 = sheet.createRow(rowNum++);
@@ -214,43 +214,50 @@ public class ExcelExporter {
         int itemNumber = 1;
         BigDecimal grandTotal = BigDecimal.ZERO;
 
-        for (ReportRow row : productData) {
-            Row dataRow = sheet.createRow(rowNum++);
+        if (productData.isEmpty()) {
+            Row emptyRow = sheet.createRow(rowNum++);
+            Cell emptyCell = emptyRow.createCell(0);
+            emptyCell.setCellValue("Sin productos vendidos en el rango seleccionado.");
+            sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum - 1, 0, 5));
+        } else {
+            for (ReportRow row : productData) {
+                Row dataRow = sheet.createRow(rowNum++);
 
-            // Número
-            dataRow.createCell(0).setCellValue(itemNumber++);
+                // Número
+                dataRow.createCell(0).setCellValue(itemNumber++);
 
-            // Producto
-            dataRow.createCell(1).setCellValue(row.getProducto());
+                // Producto
+                dataRow.createCell(1).setCellValue(row.getProducto());
 
-            // Variante
-            dataRow.createCell(2).setCellValue(row.getVariante() != null ? row.getVariante() : "N/A");
+                // Variante
+                dataRow.createCell(2).setCellValue(row.getVariante());
 
-            // Cantidad
-            dataRow.createCell(3).setCellValue(row.getCantidad());
+                // Cantidad
+                dataRow.createCell(3).setCellValue(row.getCantidad());
 
-            // Precio Unitario
-            Cell priceCell = dataRow.createCell(4);
-            priceCell.setCellValue(row.getPrecio().doubleValue());
-            priceCell.setCellStyle(currencyStyle);
+                // Precio Unitario
+                Cell priceCell = dataRow.createCell(4);
+                priceCell.setCellValue(row.getPrecio().doubleValue());
+                priceCell.setCellStyle(currencyStyle);
 
-            // Total
-            Cell totalCell = dataRow.createCell(5);
-            totalCell.setCellValue(row.getTotal().doubleValue());
-            totalCell.setCellStyle(currencyStyle);
+                // Total
+                Cell totalCell = dataRow.createCell(5);
+                totalCell.setCellValue(row.getTotal().doubleValue());
+                totalCell.setCellStyle(currencyStyle);
 
-            grandTotal = grandTotal.add(row.getTotal());
+                grandTotal = grandTotal.add(row.getTotal());
+            }
+
+            // Fila de totales
+            Row totalRow = sheet.createRow(rowNum++);
+            Cell totalLabelCell = totalRow.createCell(4);
+            totalLabelCell.setCellValue("TOTAL:");
+            totalLabelCell.setCellStyle(totalStyle);
+
+            Cell grandTotalCell = totalRow.createCell(5);
+            grandTotalCell.setCellValue(grandTotal.doubleValue());
+            grandTotalCell.setCellStyle(totalStyle);
         }
-
-        // Fila de totales
-        Row totalRow = sheet.createRow(rowNum++);
-        Cell totalLabelCell = totalRow.createCell(4);
-        totalLabelCell.setCellValue("TOTAL:");
-        totalLabelCell.setCellStyle(totalStyle);
-
-        Cell grandTotalCell = totalRow.createCell(5);
-        grandTotalCell.setCellValue(grandTotal.doubleValue());
-        grandTotalCell.setCellStyle(totalStyle);
 
         return rowNum;
     }
@@ -353,6 +360,18 @@ public class ExcelExporter {
         }
     }
 
+    private static BigDecimal safeBigDecimal(Object value) {
+        if (value instanceof BigDecimal) return (BigDecimal) value;
+        if (value instanceof Number) return BigDecimal.valueOf(((Number) value).doubleValue());
+        return BigDecimal.ZERO;
+    }
+
+    private static Integer safeInteger(Object value) {
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
     /**
      * Clase para representar una fila del reporte.
      */
@@ -372,10 +391,10 @@ public class ExcelExporter {
             this.total = total;
         }
 
-        public String getProducto() { return producto; }
-        public String getVariante() { return variante; }
-        public Integer getCantidad() { return cantidad; }
-        public BigDecimal getPrecio() { return precio; }
-        public BigDecimal getTotal() { return total; }
+        public String getProducto() { return producto != null ? producto : "N/A"; }
+        public String getVariante() { return variante != null ? variante : "N/A"; }
+        public Integer getCantidad() { return cantidad != null ? cantidad : 0; }
+        public BigDecimal getPrecio() { return precio != null ? precio : BigDecimal.ZERO; }
+        public BigDecimal getTotal() { return total != null ? total : BigDecimal.ZERO; }
     }
 }
